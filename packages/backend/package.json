@@ -1,0 +1,7 @@
+{
+    "name": "@daedalus/backend",
+    "scripts": {
+        "start": "bun index.ts",
+        "migrate": "bun src/db/migrate.ts"
+    }
+}
