@@ -1,3 +1,3 @@
-import { x } from "@daedalus/backend";
+import { trpc } from "@daedalus/api";
 
-console.log(x);
+console.log(await trpc.userList.query());

@@ -1,3 +1,4 @@
+import { secrets } from "@daedalus/config";
 import type { Config } from "drizzle-kit";
 
 export default {
@@ -5,9 +6,9 @@ export default {
     out: "./drizzle",
     driver: "mysql2",
     dbCredentials: {
-        host: process.env.DATABASE_HOST!,
-        user: process.env.DATABASE_USERNAME,
-        password: process.env.DATABASE_PASSWORD,
-        database: process.env.DATABASE_NAME!,
+        host: secrets.DATABASE.HOST,
+        user: secrets.DATABASE.USERNAME,
+        password: secrets.DATABASE.PASSWORD,
+        database: secrets.DATABASE.NAME,
     },
 } satisfies Config;

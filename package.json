@@ -17,6 +17,9 @@
   },
   "dependencies": {
     "@planetscale/database": "^1.14.0",
-    "drizzle-orm": "^0.29.3"
+    "@trpc/client": "next",
+    "@trpc/server": "next",
+    "drizzle-orm": "^0.29.3",
+    "zod": "^3.22.4"
   }
 }
