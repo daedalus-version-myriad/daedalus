@@ -1,11 +1,20 @@
 export type Secrets = {
-    API_PORT: number;
+    PORTS: {
+        API: number;
+    };
     DATABASE: {
         NAME: string;
         USERNAME: string;
         HOST: string;
         PASSWORD: string;
     };
+    DISCORD: {
+        CLIENT: {
+            ID: string;
+            SECRET: string;
+        };
+    };
+    NEXT_AUTH_SECRET: string;
 };
 
 export * from "./secrets.ts";

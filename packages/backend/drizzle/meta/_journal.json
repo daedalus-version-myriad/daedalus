@@ -1,20 +1,20 @@
 {
-  "version": "5",
-  "dialect": "mysql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "5",
-      "when": 1706024972793,
-      "tag": "0000_striped_lord_hawal",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1706030444689,
-      "tag": "0001_faithful_slyde",
-      "breakpoints": true
-    }
-  ]
+    "version": "5",
+    "dialect": "mysql",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "5",
+            "when": 1706024972793,
+            "tag": "0000_striped_lord_hawal",
+            "breakpoints": true
+        },
+        {
+            "idx": 1,
+            "version": "5",
+            "when": 1706030444689,
+            "tag": "0001_faithful_slyde",
+            "breakpoints": true
+        }
+    ]
 }

@@ -6,11 +6,22 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "bun index.ts"
+    "start": "bun index.ts",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "drizzle-kit": "^0.20.13"
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.17",
+    "drizzle-kit": "^0.20.13",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.1.0",
+    "postcss": "^8.4.33",
+    "prettier": "^3.2.4",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -20,6 +31,10 @@
     "@trpc/client": "next",
     "@trpc/server": "next",
     "drizzle-orm": "^0.29.3",
+    "next": "^14.1.0",
+    "next-auth": "latest",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "zod": "^3.22.4"
   }
 }

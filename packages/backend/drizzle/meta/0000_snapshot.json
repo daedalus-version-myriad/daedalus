@@ -1,37 +1,35 @@
 {
-  "version": "5",
-  "dialect": "mysql",
-  "id": "65b75627-aa47-4b80-abfc-d97a3ac0a5d2",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "tables": {
-    "users": {
-      "name": "users",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+    "version": "5",
+    "dialect": "mysql",
+    "id": "65b75627-aa47-4b80-abfc-d97a3ac0a5d2",
+    "prevId": "00000000-0000-0000-0000-000000000000",
+    "tables": {
+        "users": {
+            "name": "users",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {
+                "users_id": {
+                    "name": "users_id",
+                    "columns": ["id"]
+                }
+            },
+            "uniqueConstraints": {}
         }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "users_id": {
-          "name": "users_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    }
-  },
-  "schemas": {},
-  "_meta": {
+    },
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  }
+    "_meta": {
+        "schemas": {},
+        "tables": {},
+        "columns": {}
+    }
 }
