@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1706024972793,
-      "tag": "0000_striped_lord_hawal",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1706030444689,
-      "tag": "0001_faithful_slyde",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1706115920654,
-      "tag": "0002_previous_mongu",
+      "when": 1706136403719,
+      "tag": "0000_cynical_mephisto",
       "breakpoints": true
     }
   ]

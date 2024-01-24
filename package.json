@@ -27,6 +27,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.4",
     "@planetscale/database": "^1.14.0",
     "@trpc/client": "next",
     "@trpc/server": "next",

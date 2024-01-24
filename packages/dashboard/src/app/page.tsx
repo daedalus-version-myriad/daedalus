@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import getUser from "@/lib/get-user";
 import { trpc } from "@daedalus/api";
-import Link from "next/link";
 
 export default async function Home() {
     const user = await getUser();
-    const news = await trpc.newsList.query();
+    const { news } = await trpc.newsList.query();
 
     return (
         <div className="flex flex-col items-center gap-8">
@@ -19,13 +18,13 @@ export default async function Home() {
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl">Welcome to Daedalus</h1>
                 <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">the future of server management</h2>
                 {user ? (
-                    <Link href="/manage">
+                    <a href="/manage">
                         <Button>
                             <span className="flex items-center gap-2 text-sm md:text-md lg:text-lg">
                                 <Icon icon="gear"></Icon> Manage Servers
                             </span>
                         </Button>
-                    </Link>
+                    </a>
                 ) : (
                     <LoginButton>
                         <span className="flex items-center gap-2 text-sm md:text-md lg:text-lg">
@@ -49,11 +48,11 @@ export default async function Home() {
             <Container>
                 <div className="flex flex-col gap-4">
                     <div>
-                        <Link href="/news" className="border-b border-muted-foreground">
+                        <a href="/news" className="border-b border-muted-foreground">
                             Latest Updates <Icon icon="arrow-right"></Icon>
-                        </Link>
+                        </a>
                     </div>
-                    <div className="flex flex-wrap">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-4">
                         {news.map((item) => (
                             <Card key={item.date}>
                                 <CardHeader>
@@ -64,9 +63,9 @@ export default async function Home() {
                                     <p>{item.summary}</p>
                                 </CardContent>
                                 <CardFooter>
-                                    <Link href={`/news/${item.id}/${item.code}`}>
+                                    <a href={`/news/${item.code}`}>
                                         <Button>Read More</Button>
-                                    </Link>
+                                    </a>
                                 </CardFooter>
                             </Card>
                         ))}

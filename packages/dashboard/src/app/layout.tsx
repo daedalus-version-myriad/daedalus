@@ -38,11 +38,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             <Script src="https://kit.fontawesome.com/a7d0a79103.js"></Script>
             <body className={exo2.className}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    <Navbar user={user}></Navbar>
-                    <div className="flex flex-col">
+                    <div className="min-h-[100vh] flex flex-col">
+                        <Navbar user={user}></Navbar>
                         <div className="grow">{children}</div>
+                        <Footer></Footer>
                     </div>
-                    <Footer></Footer>
                 </ThemeProvider>
             </body>
         </html>

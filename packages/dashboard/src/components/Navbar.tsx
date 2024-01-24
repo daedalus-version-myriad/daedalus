@@ -5,7 +5,6 @@ import { CLIENT_ID } from "@daedalus/config/public";
 import { signIn, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 import Icon from "./Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -13,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Separator } from "./ui/separator";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "./ui/sheet";
 
-export default async function Navbar({ user }: { user: User | null }) {
+export default function Navbar({ user }: { user: User | null }) {
     const { setTheme } = useTheme();
 
     const links: [string, string, string, boolean?][] = [
@@ -28,21 +27,21 @@ export default async function Navbar({ user }: { user: User | null }) {
         <>
             <nav className="fixed w-full flex items-center justify-between border-b border-border overflow-hidden bg-background/75 backdrop-blur-[2px]">
                 <div className="flex items-center">
-                    <Link href="/" className="flex items-center gap-4 px-4 py-2 hover:bg-foreground/5">
+                    <a href="/" className="flex items-center gap-4 px-4 py-2 hover:bg-foreground/5">
                         <Image className="rounded" width={48} height={48} src="/favicon.ico" alt="Daedalus Icon"></Image>
                         <h1 className="text-2xl font-bold">Daedalus</h1>
-                    </Link>
+                    </a>
                     {links.map(([href, icon, label, brand], index) => (
                         <React.Fragment key={`${index}`}>
                             <Separator className="hidden lg:block h-8" orientation="vertical"></Separator>
-                            <Link
+                            <a
                                 href={href}
                                 target={href.startsWith("/") ? "_self" : "_blank"}
                                 className="hidden lg:flex items-center gap-4 px-4 py-5 hover:bg-foreground/5"
                             >
                                 <Icon icon={icon} brand={brand}></Icon>
                                 <span>{label}</span>
-                            </Link>
+                            </a>
                         </React.Fragment>
                     ))}
                 </div>
@@ -59,7 +58,7 @@ export default async function Navbar({ user }: { user: User | null }) {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                     <DropdownMenuItem>
-                                        <Link href="/account">My Account</Link>
+                                        <a href="/account">My Account</a>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem>
                                         <button onClick={() => signOut()}>Sign Out</button>
@@ -85,7 +84,7 @@ export default async function Navbar({ user }: { user: User | null }) {
                         <SheetContent>
                             <div className="flex flex-col items-center">
                                 {links.map(([href, icon, label, brand], index) => (
-                                    <Link
+                                    <a
                                         key={`${index}`}
                                         href={href}
                                         target={href.startsWith("/") ? "_self" : "_blank"}
@@ -93,7 +92,7 @@ export default async function Navbar({ user }: { user: User | null }) {
                                     >
                                         <Icon icon={icon} brand={brand}></Icon>
                                         <span>{label}</span>
-                                    </Link>
+                                    </a>
                                 ))}
                             </div>
                         </SheetContent>
