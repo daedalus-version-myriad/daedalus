@@ -1,7 +1,7 @@
 "use client";
 
-import { secrets } from "@daedalus/config";
-import { DefaultSession } from "next-auth";
+import { User } from "@/lib/types";
+import { CLIENT_ID } from "@daedalus/config/public";
 import { signIn, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
@@ -13,19 +13,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Separator } from "./ui/separator";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "./ui/sheet";
 
-const links: [string, string, string, boolean?][] = [
-    ["/docs", "book", "Docs"],
-    [
-        `https://discord.com/api/oauth2/authorize?client_id=${secrets.DISCORD.CLIENT.ID}&permissions=1428010036470&scope=applications.commands+bot`,
-        "add",
-        "Invite",
-    ],
-    ["https://discord.gg/7TRKfSK7EU", "discord", "Support", true],
-    ["/premium", "crown", "Premium"],
-];
-
-export default function Navbar({ user }: { user: DefaultSession["user"] }) {
+export default async function Navbar({ user }: { user: User | null }) {
     const { setTheme } = useTheme();
+
+    const links: [string, string, string, boolean?][] = [
+        ["/docs", "book", "Docs"],
+        [`https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&permissions=1428010036470&scope=applications.commands+bot`, "add", "Invite"],
+        ["https://discord.gg/7TRKfSK7EU", "discord", "Support", true],
+        ["/premium", "crown", "Premium"],
+        ...(user?.admin ? [["/admin", "screwdriver-wrench", "Admin"] as [string, string, string]] : []),
+    ];
 
     return (
         <>

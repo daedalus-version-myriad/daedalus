@@ -1,4 +1,5 @@
 export type Secrets = {
+    OWNER: string;
     PORTS: {
         API: number;
     };

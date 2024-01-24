@@ -1,11 +1,11 @@
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import getUser from "@/lib/get-user";
 import type { Metadata, Viewport } from "next";
 import { Exo_2 } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "../components/ThemeProvider";
 import "./globals.css";
-import { getServerSession } from "next-auth";
-import authOptions from "../../auth-options";
 
 const exo2 = Exo_2({ subsets: ["latin"] });
 
@@ -31,15 +31,18 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    const session = await getServerSession(authOptions);
+    const user = await getUser();
 
     return (
         <html lang="en">
             <Script src="https://kit.fontawesome.com/a7d0a79103.js"></Script>
             <body className={exo2.className}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    <Navbar user={session?.user}></Navbar>
-                    {children}
+                    <Navbar user={user}></Navbar>
+                    <div className="flex flex-col">
+                        <div className="grow">{children}</div>
+                    </div>
+                    <Footer></Footer>
                 </ThemeProvider>
             </body>
         </html>
