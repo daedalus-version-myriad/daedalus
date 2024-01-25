@@ -54,7 +54,7 @@ export default function NewsForm(
                             <FormControl>
                                 <Input placeholder="big-things-happening" {...field} readOnly={data.readonlyCode ?? false}></Input>
                             </FormControl>
-                            <FormDescription>This will be an optional component of the URL to make links easier to differentiate.</FormDescription>
+                            <FormDescription>This is the unique internal ID, also present in the URL.</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
