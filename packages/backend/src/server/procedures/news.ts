@@ -39,15 +39,13 @@ export default {
             }),
         )
         .mutation(async ({ input }) => {
-            return await db.transaction(async (tx) => {
-                const [{ count }] = await tx
-                    .select({ count: sql<number>`COUNT(*)` })
-                    .from(tables.news)
-                    .where(eq(tables.news.code, input.code));
-
-                if (count > 0) return "That code is already in use.";
-                await tx.insert(tables.news).values(input);
-            });
+            try {
+                await db.insert(tables.news).values(input);
+            } catch (error: any) {
+                return error.body.message.includes("AlreadyExists")
+                    ? "That code is already in use."
+                    : (console.error(error), "An unexpected database error occurred.");
+            }
         }),
     newsEdit: proc
         .input(
@@ -60,13 +58,11 @@ export default {
             }),
         )
         .mutation(async ({ input }) => {
-            return await db.transaction(async (tx) => {
-                const { rowsAffected } = await tx
-                    .update(tables.news)
-                    .set({ code: input.code, title: input.title, subtitle: input.subtitle, summary: input.summary, body: input.body })
-                    .where(eq(tables.news.code, input.code));
+            const { rowsAffected } = await db
+                .update(tables.news)
+                .set({ code: input.code, title: input.title, subtitle: input.subtitle, summary: input.summary, body: input.body })
+                .where(eq(tables.news.code, input.code));
 
-                if (rowsAffected === 0) return "No article found with that code.";
-            });
+            if (rowsAffected === 0) return "No article found with that code.";
         }),
 } as const;
