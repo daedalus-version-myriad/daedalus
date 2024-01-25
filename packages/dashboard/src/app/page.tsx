@@ -2,14 +2,12 @@
 
 import Container from "@/components/Container";
 import Icon from "@/components/Icon";
-import LoginButton from "@/components/LoginButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import getUser from "@/lib/get-user";
 import { trpc } from "@daedalus/api";
+import TopButton from "./top-button";
 
 export default async function Home() {
-    const user = await getUser();
     const { news } = await trpc.newsList.query();
 
     return (
@@ -17,21 +15,7 @@ export default async function Home() {
             <div className="flex flex-col items-center gap-2 md:gap-4 py-16">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl">Welcome to Daedalus</h1>
                 <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">the future of server management</h2>
-                {user ? (
-                    <a href="/manage">
-                        <Button>
-                            <span className="flex items-center gap-2 text-sm md:text-md lg:text-lg">
-                                <Icon icon="gear"></Icon> Manage Servers
-                            </span>
-                        </Button>
-                    </a>
-                ) : (
-                    <LoginButton>
-                        <span className="flex items-center gap-2 text-sm md:text-md lg:text-lg">
-                            <Icon icon="discord" brand></Icon> Log In
-                        </span>
-                    </LoginButton>
-                )}
+                <TopButton></TopButton>
             </div>
             <Container>
                 <div className="flex flex-col items-center gap-8">
@@ -40,8 +24,8 @@ export default async function Home() {
                         and server staff with advanced functionality, intuitive design, and features designed with convenience and accessibility in mind.
                     </p>
                     <p className="text-lg">
-                        See something you need but we don&apos;t have? We&apos;re constantly implementing new features and enhancing existing ones to continuously build a
-                        better experience for you, so stop by our support server and let us know what you need!
+                        See something you need but we don&apos;t have? We&apos;re constantly implementing new features and enhancing existing ones to
+                        continuously build a better experience for you, so stop by our support server and let us know what you need!
                     </p>
                 </div>
             </Container>

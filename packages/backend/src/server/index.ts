@@ -1,10 +1,10 @@
 import { secrets } from "@daedalus/config";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import admins from "./procedures/admins.ts";
 import news from "./procedures/news.ts";
+import users from "./procedures/users.ts";
 import { router } from "./trpc.ts";
 
-const appRouter = router({ ...admins, ...news });
+const appRouter = router({ ...users, ...news });
 
 export type AppRouter = typeof appRouter;
 

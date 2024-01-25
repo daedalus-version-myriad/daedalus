@@ -5,6 +5,11 @@ export const admins = mysqlTable("admins", {
     id: varchar("id", { length: 20 }).notNull().primaryKey(),
 });
 
+export const tokens = mysqlTable("tokens", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    token: varchar("token", { length: 128 }).notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {

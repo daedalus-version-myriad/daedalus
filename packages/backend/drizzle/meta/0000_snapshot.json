@@ -1,104 +1,98 @@
 {
-  "version": "5",
-  "dialect": "mysql",
-  "id": "7fcff3a1-2771-4122-8698-0984e8a33065",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "tables": {
-    "admins": {
-      "name": "admins",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+    "version": "5",
+    "dialect": "mysql",
+    "id": "7fcff3a1-2771-4122-8698-0984e8a33065",
+    "prevId": "00000000-0000-0000-0000-000000000000",
+    "tables": {
+        "admins": {
+            "name": "admins",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {
+                "admins_id": {
+                    "name": "admins_id",
+                    "columns": ["id"]
+                }
+            },
+            "uniqueConstraints": {}
+        },
+        "news": {
+            "name": "news",
+            "columns": {
+                "code": {
+                    "name": "code",
+                    "type": "varchar(64)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "date": {
+                    "name": "date",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "CURRENT_TIMESTAMP"
+                },
+                "title": {
+                    "name": "title",
+                    "type": "varchar(64)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "subtitle": {
+                    "name": "subtitle",
+                    "type": "varchar(64)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "summary": {
+                    "name": "summary",
+                    "type": "varchar(256)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "body": {
+                    "name": "body",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "idx_date": {
+                    "name": "idx_date",
+                    "columns": ["date"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {
+                "news_code": {
+                    "name": "news_code",
+                    "columns": ["code"]
+                }
+            },
+            "uniqueConstraints": {}
         }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "admins_id": {
-          "name": "admins_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
     },
-    "news": {
-      "name": "news",
-      "columns": {
-        "code": {
-          "name": "code",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "date": {
-          "name": "date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "subtitle": {
-          "name": "subtitle",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "summary": {
-          "name": "summary",
-          "type": "varchar(256)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "body": {
-          "name": "body",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "idx_date": {
-          "name": "idx_date",
-          "columns": [
-            "date"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "news_code": {
-          "name": "news_code",
-          "columns": [
-            "code"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    }
-  },
-  "schemas": {},
-  "_meta": {
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  }
+    "_meta": {
+        "schemas": {},
+        "tables": {},
+        "columns": {}
+    }
 }

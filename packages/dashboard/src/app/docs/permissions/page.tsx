@@ -22,9 +22,9 @@ export default function DocsPermissions() {
                         granted to all or most members anyway.
                     </p>
                     <p>
-                        You can disable these anyway, but note that we do not guarantee that features will work as expected even if they don&apos;t seem to obviously
-                        need the permission. We will still seek to remove unneeded permission access whenever possible, so if you notice a feature isn&apos;t working
-                        even though it seems like it should, please let us know.
+                        You can disable these anyway, but note that we do not guarantee that features will work as expected even if they don&apos;t seem to
+                        obviously need the permission. We will still seek to remove unneeded permission access whenever possible, so if you notice a feature
+                        isn&apos;t working even though it seems like it should, please let us know.
                     </p>
                     <ul className="list-disc list-inside space-y-2">
                         <li>
@@ -35,8 +35,8 @@ export default function DocsPermissions() {
                             <b>Send Messages</b> and <b>Send Messages in Threads</b> are required for similar reasons as <i>View Channel</i>.
                         </li>
                         <li>
-                            <b>Embed Links</b> is required as most of the bot&apos;s messages are posted as embeds. If you deny this permission, many messages will
-                            be mostly empty or not send at all.
+                            <b>Embed Links</b> is required as most of the bot&apos;s messages are posted as embeds. If you deny this permission, many messages
+                            will be mostly empty or not send at all.
                         </li>
                         <li>
                             <b>Attach Files</b> is required for logs or uploading files when a message&apos;s length overflows normal message limits.

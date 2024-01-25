@@ -14,6 +14,7 @@ export type Secrets = {
             ID: string;
             SECRET: string;
         };
+        TOKEN: string;
     };
     NEXT_AUTH_SECRET: string;
 };

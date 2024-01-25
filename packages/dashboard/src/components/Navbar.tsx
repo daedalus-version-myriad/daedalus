@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "@/lib/types";
+import { useUserContext } from "@/context/user";
 import { CLIENT_ID } from "@daedalus/config/public";
 import { signIn, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
@@ -12,8 +12,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Separator } from "./ui/separator";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "./ui/sheet";
 
-export default function Navbar({ user }: { user: User | null }) {
+export default function Navbar() {
     const { setTheme } = useTheme();
+    const user = useUserContext();
 
     const links: [string, string, string, boolean?][] = [
         ["/docs", "book", "Docs"],

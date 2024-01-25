@@ -9,12 +9,10 @@ export default async function () {
         secret: secrets.NEXT_AUTH_SECRET,
         callbacks: {
             async session(session) {
-                return {
-                    id: session.token.sub!,
-                    name: session.token.name!,
-                    image: session.token.picture!,
-                    admin: await trpc.isAdmin.query(session.token.sub!),
-                };
+                const id = session.token.sub;
+                if (!id) return null;
+
+                return await trpc.userGet.query(id);
             },
         },
     });

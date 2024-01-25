@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { UserWrapper } from "@/context/user";
 import getUser from "@/lib/get-user";
 import type { Metadata, Viewport } from "next";
 import { Exo_2 } from "next/font/google";
@@ -39,11 +40,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             <Script src="https://kit.fontawesome.com/a7d0a79103.js"></Script>
             <body className={exo2.className}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    <div className="min-h-[100vh] flex flex-col">
-                        <Navbar user={user}></Navbar>
-                        <div className="grow">{children}</div>
-                        <Footer></Footer>
-                    </div>
+                    <UserWrapper user={user}>
+                        <div className="min-h-[100vh] flex flex-col">
+                            <Navbar></Navbar>
+                            <div className="grow">{children}</div>
+                            <Footer></Footer>
+                        </div>
+                    </UserWrapper>
                 </ThemeProvider>
             </body>
         </html>
