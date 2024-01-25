@@ -74,3 +74,15 @@
         @apply bg-background text-foreground;
     }
 }
+
+a.link {
+    @apply border-b border-muted-foreground;
+}
+
+u {
+    text-underline-offset: 4px;
+}
+
+code {
+    @apply bg-foreground/10 p-1 rounded;
+}

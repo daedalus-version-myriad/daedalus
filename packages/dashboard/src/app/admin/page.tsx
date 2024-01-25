@@ -7,7 +7,7 @@ export default function AdminHome() {
                 <h1 className="text-2xl">Admin Dashboard</h1>
                 <ul className="list-disc list-inside">
                     <li>
-                        <a href="/admin/news" className="border-b border-muted-foreground">
+                        <a href="/admin/news" className="link">
                             News / Latest Updates
                         </a>
                     </li>

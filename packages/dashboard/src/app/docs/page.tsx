@@ -21,7 +21,7 @@ export default function Docs() {
                     <a href="/docs/modules-commands">
                         <Button>Modules &amp; Commands</Button>
                     </a>
-                    <p>View a list of modules and commands and information on the bot's modular design and general information.</p>
+                    <p>View a list of modules and commands and information on the bot&apos;s modular design and general information.</p>
                     <a href="/docs/guides">
                         <Button>Guides</Button>
                     </a>

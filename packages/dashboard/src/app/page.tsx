@@ -40,7 +40,7 @@ export default async function Home() {
                         and server staff with advanced functionality, intuitive design, and features designed with convenience and accessibility in mind.
                     </p>
                     <p className="text-lg">
-                        See something you need but we don't have? We're constantly implementing new features and enhancing existing ones to continuously build a
+                        See something you need but we don&apos;t have? We&apos;re constantly implementing new features and enhancing existing ones to continuously build a
                         better experience for you, so stop by our support server and let us know what you need!
                     </p>
                 </div>
@@ -48,7 +48,7 @@ export default async function Home() {
             <Container>
                 <div className="flex flex-col gap-4">
                     <div>
-                        <a href="/news" className="border-b border-muted-foreground">
+                        <a href="/news" className="link">
                             Latest Updates <Icon icon="arrow-right"></Icon>
                         </a>
                     </div>

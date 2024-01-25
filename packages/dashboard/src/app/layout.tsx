@@ -9,17 +9,18 @@ import "./globals.css";
 
 const exo2 = Exo_2({ subsets: ["latin"] });
 
+const description =
+    "Daedalus is a highly customizable and powerful modular discord bot supporting a variety of core tools, as well as many extra features to help you improve your server's environment. Daedalus has a focus on transparency and giving you full control over how the bot operates in your server.";
+
 export const metadata: Metadata = {
     metadataBase: new URL("https://daedalusbot.xyz"),
     title: "Daedalus Dashboard",
-    description:
-        "Daedalus is a highly customizable and powerful modular discord bot supporting a variety of core tools, as well as many extra features to help you improve your server's environment. Daedalus has a focus on transparency and giving you full control over how the bot operates in your server.",
+    description,
     keywords: ["daedalus", "discord", "bot"],
     openGraph: {
         type: "website",
         title: "Daedalus Dashboard",
-        description:
-            "Daedalus is a highly customizable and powerful modular discord bot supporting a variety of core tools, as well as many extra features to help you improve your server's environment. Daedalus has a focus on transparency and giving you full control over how the bot operates in your server.",
+        description,
         url: "https://daedalusbot.xyz",
         images: { url: "https://daedalusbot.xyz/favicon.png" },
     },
