@@ -1,0 +1,155 @@
+{
+    "version": "5",
+    "dialect": "mysql",
+    "id": "239cb852-c154-4a0c-bdea-4a9116e27e64",
+    "prevId": "7fcff3a1-2771-4122-8698-0984e8a33065",
+    "tables": {
+        "admins": {
+            "name": "admins",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {
+                "admins_id": {
+                    "name": "admins_id",
+                    "columns": ["id"]
+                }
+            },
+            "uniqueConstraints": {}
+        },
+        "guild_settings": {
+            "name": "guild_settings",
+            "columns": {
+                "guild": {
+                    "name": "guild",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "dashboard_permission": {
+                    "name": "dashboard_permission",
+                    "type": "enum('owner','admin','manager')",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "'manager'"
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {
+                "guild_settings_guild": {
+                    "name": "guild_settings_guild",
+                    "columns": ["guild"]
+                }
+            },
+            "uniqueConstraints": {}
+        },
+        "news": {
+            "name": "news",
+            "columns": {
+                "code": {
+                    "name": "code",
+                    "type": "varchar(64)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "date": {
+                    "name": "date",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "CURRENT_TIMESTAMP"
+                },
+                "title": {
+                    "name": "title",
+                    "type": "varchar(64)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "subtitle": {
+                    "name": "subtitle",
+                    "type": "varchar(64)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "summary": {
+                    "name": "summary",
+                    "type": "varchar(256)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "body": {
+                    "name": "body",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {
+                "idx_date": {
+                    "name": "idx_date",
+                    "columns": ["date"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {
+                "news_code": {
+                    "name": "news_code",
+                    "columns": ["code"]
+                }
+            },
+            "uniqueConstraints": {}
+        },
+        "tokens": {
+            "name": "tokens",
+            "columns": {
+                "guild": {
+                    "name": "guild",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "token": {
+                    "name": "token",
+                    "type": "varchar(128)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {
+                "tokens_guild": {
+                    "name": "tokens_guild",
+                    "columns": ["guild"]
+                }
+            },
+            "uniqueConstraints": {}
+        }
+    },
+    "schemas": {},
+    "_meta": {
+        "schemas": {},
+        "tables": {},
+        "columns": {}
+    }
+}

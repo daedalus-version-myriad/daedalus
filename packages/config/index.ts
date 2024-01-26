@@ -15,8 +15,8 @@ export type Secrets = {
             SECRET: string;
         };
         TOKEN: string;
+        CALLBACK: string;
     };
-    NEXT_AUTH_SECRET: string;
 };
 
-export * from "./secrets.ts";
+export * from "./secrets";

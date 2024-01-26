@@ -7,4 +7,14 @@ export type User = {
     admin: boolean;
 };
 
+export type Guild = {
+    id: string;
+    name: string;
+    icon?: string;
+    owner: boolean;
+    permissions: string;
+    hasBot: boolean;
+    features: string[];
+};
+
 export type FormHandler<T> = (data: T) => Awaitable<{ name: keyof T; type: string; message: string }[] | undefined>;

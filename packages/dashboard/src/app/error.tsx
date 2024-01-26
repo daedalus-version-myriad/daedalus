@@ -6,7 +6,7 @@ import Error from "next/error";
 import { useEffect } from "react";
 
 export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
-    useEffect(() => console.error(error), []);
+    useEffect(() => console.error(error), [error]);
 
     return (
         <Container>

@@ -2,9 +2,9 @@
 
 import { useUserContext } from "@/context/user";
 import { CLIENT_ID } from "@daedalus/config/public";
-import { signIn, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import React from "react";
 import Icon from "./Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -15,6 +15,7 @@ import { Sheet, SheetClose, SheetContent, SheetTrigger } from "./ui/sheet";
 export default function Navbar() {
     const { setTheme } = useTheme();
     const user = useUserContext();
+    const pathname = usePathname();
 
     const links: [string, string, string, boolean?][] = [
         ["/docs", "book", "Docs"],
@@ -62,15 +63,15 @@ export default function Navbar() {
                                         <a href="/account">My Account</a>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem>
-                                        <button onClick={() => signOut()}>Sign Out</button>
+                                        <a href={`/auth/logout?redirect=${encodeURIComponent(pathname)}`}>Sign Out</a>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </>
                     ) : (
-                        <button className="px-4 py-5 hover:bg-foreground/5" onClick={() => signIn("discord")}>
+                        <a href={`/auth/login?redirect=${encodeURIComponent(pathname)}`} className="px-4 py-5 hover:bg-foreground/5">
                             Log In
-                        </button>
+                        </a>
                     )}
                     <button className="hidden dark:block w-16 py-5 hover:bg-foreground/5" onClick={() => setTheme("light")}>
                         <Icon icon="sun"></Icon>

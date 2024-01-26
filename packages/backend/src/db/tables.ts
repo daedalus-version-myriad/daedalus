@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { index, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 export const admins = mysqlTable("admins", {
     id: varchar("id", { length: 20 }).notNull().primaryKey(),
@@ -8,6 +8,11 @@ export const admins = mysqlTable("admins", {
 export const tokens = mysqlTable("tokens", {
     guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
     token: varchar("token", { length: 128 }).notNull(),
+});
+
+export const guildSettings = mysqlTable("guild_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    dashboardPermission: mysqlEnum("dashboard_permission", ["owner", "admin", "manager"]).notNull().default("manager"),
 });
 
 export const news = mysqlTable(

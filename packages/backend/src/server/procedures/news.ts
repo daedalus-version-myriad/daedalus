@@ -1,8 +1,8 @@
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { db } from "../../db/db.ts";
-import { tables } from "../../db/index.ts";
-import { proc } from "../trpc.ts";
+import { db } from "../../db/db";
+import { tables } from "../../db/index";
+import { proc } from "../trpc";
 
 const DEFAULT_LIMIT = 10;
 const DEFAULT_PAGE = 1;

@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "@/lib/types.js";
+import { User } from "@/lib/types";
 import { createContext, useContext } from "react";
 
 const UserContext = createContext<User | null>(null);

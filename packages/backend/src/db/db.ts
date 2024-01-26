@@ -1,4 +1,4 @@
 import { drizzle } from "drizzle-orm/planetscale-serverless";
-import { connection } from "./connection.ts";
+import { connection } from "./connection";
 
 export const db = drizzle(connection);

@@ -1,3 +1,3 @@
-export * from "./connection.ts";
-export * from "./db.ts";
-export * as tables from "./tables.ts";
+export * from "./connection";
+export * from "./db";
+export * as tables from "./tables";

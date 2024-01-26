@@ -34,11 +34,11 @@
         "discord.js": "^14.14.1",
         "drizzle-orm": "^0.29.3",
         "next": "^14.1.0",
-        "next-auth": "latest",
         "next-themes": "^0.2.1",
         "nopt": "^7.2.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "sharp": "^0.33.2",
         "usehooks-ts": "^2.9.5",
         "zlib-sync": "^0.1.9",
         "zod": "^3.22.4"

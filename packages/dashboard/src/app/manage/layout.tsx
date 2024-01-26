@@ -4,8 +4,9 @@ import { useUserContext } from "@/context/user";
 import { redirect } from "next/navigation";
 import React from "react";
 
-export default function AdminLayout({ children }: React.PropsWithChildren) {
+export default function ManageLayout({ children }: React.PropsWithChildren) {
     const user = useUserContext();
-    if (!user?.admin) return void redirect("/");
+    if (!user) return void redirect("/auth/login?redirect=/manage");
+
     return <>{children}</>;
 }
