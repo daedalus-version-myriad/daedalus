@@ -76,7 +76,7 @@
 }
 
 a.link {
-    @apply border-b border-muted-foreground;
+    @apply text-primary no-underline border-b border-muted-foreground;
 }
 
 u {
@@ -85,4 +85,27 @@ u {
 
 code {
     @apply bg-foreground/10 p-1 rounded;
+    color: hsl(var(--muted-foreground)) !important;
+}
+
+code::before,
+code::after {
+    content: "" !important;
+}
+
+.prose {
+    @apply text-primary;
+}
+
+p:not(.not-prose),
+li:not(.not-prose) {
+    @apply prose;
+}
+
+.center-col {
+    @apply flex flex-col items-center;
+}
+
+.center-row {
+    @apply flex items-center;
 }

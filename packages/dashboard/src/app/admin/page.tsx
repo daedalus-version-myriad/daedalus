@@ -5,7 +5,7 @@ export default function AdminHome() {
         <Container>
             <div className="mt-8">
                 <h1 className="text-2xl">Admin Dashboard</h1>
-                <ul className="list-disc list-inside">
+                <ul className="list-disc ml-4">
                     <li>
                         <a href="/admin/news" className="link">
                             News / Latest Updates

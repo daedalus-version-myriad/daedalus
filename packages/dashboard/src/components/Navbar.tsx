@@ -1,7 +1,8 @@
 "use client";
 
+import { categories } from "@/app/manage/[id]/layout-body";
 import { useUserContext } from "@/context/user";
-import { CLIENT_ID } from "@daedalus/config/public";
+import { INVITE_LINK } from "@/lib/data";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -19,7 +20,7 @@ export default function Navbar() {
 
     const links: [string, string, string, boolean?][] = [
         ["/docs", "book", "Docs"],
-        [`https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&permissions=1428010036470&scope=applications.commands+bot`, "add", "Invite"],
+        [INVITE_LINK, "add", "Invite"],
         ["https://discord.gg/7TRKfSK7EU", "discord", "Support", true],
         ["/premium", "crown", "Premium"],
         ...(user?.admin ? [["/admin", "screwdriver-wrench", "Admin"] as [string, string, string]] : []),
@@ -27,9 +28,9 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="fixed w-full flex items-center justify-between border-b border-border overflow-hidden bg-background/75 backdrop-blur-[2px]">
-                <div className="flex items-center">
-                    <a href="/" className="flex items-center gap-4 px-4 py-2 hover:bg-foreground/5">
+            <nav className="fixed w-full center-row justify-between border-b border-border overflow-hidden bg-background/75 backdrop-blur-[2px]">
+                <div className="center-row">
+                    <a href="/" className="center-row gap-4 px-4 py-2 hover:bg-foreground/5">
                         <Image className="rounded" width={48} height={48} src="/favicon.ico" alt="Daedalus Icon"></Image>
                         <h1 className="text-2xl font-bold">Daedalus</h1>
                     </a>
@@ -39,7 +40,7 @@ export default function Navbar() {
                             <a
                                 href={href}
                                 target={href.startsWith("/") ? "_self" : "_blank"}
-                                className="hidden lg:flex items-center gap-4 px-4 py-5 hover:bg-foreground/5"
+                                className="hidden lg:flex center-row gap-4 px-4 py-5 hover:bg-foreground/5"
                             >
                                 <Icon icon={icon} brand={brand}></Icon>
                                 <span>{label}</span>
@@ -47,11 +48,11 @@ export default function Navbar() {
                         </React.Fragment>
                     ))}
                 </div>
-                <div className="flex items-center">
+                <div className="center-row">
                     {user ? (
                         <>
                             <DropdownMenu>
-                                <DropdownMenuTrigger className="flex items-center gap-4 px-4 py-3 hover:bg-foreground/5 outline-none">
+                                <DropdownMenuTrigger className="center-row gap-4 px-4 py-3 hover:bg-foreground/5 outline-none">
                                     <Avatar>
                                         <AvatarImage src={user.image ?? ""} alt={`@${user.name}`}></AvatarImage>
                                         <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
@@ -84,18 +85,34 @@ export default function Navbar() {
                             <Icon icon="bars"></Icon>
                         </SheetTrigger>
                         <SheetContent>
-                            <div className="flex flex-col items-center">
+                            <div className="center-col">
                                 {links.map(([href, icon, label, brand], index) => (
                                     <a
                                         key={`${index}`}
                                         href={href}
                                         target={href.startsWith("/") ? "_self" : "_blank"}
-                                        className="flex items-center gap-4 px-4 py-2 w-full hover:bg-foreground/5"
+                                        className="center-row gap-4 px-4 py-2 w-full hover:bg-foreground/5"
                                     >
                                         <Icon icon={icon} brand={brand}></Icon>
                                         <span>{label}</span>
                                     </a>
                                 ))}
+                                {pathname.startsWith("/manage")
+                                    ? ((id) => (
+                                          <>
+                                              <Separator className="my-4"></Separator>
+                                              {categories.map(([suffix, icon, label, brand]) => (
+                                                  <a
+                                                      href={`/manage/${id}${suffix}`}
+                                                      key={suffix}
+                                                      className={`center-row gap-4 px-4 py-2 w-full hover:bg-foreground/5`}
+                                                  >
+                                                      <Icon icon={icon} brand={!!brand}></Icon> {label}
+                                                  </a>
+                                              ))}
+                                          </>
+                                      ))(pathname.substring(8).split("/")[0])
+                                    : null}
                             </div>
                         </SheetContent>
                         <SheetClose className="outline-none"></SheetClose>

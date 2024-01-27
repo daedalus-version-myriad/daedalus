@@ -13,9 +13,9 @@ export default async function AdminNews({ searchParams }: { searchParams?: Recor
 
     return (
         <Container>
-            <div className="mt-8 flex flex-col items-center gap-4">
+            <div className="mt-8 center-col gap-4">
                 <a href="/admin/news/new">
-                    <Button className="flex items-center gap-2">
+                    <Button className="center-row gap-2">
                         <Icon icon="add"></Icon> New Item
                     </Button>
                 </a>

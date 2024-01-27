@@ -12,7 +12,7 @@ export default async function AdminNews({ searchParams }: { searchParams?: Recor
 
     return (
         <Container>
-            <div className="mt-8 flex flex-col items-center gap-4">
+            <div className="mt-8 center-col gap-4">
                 <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-4">
                     {news.map((item) => (
                         <Card key={`${item.date}`}>

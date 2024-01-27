@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 
 export default function DocsPermissions() {
     return (
-        <div className="flex flex-col items-center gap-8 py-16">
-            <div className="flex flex-col items-center gap-2 md:gap-4">
+        <div className="center-col gap-8 py-16">
+            <div className="center-col gap-2 md:gap-4">
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl">Daedalus Documentation</h1>
                 <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">Permissions</h2>
             </div>
-            <Container>
+            <Container className="center-col">
                 <div className="flex flex-col gap-4">
                     <a href="/docs">
-                        <Button variant="outline" className="flex items-center gap-2">
+                        <Button variant="outline" className="center-row gap-2">
                             <Icon icon="chevron-left"></Icon> Back
                         </Button>
                     </a>
@@ -26,7 +26,7 @@ export default function DocsPermissions() {
                         obviously need the permission. We will still seek to remove unneeded permission access whenever possible, so if you notice a feature
                         isn&apos;t working even though it seems like it should, please let us know.
                     </p>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-disc ml-4 space-y-2">
                         <li>
                             <b>View Channel</b> is required for automod, autoresponder, logging, etc. Slash commands bypass this permission if you do not grant
                             it, but most features will not work if the bot cannot access the applicable channels.
@@ -54,7 +54,7 @@ export default function DocsPermissions() {
                         </li>
                     </ul>
                     <h1 className="text-2xl">Module-Specific Permissions</h1>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-disc ml-4 space-y-2">
                         <li>
                             <b>Kick Members</b> is required for automod and the kick command.
                         </li>

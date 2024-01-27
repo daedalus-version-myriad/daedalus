@@ -19,13 +19,13 @@ export default function ModuleList() {
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={open} className="w-[200px] justify-between">
-                        {value ? modules.find((module) => module.value === value)?.label : "Select module..."}
-                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        {value ? modules.find((module) => module.value === value)?.label : "Select a module."}
+                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"></CaretSortIcon>
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                     <Command>
-                        <CommandInput placeholder="Search modules..." className="h-9" />
+                        <CommandInput placeholder="Search modules" className="h-9"></CommandInput>
                         <CommandEmpty>No modules found.</CommandEmpty>
                         <CommandGroup>
                             {modules.map((module) => (
@@ -38,7 +38,7 @@ export default function ModuleList() {
                                     }}
                                 >
                                     {module.label}
-                                    <CheckIcon className={cn("ml-auto h-4 w-4", value === module.value ? "opacity-100" : "opacity-0")} />
+                                    <CheckIcon className={cn("ml-auto h-4 w-4", value === module.value ? "opacity-100" : "opacity-0")}></CheckIcon>
                                 </CommandItem>
                             ))}
                         </CommandGroup>

@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 
 export default function DocsCustomClients() {
     return (
-        <div className="flex flex-col items-center gap-8 py-16">
-            <div className="flex flex-col items-center gap-2 md:gap-4">
+        <div className="center-col gap-8 py-16">
+            <div className="center-col gap-2 md:gap-4">
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl">Daedalus Documentation</h1>
                 <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">Custom Clients</h2>
             </div>
-            <Container>
+            <Container className="center-col">
                 <div className="flex flex-col gap-4">
                     <a href="/docs/guides">
-                        <Button variant="outline" className="flex items-center gap-2">
+                        <Button variant="outline" className="center-row gap-2">
                             <Icon icon="chevron-left"></Icon> Back
                         </Button>
                     </a>
@@ -25,7 +25,7 @@ export default function DocsCustomClients() {
                         . It allows you to set up a custom bot account and run Daedalus through it, giving you full control over the bot&apos;s appearance.
                     </p>
                     <p>Here is a list of what you need to keep in mind before using this feature:</p>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-disc ml-4 space-y-2">
                         <li>
                             Modmail behavior is improved when using custom clients. When the user DMs your bot, they will be asked for confirmation that they
                             want to message your server instead of receiving a server selection. This makes the process simpler and faster.

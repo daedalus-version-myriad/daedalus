@@ -6,13 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Guild } from "@/lib/types";
+import { INVITE_LINK } from "@/lib/data";
+import { PartialGuild } from "@/lib/types";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { fetchGuilds } from "./fetch";
 
 export default function ManageHomePage() {
-    const [data, setData] = useState<{ updated: number; servers: Guild[] } | null>(null);
+    const [data, setData] = useState<{ updated: number; servers: PartialGuild[] } | null>(null);
     const [query, setQuery] = useState("");
 
     async function load() {
@@ -36,19 +37,19 @@ export default function ManageHomePage() {
     }, []);
 
     return (
-        <div className="flex flex-col items-center gap-16 my-8">
+        <div className="center-col gap-16 my-8">
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl">Manage Your Servers</h1>
             <Container>
-                <div className="flex flex-col items-center gap-4">
+                <div className="center-col gap-4">
                     <Input placeholder="Filter Servers" onChange={(e) => setQuery(e.currentTarget.value)}></Input>
-                    <Button onClick={load} className="flex items-center gap-2" disabled={!data}>
+                    <Button onClick={load} className="center-row gap-2" disabled={!data}>
                         <Icon icon="refresh"></Icon> Reload Servers
                     </Button>
                     <p>{query}</p>
                     <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4">
                         {data
                             ? data.servers.map((guild) => (
-                                  <a key={guild.id} href={`/manage/${guild.id}`}>
+                                  <a key={guild.id} href={guild.hasBot ? `/manage/${guild.id}` : `${INVITE_LINK}&guild_id=${guild.id}`}>
                                       <div
                                           className={`p-4 grid grid-cols-[max-content_1fr] items-center gap-x-4 gap-y-2 h-24 border border-2 rounded ${guild.hasBot ? "bg-secondary/40" : "text-muted-foreground"}`}
                                       >
@@ -71,7 +72,7 @@ export default function ManageHomePage() {
                                               )}
                                           </div>
                                           <b className="max-h-16 text-lg truncate">{guild.name}</b>
-                                          <div className="flex items-center gap-2">
+                                          <div className="center-row gap-2">
                                               {guild.owner ? (
                                                   <Badge variant="secondary">owner</Badge>
                                               ) : BigInt(guild.permissions) & 8n ? (

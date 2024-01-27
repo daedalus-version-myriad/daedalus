@@ -11,19 +11,19 @@ export default async function Home() {
     const { news } = await trpc.newsList.query();
 
     return (
-        <div className="flex flex-col items-center gap-8">
-            <div className="flex flex-col items-center gap-2 md:gap-4 py-16">
+        <div className="center-col gap-8">
+            <div className="center-col gap-2 md:gap-4 py-16">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl">Welcome to Daedalus</h1>
                 <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">the future of server management</h2>
                 <TopButton></TopButton>
             </div>
             <Container>
-                <div className="flex flex-col items-center gap-8">
-                    <p className="text-lg">
+                <div className="center-col gap-8">
+                    <p className="prose-lg">
                         Daedalus offers a high-quality, highly-customizable, and modern out-of-the-box experience. Offer only the best for your server members
                         and server staff with advanced functionality, intuitive design, and features designed with convenience and accessibility in mind.
                     </p>
-                    <p className="text-lg">
+                    <p className="prose-lg">
                         See something you need but we don&apos;t have? We&apos;re constantly implementing new features and enhancing existing ones to
                         continuously build a better experience for you, so stop by our support server and let us know what you need!
                     </p>

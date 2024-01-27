@@ -1,15 +1,21 @@
 import Container from "@/components/Container";
+import Icon from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 
 export default function Docs() {
     return (
-        <div className="flex flex-col items-center gap-8 py-16">
-            <div className="flex flex-col items-center gap-2 md:gap-4">
+        <div className="center-col gap-8 py-16">
+            <div className="center-col gap-2 md:gap-4">
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl">Daedalus Documentation</h1>
                 <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">Guides</h2>
             </div>
-            <Container>
+            <Container className="center-col">
                 <div className="flex flex-col gap-4">
+                    <a href="/docs">
+                        <Button variant="outline" className="center-row gap-2">
+                            <Icon icon="chevron-left"></Icon> Back
+                        </Button>
+                    </a>
                     <a href="/docs/guides/custom-messages">
                         <Button>Custom Messages</Button>
                     </a>

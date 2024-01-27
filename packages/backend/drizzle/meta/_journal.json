@@ -1,20 +1,55 @@
 {
-    "version": "5",
-    "dialect": "mysql",
-    "entries": [
-        {
-            "idx": 0,
-            "version": "5",
-            "when": 1706136403719,
-            "tag": "0000_cynical_mephisto",
-            "breakpoints": true
-        },
-        {
-            "idx": 1,
-            "version": "5",
-            "when": 1706252452145,
-            "tag": "0001_free_vance_astro",
-            "breakpoints": true
-        }
-    ]
+  "version": "5",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1706136403719,
+      "tag": "0000_cynical_mephisto",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1706252452145,
+      "tag": "0001_free_vance_astro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1706322744077,
+      "tag": "0002_real_nuke",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1706334500812,
+      "tag": "0003_fantastic_ben_grimm",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1706336064550,
+      "tag": "0004_fair_hawkeye",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1706337715265,
+      "tag": "0005_lumpy_doomsday",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1706340284260,
+      "tag": "0006_modern_the_hood",
+      "breakpoints": true
+    }
+  ]
 }

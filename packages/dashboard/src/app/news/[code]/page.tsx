@@ -13,7 +13,7 @@ export default async function NewsArticle({ params }: { params: { code: string }
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl mb-4">{item.title}</h1>
                 <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">{item.subtitle}</h2>
                 <br />
-                <div dangerouslySetInnerHTML={{ __html: item.body }}></div>
+                <div className="flex flex-col gap-4" dangerouslySetInnerHTML={{ __html: item.body }}></div>
                 <br />
                 <a href="/news">
                     <Button>Back</Button>

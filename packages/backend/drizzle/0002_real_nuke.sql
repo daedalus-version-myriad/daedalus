@@ -1,0 +1,1 @@
+ALTER TABLE `guild_settings` ADD `embed_color` int DEFAULT 38536 NOT NULL;

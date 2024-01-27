@@ -55,7 +55,7 @@ export default function NewsForm(
                                 <Input placeholder="big-things-happening" {...field} readOnly={data.readonlyCode ?? false}></Input>
                             </FormControl>
                             <FormDescription>This is the unique internal ID, also present in the URL.</FormDescription>
-                            <FormMessage />
+                            <FormMessage></FormMessage>
                         </FormItem>
                     )}
                 ></FormField>
@@ -69,7 +69,7 @@ export default function NewsForm(
                                 <Input placeholder="Cool Updates" {...field}></Input>
                             </FormControl>
                             <FormDescription>This will be the title displayed in the article and on the front page.</FormDescription>
-                            <FormMessage />
+                            <FormMessage></FormMessage>
                         </FormItem>
                     )}
                 ></FormField>
@@ -83,7 +83,7 @@ export default function NewsForm(
                                 <Input placeholder="Things are happening." {...field}></Input>
                             </FormControl>
                             <FormDescription>This subtitle will be displayed under the title in the article and on the front page.</FormDescription>
-                            <FormMessage />
+                            <FormMessage></FormMessage>
                         </FormItem>
                     )}
                 ></FormField>

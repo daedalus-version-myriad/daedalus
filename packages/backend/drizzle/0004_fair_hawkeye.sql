@@ -1,0 +1,1 @@
+ALTER TABLE `guild_settings` ADD `ban_footer` varchar(1024) DEFAULT '' NOT NULL;

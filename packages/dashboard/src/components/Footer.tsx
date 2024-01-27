@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-        <div className="w-full h-16 px-4 flex items-center gap-1 border-t border-border">
+        <div className="w-full h-16 px-4 center-row gap-1 border-t border-border">
             <span>
                 &copy;{" "}
                 <a href="https://github.com/hyper-neutrino" className="link">

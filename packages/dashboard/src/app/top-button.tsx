@@ -10,7 +10,7 @@ export default function TopButton() {
     return user ? (
         <a href="/manage">
             <Button>
-                <span className="flex items-center gap-2 text-sm md:text-md lg:text-lg">
+                <span className="center-row gap-2 text-sm md:text-md lg:text-lg">
                     <Icon icon="gear"></Icon> Manage Servers
                 </span>
             </Button>
@@ -18,7 +18,7 @@ export default function TopButton() {
     ) : (
         <a href="/auth/login">
             <Button>
-                <span className="flex items-center gap-2 text-sm md:text-md lg:text-lg">
+                <span className="center-row gap-2 text-sm md:text-md lg:text-lg">
                     <Icon icon="discord" brand></Icon> Log In
                 </span>
             </Button>

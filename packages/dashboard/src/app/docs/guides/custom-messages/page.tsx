@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 
 export default function DocsCustomMessages() {
     return (
-        <div className="flex flex-col items-center gap-8 py-16">
-            <div className="flex flex-col items-center gap-2 md:gap-4">
+        <div className="center-col gap-8 py-16">
+            <div className="center-col gap-2 md:gap-4">
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl">Daedalus Documentation</h1>
                 <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">Custom Messages</h2>
             </div>
-            <Container>
+            <Container className="center-col">
                 <div className="flex flex-col gap-4">
                     <a href="/docs/guides">
-                        <Button variant="outline" className="flex items-center gap-2">
+                        <Button variant="outline" className="center-row gap-2">
                             <Icon icon="chevron-left"></Icon> Back
                         </Button>
                     </a>
@@ -41,7 +41,7 @@ export default function DocsCustomMessages() {
                     </p>
                     <h1 className="text-2xl">Members</h1>
                     <p>If the context targets a server member (e.g. welcome messages), the following are available:</p>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-disc ml-4 space-y-2">
                         <li>
                             <code>{"{avatar}"}</code>: the user&apos;s server-specific avatar if present, their user avatar otherwise
                         </li>
@@ -54,7 +54,7 @@ export default function DocsCustomMessages() {
                     </ul>
                     <h1 className="text-2xl">Members &amp; Users</h1>
                     <p>If the context targets a server member (e.g. welcome messages) or a user, the following are available:</p>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-disc ml-4 space-y-2">
                         <li>
                             <code>{"{mention}"}</code>: mention the user — note that this only pings if in the message content and not in an embed
                         </li>
@@ -85,7 +85,7 @@ export default function DocsCustomMessages() {
                     </ul>
                     <h1 className="text-2xl">Roles</h1>
                     <p>If the context targets a role (e.g. supporter announcements), the following are available:</p>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-disc ml-4 space-y-2">
                         <li>
                             <code>{"{role-icon}"}</code>: the role&apos;s icon URL
                         </li>
@@ -101,7 +101,7 @@ export default function DocsCustomMessages() {
                     </ul>
                     <h1 className="text-2xl">Guilds</h1>
                     <p>If the context targets a server (always), the following are available:</p>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-disc ml-4 space-y-2">
                         <li>
                             <code>{"{server}"}</code>: the server&apos;s name
                         </li>
@@ -146,7 +146,7 @@ export default function DocsCustomMessages() {
                     <p>
                         Arguments surrounded by <code>[]</code> are optional. <code>...</code> indicates that an arbitrary number of arguments are allowed.
                     </p>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-disc ml-4 space-y-2">
                         <li>
                             <code>{"{? a b [c]}"}</code>: if a is true-like (non-empty string or non-zero number), returns b, and otherwise returns c (or
                             &quot;&quot; if c is missing)

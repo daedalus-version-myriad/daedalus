@@ -12,7 +12,7 @@ export default function ErrorPage({ error, reset }: { error: Error; reset: () =>
         <Container>
             <div className="mt-8 flex flex-col gap-4">
                 <h1 className="text-2xl">An error occurred!</h1>
-                <div className="flex items-center gap-2">
+                <div className="center-row gap-2">
                     <a href="/">
                         <Button>Return to Home</Button>
                     </a>

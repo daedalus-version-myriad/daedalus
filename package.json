@@ -10,6 +10,7 @@
         "format": "prettier --write ."
     },
     "devDependencies": {
+        "@tailwindcss/typography": "^0.5.10",
         "@types/bun": "latest",
         "@types/node": "^20.11.5",
         "@types/react": "^18.2.48",
@@ -37,6 +38,7 @@
         "next-themes": "^0.2.1",
         "nopt": "^7.2.0",
         "react": "^18.2.0",
+        "react-colorful": "^5.6.1",
         "react-dom": "^18.2.0",
         "sharp": "^0.33.2",
         "usehooks-ts": "^2.9.5",
