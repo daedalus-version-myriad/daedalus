@@ -7,7 +7,8 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React from "react";
-import Icon from "./Icon";
+import { FaBars, FaBook, FaCrown, FaDiscord, FaMoon, FaPlus, FaScrewdriverWrench, FaSun } from "react-icons/fa6";
+import { IconType } from "react-icons/lib";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Separator } from "./ui/separator";
@@ -18,12 +19,12 @@ export default function Navbar() {
     const user = useUserContext();
     const pathname = usePathname();
 
-    const links: [string, string, string, boolean?][] = [
-        ["/docs", "book", "Docs"],
-        [INVITE_LINK, "add", "Invite"],
-        ["https://discord.gg/7TRKfSK7EU", "discord", "Support", true],
-        ["/premium", "crown", "Premium"],
-        ...(user?.admin ? [["/admin", "screwdriver-wrench", "Admin"] as [string, string, string]] : []),
+    const links: [string, IconType, string][] = [
+        ["/docs", FaBook, "Docs"],
+        [INVITE_LINK, FaPlus, "Invite"],
+        ["https://discord.gg/7TRKfSK7EU", FaDiscord, "Support"],
+        ["/premium", FaCrown, "Premium"],
+        ...(user?.admin ? [["/admin", FaScrewdriverWrench, "Admin"] as [string, IconType, string]] : []),
     ];
 
     return (
@@ -34,7 +35,7 @@ export default function Navbar() {
                         <Image className="rounded" width={48} height={48} src="/favicon.ico" alt="Daedalus Icon"></Image>
                         <h1 className="text-2xl font-bold">Daedalus</h1>
                     </a>
-                    {links.map(([href, icon, label, brand], index) => (
+                    {links.map(([href, icon, label], index) => (
                         <React.Fragment key={`${index}`}>
                             <Separator className="hidden lg:block h-8" orientation="vertical"></Separator>
                             <a
@@ -42,7 +43,7 @@ export default function Navbar() {
                                 target={href.startsWith("/") ? "_self" : "_blank"}
                                 className="hidden lg:flex center-row gap-4 px-4 py-5 hover:bg-foreground/5"
                             >
-                                <Icon icon={icon} brand={brand}></Icon>
+                                {icon({})}
                                 <span>{label}</span>
                             </a>
                         </React.Fragment>
@@ -74,26 +75,26 @@ export default function Navbar() {
                             Log In
                         </a>
                     )}
-                    <button className="hidden dark:block w-16 py-5 hover:bg-foreground/5" onClick={() => setTheme("light")}>
-                        <Icon icon="sun"></Icon>
+                    <button className="hidden dark:flex h-16 w-16 center-col justify-center hover:bg-foreground/5" onClick={() => setTheme("light")}>
+                        <FaSun></FaSun>
                     </button>
-                    <button className="block dark:hidden w-16 py-5 hover:bg-foreground/5" onClick={() => setTheme("dark")}>
-                        <Icon icon="moon"></Icon>
+                    <button className="flex dark:hidden h-16 w-16 center-col justify-center hover:bg-foreground/5" onClick={() => setTheme("dark")}>
+                        <FaMoon></FaMoon>
                     </button>
                     <Sheet>
                         <SheetTrigger className="lg:hidden w-16 py-5 hover:bg-foreground/5">
-                            <Icon icon="bars"></Icon>
+                            <FaBars></FaBars>
                         </SheetTrigger>
                         <SheetContent>
                             <div className="center-col">
-                                {links.map(([href, icon, label, brand], index) => (
+                                {links.map(([href, icon, label], index) => (
                                     <a
                                         key={`${index}`}
                                         href={href}
                                         target={href.startsWith("/") ? "_self" : "_blank"}
                                         className="center-row gap-4 px-4 py-2 w-full hover:bg-foreground/5"
                                     >
-                                        <Icon icon={icon} brand={brand}></Icon>
+                                        {icon({})}
                                         <span>{label}</span>
                                     </a>
                                 ))}
@@ -107,7 +108,7 @@ export default function Navbar() {
                                                       key={suffix}
                                                       className={`center-row gap-4 px-4 py-2 w-full hover:bg-foreground/5`}
                                                   >
-                                                      <Icon icon={icon} brand={!!brand}></Icon> {label}
+                                                      {icon({})}
                                                   </a>
                                               ))}
                                           </>

@@ -19,14 +19,14 @@ export default function ModuleList() {
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={open} className="w-[200px] justify-between">
-                        {value ? modules.find((module) => module.value === value)?.label : "Select a module."}
+                        {value ? modules.find((module) => module.value === value)?.label : "Select a module"}
                         <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"></CaretSortIcon>
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                     <Command>
                         <CommandInput placeholder="Search modules" className="h-9"></CommandInput>
-                        <CommandEmpty>No modules found.</CommandEmpty>
+                        <CommandEmpty>No modules found</CommandEmpty>
                         <CommandGroup>
                             {modules.map((module) => (
                                 <CommandItem

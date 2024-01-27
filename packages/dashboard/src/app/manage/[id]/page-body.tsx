@@ -1,17 +1,22 @@
 "use client";
 
 import ColorPicker from "@/components/ColorPicker";
+import MultiChannelSelector from "@/components/MultiChannelSelector";
 import MultiRoleSelector from "@/components/MultiRoleSelector";
 import NormalSelect from "@/components/NormalSelect";
 import Panel from "@/components/Panel";
+import { SaveChangesBar } from "@/components/SaveChangesBar";
 import SingleRoleSelector from "@/components/SingleRoleSelector";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { GuildSettings } from "@daedalus/types";
 import { useState } from "react";
+import save from "./save";
 
-export function Body({ data }: { data: GuildSettings }) {
+export function Body({ data: initial }: { data: GuildSettings }) {
+    const [data, setData] = useState<GuildSettings>(initial);
+
     const [dashboardPermission, setDashboardPermission] = useState<string>(data.dashboardPermission);
     const [embedColor, setEmbedColor] = useState<number>(data.embedColor);
     const [muteRole, setMuteRole] = useState<string | null>(data.muteRole);
@@ -22,6 +27,20 @@ export function Body({ data }: { data: GuildSettings }) {
     const [allowlistOnly, setAllowlistOnly] = useState<boolean>(data.allowlistOnly);
     const [allowedChannels, setAllowedChannels] = useState<string[]>(data.allowedChannels);
     const [blockedChannels, setBlockedChannels] = useState<string[]>(data.blockedChannels);
+
+    const updated = {
+        guild: data.guild,
+        dashboardPermission: dashboardPermission as GuildSettings["dashboardPermission"],
+        embedColor,
+        muteRole,
+        banFooter,
+        modOnly,
+        allowedRoles,
+        blockedRoles,
+        allowlistOnly,
+        allowedChannels,
+        blockedChannels,
+    };
 
     return (
         <>
@@ -76,41 +95,76 @@ export function Body({ data }: { data: GuildSettings }) {
                     Control permissions for the entire bot. To control permissions by each individual command, return to the server settings, go to a module and
                     click &quot;manage&quot; on a command card to edit its permission overrides.
                 </p>
-                <Panel>
-                    <h2 className="text-lg">Role Permissions</h2>
-                    <Label className="center-row gap-4">
-                        <Switch checked={modOnly} onCheckedChange={setModOnly}></Switch>
-                        <span>
-                            <b>Entire Bot Mod Only</b> (only allowed roles may use any commands &mdash; cannot be overridden)
-                        </span>
-                    </Label>
-                    <p>
-                        Allowed Roles <span className="text-muted-foreground">(This is overridden by blocked roles.)</span>
-                    </p>
-                    <MultiRoleSelector roles={allowedRoles} setRoles={setAllowedRoles} showEveryone showHigher showManaged></MultiRoleSelector>
-                    <p>
-                        Blocked Roles <span className="text-muted-foreground">(This overrides allowed roles.)</span>
-                    </p>
-                    <MultiRoleSelector roles={blockedRoles} setRoles={setBlockedRoles} showEveryone showHigher showManaged></MultiRoleSelector>
-                </Panel>
-                <Panel>
-                    <h2 className="text-lg">Channel Permissions</h2>
-                    <Label className="center-row gap-4">
-                        <Switch checked={allowlistOnly} onCheckedChange={setAllowlistOnly}></Switch>
-                        <span>
-                            <b>Allowlist Only</b> (commands can only be used in allowed channels &mdash; cannot be overridden)
-                        </span>
-                    </Label>
-                    <p>
-                        <span className="text-muted-foreground">
-                            Note: If a channel is allowed but its parent category is blocked or vice versa, the channel&apos;s own settings will have priority.
-                            If a channel is both allowed and blocked, it will be blocked.
-                        </span>
-                    </p>
-                    <p>Allowed Channels</p>
-                    <p>Blocked Channels</p>
-                </Panel>
+                <div>
+                    <Panel>
+                        <h2 className="text-lg">Role Permissions</h2>
+                        <Label className="center-row gap-4">
+                            <Switch checked={modOnly} onCheckedChange={setModOnly}></Switch>
+                            <span>
+                                <b>Entire Bot Mod Only</b> (only allowed roles may use any commands &mdash; cannot be overridden)
+                            </span>
+                        </Label>
+                        <p>
+                            Allowed Roles <span className="text-muted-foreground">(This is overridden by blocked roles.)</span>
+                        </p>
+                        <MultiRoleSelector roles={allowedRoles} setRoles={setAllowedRoles} showEveryone showHigher showManaged></MultiRoleSelector>
+                        <p>
+                            Blocked Roles <span className="text-muted-foreground">(This overrides allowed roles.)</span>
+                        </p>
+                        <MultiRoleSelector roles={blockedRoles} setRoles={setBlockedRoles} showEveryone showHigher showManaged></MultiRoleSelector>
+                    </Panel>
+                    <Panel>
+                        <h2 className="text-lg">Channel Permissions</h2>
+                        <Label className="center-row gap-4">
+                            <Switch checked={allowlistOnly} onCheckedChange={setAllowlistOnly}></Switch>
+                            <span>
+                                <b>Allowlist Only</b> (commands can only be used in allowed channels &mdash; cannot be overridden)
+                            </span>
+                        </Label>
+                        <p>
+                            <span className="text-muted-foreground">
+                                Note: If a channel is allowed but its parent category is blocked or vice versa, the channel&apos;s own settings will have
+                                priority. If a channel is both allowed and blocked, it will be blocked.
+                            </span>
+                        </p>
+                        <p>Allowed Channels</p>
+                        <MultiChannelSelector
+                            channels={allowedChannels}
+                            setChannels={setAllowedChannels}
+                            types={[0, 2, 4, 5, 13, 15, 16]}
+                        ></MultiChannelSelector>
+                        <p>Blocked Channels</p>
+                        <MultiChannelSelector
+                            channels={blockedChannels}
+                            setChannels={setBlockedChannels}
+                            types={[0, 2, 4, 5, 13, 15, 16]}
+                        ></MultiChannelSelector>
+                    </Panel>
+                </div>
             </Panel>
+            <SaveChangesBar
+                unsaved={JSON.stringify(updated) !== JSON.stringify(data)}
+                reset={() => {
+                    setDashboardPermission(data.dashboardPermission);
+                    setEmbedColor(data.embedColor);
+                    setMuteRole(data.muteRole);
+                    setBanFooter(data.banFooter);
+                    setModOnly(data.modOnly);
+                    setAllowedRoles(data.allowedRoles);
+                    setBlockedRoles(data.blockedRoles);
+                    setAllowlistOnly(data.allowlistOnly);
+                    setAllowedChannels(data.allowedChannels);
+                    setBlockedChannels(data.blockedChannels);
+                }}
+                save={async () => {
+                    try {
+                        await save(updated);
+                        setData(updated);
+                    } catch (error) {
+                        alert(`${error}`);
+                    }
+                }}
+            ></SaveChangesBar>
         </>
     );
 }

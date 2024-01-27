@@ -50,6 +50,13 @@
       "when": 1706340284260,
       "tag": "0006_modern_the_hood",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1706387670966,
+      "tag": "0007_fantastic_talkback",
+      "breakpoints": true
     }
   ]
 }

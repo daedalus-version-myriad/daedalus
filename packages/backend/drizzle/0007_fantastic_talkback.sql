@@ -1,0 +1,1 @@
+ALTER TABLE `guild_settings` ADD `blocked_roles` text DEFAULT ('') NOT NULL;

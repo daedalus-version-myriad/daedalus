@@ -18,7 +18,7 @@ export const guildSettings = mysqlTable("guild_settings", {
     banFooter: varchar("ban_footer", { length: 1024 }).notNull().default(""),
     modOnly: boolean("mod_only").notNull().default(false),
     allowedRoles: text("allowed_roles").notNull().default(""),
-    blockedRoles: text("allowed_roles").notNull().default(""),
+    blockedRoles: text("blocked_roles").notNull().default(""),
     allowlistOnly: boolean("allowlist_only").notNull().default(false),
     allowedChannels: text("allowed_channels").notNull().default(""),
     blockedChannels: text("blocked_channels").notNull().default(""),

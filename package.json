@@ -1,48 +1,49 @@
 {
-    "name": "daedalus",
-    "module": "index.ts",
-    "type": "module",
-    "workspaces": [
-        "packages/*"
-    ],
-    "scripts": {
-        "start": "bun index.ts",
-        "format": "prettier --write ."
-    },
-    "devDependencies": {
-        "@tailwindcss/typography": "^0.5.10",
-        "@types/bun": "latest",
-        "@types/node": "^20.11.5",
-        "@types/react": "^18.2.48",
-        "@types/react-dom": "^18.2.18",
-        "autoprefixer": "^10.4.17",
-        "drizzle-kit": "^0.20.13",
-        "eslint": "^8.56.0",
-        "eslint-config-next": "^14.1.0",
-        "postcss": "^8.4.33",
-        "prettier": "^3.2.4",
-        "tailwindcss": "^3.4.1",
-        "typescript": "^5.3.3"
-    },
-    "peerDependencies": {
-        "typescript": "^5.0.0"
-    },
-    "dependencies": {
-        "@hookform/resolvers": "^3.3.4",
-        "@planetscale/database": "^1.14.0",
-        "@trpc/client": "next",
-        "@trpc/server": "next",
-        "discord.js": "^14.14.1",
-        "drizzle-orm": "^0.29.3",
-        "next": "^14.1.0",
-        "next-themes": "^0.2.1",
-        "nopt": "^7.2.0",
-        "react": "^18.2.0",
-        "react-colorful": "^5.6.1",
-        "react-dom": "^18.2.0",
-        "sharp": "^0.33.2",
-        "usehooks-ts": "^2.9.5",
-        "zlib-sync": "^0.1.9",
-        "zod": "^3.22.4"
-    }
+  "name": "daedalus",
+  "module": "index.ts",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "bun index.ts",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/bun": "latest",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.17",
+    "drizzle-kit": "^0.20.13",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.1.0",
+    "postcss": "^8.4.33",
+    "prettier": "^3.2.4",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.3.4",
+    "@planetscale/database": "^1.14.0",
+    "@trpc/client": "next",
+    "@trpc/server": "next",
+    "discord.js": "^14.14.1",
+    "drizzle-orm": "^0.29.3",
+    "next": "^14.1.0",
+    "next-themes": "^0.2.1",
+    "nopt": "^7.2.0",
+    "react": "^18.2.0",
+    "react-colorful": "^5.6.1",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.0.1",
+    "sharp": "^0.33.2",
+    "usehooks-ts": "^2.9.5",
+    "zlib-sync": "^0.1.9",
+    "zod": "^3.22.4"
+  }
 }

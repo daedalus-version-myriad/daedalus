@@ -2,7 +2,7 @@ import { useRoleMap } from "@/hooks/roles";
 import { cn } from "@/lib/utils";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
-import Icon from "./Icon";
+import { FaTrash, FaXmark } from "react-icons/fa6";
 import { Button } from "./ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -31,16 +31,16 @@ export default function MultiRoleSelector({
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={open} className="w-[max-content] justify-between">
-                        Select roles.
+                        Select roles
                         <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"></CaretSortIcon>
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent align="start" className="w-[max-content] max-w-[320px] p-0">
                     <Command>
-                        <CommandInput placeholder="Search roles..." className="h-9"></CommandInput>
-                        <CommandEmpty>No roles found.</CommandEmpty>
-                        <CommandGroup>
-                            <ScrollArea className="h-72">
+                        <CommandInput placeholder="Search roles" className="h-9"></CommandInput>
+                        <CommandEmpty>No roles found</CommandEmpty>
+                        <ScrollArea className="h-72">
+                            <CommandGroup>
                                 {Object.values(roles)
                                     .filter((role) => (showManaged || !role.managed) && (showHigher || !role.higher) && (showEveryone || !role.everyone))
                                     .map((role) => (
@@ -64,20 +64,20 @@ export default function MultiRoleSelector({
                                             <CheckIcon className={cn("ml-auto h-4 w-4", ids.includes(role.id) ? "opacity-100" : "opacity-0")}></CheckIcon>
                                         </CommandItem>
                                     ))}
-                            </ScrollArea>
-                        </CommandGroup>
+                            </CommandGroup>
+                        </ScrollArea>
                     </Command>
                 </PopoverContent>
             </Popover>
             {ids.map((id) => (
                 <Button variant="outline" className="h-9 center-row gap-4" key={id} onClick={() => setRoles(ids.filter((x) => x !== id))}>
-                    <Icon icon="xmark"></Icon>
+                    <FaXmark></FaXmark>
                     {roles[id].name}
                 </Button>
             ))}
             {ids.length > 0 ? (
                 <Button variant="outline" className="h-9 center-row gap-4" onClick={() => setRoles([])}>
-                    <Icon icon="trash" className="text-destructive"></Icon>
+                    <FaTrash color="#ff0000aa"></FaTrash>
                     Clear Roles
                 </Button>
             ) : null}

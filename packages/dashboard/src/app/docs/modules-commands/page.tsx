@@ -1,6 +1,6 @@
 import Container from "@/components/Container";
-import Icon from "@/components/Icon";
 import { Button } from "@/components/ui/button";
+import { FaChevronLeft } from "react-icons/fa6";
 import ModuleList from "./module-list";
 
 export default function DocsModulesCommands() {
@@ -14,7 +14,7 @@ export default function DocsModulesCommands() {
                 <div className="flex flex-col gap-4">
                     <a href="/docs">
                         <Button variant="outline" className="center-row gap-2">
-                            <Icon icon="chevron-left"></Icon> Back
+                            <FaChevronLeft></FaChevronLeft> Back
                         </Button>
                     </a>
                     <p>

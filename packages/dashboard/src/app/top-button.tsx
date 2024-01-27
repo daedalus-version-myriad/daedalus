@@ -1,8 +1,8 @@
 "use client";
 
-import Icon from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 import { useUserContext } from "@/context/user";
+import { FaDiscord, FaGear } from "react-icons/fa6";
 
 export default function TopButton() {
     const user = useUserContext();
@@ -11,7 +11,7 @@ export default function TopButton() {
         <a href="/manage">
             <Button>
                 <span className="center-row gap-2 text-sm md:text-md lg:text-lg">
-                    <Icon icon="gear"></Icon> Manage Servers
+                    <FaGear></FaGear> Manage Servers
                 </span>
             </Button>
         </a>
@@ -19,7 +19,7 @@ export default function TopButton() {
         <a href="/auth/login">
             <Button>
                 <span className="center-row gap-2 text-sm md:text-md lg:text-lg">
-                    <Icon icon="discord" brand></Icon> Log In
+                    <FaDiscord></FaDiscord> Log In
                 </span>
             </Button>
         </a>

@@ -1,7 +1,7 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
-import { snowflake } from "../schemas.ts";
+import { snowflake } from "../schemas";
 import { proc } from "../trpc";
 
 export default {

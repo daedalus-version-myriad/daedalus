@@ -1,7 +1,6 @@
 "use client";
 
 import Container from "@/components/Container";
-import Icon from "@/components/Icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { INVITE_LINK } from "@/lib/data";
 import { PartialGuild } from "@/lib/types";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { FaArrowsRotate } from "react-icons/fa6";
 import { fetchGuilds } from "./fetch";
 
 export default function ManageHomePage() {
@@ -43,7 +43,7 @@ export default function ManageHomePage() {
                 <div className="center-col gap-4">
                     <Input placeholder="Filter Servers" onChange={(e) => setQuery(e.currentTarget.value)}></Input>
                     <Button onClick={load} className="center-row gap-2" disabled={!data}>
-                        <Icon icon="refresh"></Icon> Reload Servers
+                        <FaArrowsRotate></FaArrowsRotate> Reload Servers
                     </Button>
                     <p>{query}</p>
                     <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4">

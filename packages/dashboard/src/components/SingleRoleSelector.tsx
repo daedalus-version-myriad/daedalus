@@ -2,7 +2,7 @@ import { useRoleMap } from "@/hooks/roles";
 import { cn } from "@/lib/utils";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
-import Icon from "./Icon";
+import { FaXmark } from "react-icons/fa6";
 import { Button } from "./ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -31,16 +31,16 @@ export default function SingleRoleSelector({
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={open} className="w-[max-content] justify-between">
-                        {id ? roles[id]?.name : "Select a role."}
+                        {id ? roles[id]?.name : "Select a role"}
                         <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"></CaretSortIcon>
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent align="start" className="w-[max-content] max-w-[320px] p-0">
                     <Command>
-                        <CommandInput placeholder="Search roles..." className="h-9"></CommandInput>
-                        <CommandEmpty>No roles found.</CommandEmpty>
-                        <CommandGroup>
-                            <ScrollArea className="h-72">
+                        <CommandInput placeholder="Search roles" className="h-9"></CommandInput>
+                        <CommandEmpty>No roles found</CommandEmpty>
+                        <ScrollArea className="h-72">
+                            <CommandGroup>
                                 {Object.values(roles)
                                     .filter((role) => (showManaged || !role.managed) && (showHigher || !role.higher) && (showEveryone || !role.everyone))
                                     .map((role) => (
@@ -61,14 +61,14 @@ export default function SingleRoleSelector({
                                             <CheckIcon className={cn("ml-auto h-4 w-4", role.id === id ? "opacity-100" : "opacity-0")}></CheckIcon>
                                         </CommandItem>
                                     ))}
-                            </ScrollArea>
-                        </CommandGroup>
+                            </CommandGroup>
+                        </ScrollArea>
                     </Command>
                 </PopoverContent>
             </Popover>
             {id ? (
                 <Button variant="outline" className="h-9" onClick={() => setRole(null)}>
-                    <Icon icon="xmark"></Icon>
+                    <FaXmark></FaXmark>
                 </Button>
             ) : null}
         </div>

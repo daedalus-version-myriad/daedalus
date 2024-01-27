@@ -3,8 +3,8 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
-import { snowflake } from "../schemas.ts";
-import { decodeArray } from "../transformations.ts";
+import { snowflake } from "../schemas";
+import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
 
 export default {

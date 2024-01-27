@@ -1,6 +1,6 @@
 import Container from "@/components/Container";
-import Icon from "@/components/Icon";
 import { Button } from "@/components/ui/button";
+import { FaChevronLeft } from "react-icons/fa6";
 
 export default function DocsCustomClients() {
     return (
@@ -13,7 +13,7 @@ export default function DocsCustomClients() {
                 <div className="flex flex-col gap-4">
                     <a href="/docs/guides">
                         <Button variant="outline" className="center-row gap-2">
-                            <Icon icon="chevron-left"></Icon> Back
+                            <FaChevronLeft></FaChevronLeft> Back
                         </Button>
                     </a>
                     <h1 className="text-2xl">Custom Clients</h1>

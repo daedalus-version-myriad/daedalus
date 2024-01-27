@@ -7,7 +7,7 @@ import { z } from "zod";
 import { bot, clients } from "../../bot/index";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
-import { snowflake } from "../schemas.ts";
+import { snowflake } from "../schemas";
 import { proc } from "../trpc";
 
 async function isAdmin(id: string) {
@@ -137,16 +137,18 @@ export default {
                         higher: role.comparePositionTo(me.roles.highest) >= 0,
                         position: role.position,
                     })),
-                channels: guild.channels.cache.map((channel) => ({
-                    id: channel.id,
-                    type: channel.type,
-                    position: "position" in channel ? channel.position : 0,
-                    name: channel.name,
-                    parent: channel.parentId,
-                    readonly: channel.isThread()
-                        ? !channel.parent?.permissionsFor(me).has(PermissionFlagsBits.SendMessagesInThreads)
-                        : !channel.permissionsFor(me).has(PermissionFlagsBits.SendMessages),
-                })),
+                channels: guild.channels.cache
+                    .filter((channel) => !channel.isThread())
+                    .map((channel) => ({
+                        id: channel.id,
+                        type: channel.type,
+                        position: "position" in channel ? channel.position : 0,
+                        name: channel.name,
+                        parent: channel.parentId,
+                        readonly: channel.isThread()
+                            ? !channel.parent?.permissionsFor(me).has(PermissionFlagsBits.SendMessagesInThreads)
+                            : !channel.permissionsFor(me).has(PermissionFlagsBits.SendMessages),
+                    })),
                 emojis: guild.emojis.cache.map((emoji) => ({ id: emoji.id, name: emoji.name ?? "[unnamed emoji]", url: emoji.imageURL({ size: 64 }) })),
                 stickers: guild.stickers.cache.map((sticker) => ({ id: sticker.id, name: sticker.name, url: sticker.url })),
             };

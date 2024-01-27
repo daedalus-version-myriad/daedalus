@@ -1,10 +1,11 @@
 "use client";
 
-import Icon from "@/components/Icon";
 import { usePathname } from "next/navigation";
 import React from "react";
+import { FaGear } from "react-icons/fa6";
+import { IconType } from "react-icons/lib";
 
-export const categories: [string, string, string, boolean?][] = [["", "gear", "Guild Settings"]];
+export const categories: [string, IconType, string, boolean?][] = [["", FaGear, "Guild Settings"]];
 
 export default function ManageLayoutBody({ children, id, name }: { children: React.ReactNode; id: string; name: string }) {
     const pathname = usePathname();
@@ -18,7 +19,7 @@ export default function ManageLayoutBody({ children, id, name }: { children: Rea
                         key={suffix}
                         className={`px-4 py-2 center-row gap-4 ${pathname.endsWith(`${id}${suffix}`) ? "bg-muted" : ""}`}
                     >
-                        <Icon icon={icon} brand={!!brand}></Icon> {label}
+                        {icon({})} {label}
                     </a>
                 ))}
             </div>

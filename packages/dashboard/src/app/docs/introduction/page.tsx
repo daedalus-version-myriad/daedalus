@@ -1,7 +1,7 @@
 import Container from "@/components/Container";
-import Icon from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { FaChevronLeft } from "react-icons/fa6";
 
 export default function DocsIntroduction() {
     return (
@@ -14,7 +14,7 @@ export default function DocsIntroduction() {
                 <div className="flex flex-col gap-4">
                     <a href="/docs">
                         <Button variant="outline" className="center-row gap-2">
-                            <Icon icon="chevron-left"></Icon> Back
+                            <FaChevronLeft></FaChevronLeft> Back
                         </Button>
                     </a>
                     <h1 className="text-2xl">Welcome!</h1>

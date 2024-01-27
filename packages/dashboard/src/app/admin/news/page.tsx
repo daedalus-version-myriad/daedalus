@@ -1,11 +1,11 @@
 "use server";
 
 import Container from "@/components/Container";
-import Icon from "@/components/Icon";
 import PageSelector from "@/components/PageSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@daedalus/api";
+import { FaPlus } from "react-icons/fa6";
 
 export default async function AdminNews({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
     const page = +(searchParams?.page ?? 1);
@@ -16,7 +16,7 @@ export default async function AdminNews({ searchParams }: { searchParams?: Recor
             <div className="mt-8 center-col gap-4">
                 <a href="/admin/news/new">
                     <Button className="center-row gap-2">
-                        <Icon icon="add"></Icon> New Item
+                        <FaPlus></FaPlus> New Item
                     </Button>
                 </a>
                 <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-4">

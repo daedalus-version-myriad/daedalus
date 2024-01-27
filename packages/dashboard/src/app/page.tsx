@@ -1,10 +1,10 @@
 "use server";
 
 import Container from "@/components/Container";
-import Icon from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@daedalus/api";
+import { FaArrowRight } from "react-icons/fa6";
 import TopButton from "./top-button";
 
 export default async function Home() {
@@ -32,8 +32,8 @@ export default async function Home() {
             <Container>
                 <div className="flex flex-col gap-4">
                     <div>
-                        <a href="/news" className="link">
-                            Latest Updates <Icon icon="arrow-right"></Icon>
+                        <a href="/news" className="link inline-flex items-center gap-2">
+                            Latest Updates <FaArrowRight></FaArrowRight>
                         </a>
                     </div>
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-4">
