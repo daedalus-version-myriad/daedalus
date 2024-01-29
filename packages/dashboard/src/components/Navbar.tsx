@@ -1,6 +1,7 @@
 "use client";
 
-import { categories } from "@/app/manage/[id]/layout-body";
+import { categories as accountCategories } from "@/app/account/layout";
+import { categories as manageCategories } from "@/app/manage/[id]/layout-body";
 import { useUserContext } from "@/context/user";
 import { INVITE_LINK } from "@/lib/data";
 import { useTheme } from "next-themes";
@@ -41,7 +42,7 @@ export default function Navbar() {
                             <a
                                 href={href}
                                 target={href.startsWith("/") ? "_self" : "_blank"}
-                                className="hidden lg:flex center-row gap-4 px-4 py-5 hover:bg-foreground/5"
+                                className="hidden lg:flex items-center gap-4 px-4 py-5 hover:bg-foreground/5"
                             >
                                 {icon({})}
                                 <span>{label}</span>
@@ -82,7 +83,7 @@ export default function Navbar() {
                         <FaMoon></FaMoon>
                     </button>
                     <Sheet>
-                        <SheetTrigger className="lg:hidden w-16 py-5 hover:bg-foreground/5">
+                        <SheetTrigger className="lg:hidden h-16 w-16 center-col justify-center hover:bg-foreground/5">
                             <FaBars></FaBars>
                         </SheetTrigger>
                         <SheetContent>
@@ -98,17 +99,35 @@ export default function Navbar() {
                                         <span>{label}</span>
                                     </a>
                                 ))}
-                                {pathname.startsWith("/manage")
+                                {pathname.match(/^\/manage\/\d/)
                                     ? ((id) => (
                                           <>
                                               <Separator className="my-4"></Separator>
-                                              {categories.map(([suffix, icon, label, brand]) => (
+                                              {manageCategories.map(([suffix, icon, label]) => (
                                                   <a
                                                       href={`/manage/${id}${suffix}`}
                                                       key={suffix}
                                                       className={`center-row gap-4 px-4 py-2 w-full hover:bg-foreground/5`}
                                                   >
                                                       {icon({})}
+                                                      <span>{label}</span>
+                                                  </a>
+                                              ))}
+                                          </>
+                                      ))(pathname.substring(8).split("/")[0])
+                                    : null}
+                                {pathname.startsWith("/account")
+                                    ? ((id) => (
+                                          <>
+                                              <Separator className="my-4"></Separator>
+                                              {accountCategories.map(([suffix, icon, label]) => (
+                                                  <a
+                                                      href={`/account${suffix}`}
+                                                      key={suffix}
+                                                      className={`center-row gap-4 px-4 py-2 w-full hover:bg-foreground/5`}
+                                                  >
+                                                      {icon({})}
+                                                      <span>{label}</span>
                                                   </a>
                                               ))}
                                           </>

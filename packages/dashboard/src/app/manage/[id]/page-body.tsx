@@ -157,12 +157,9 @@ export function Body({ data: initial }: { data: GuildSettings }) {
                     setBlockedChannels(data.blockedChannels);
                 }}
                 save={async () => {
-                    try {
-                        await save(updated);
-                        setData(updated);
-                    } catch (error) {
-                        alert(`${error}`);
-                    }
+                    const error = await save(updated);
+                    if (error) return alert(error);
+                    setData(updated);
                 }}
             ></SaveChangesBar>
         </>

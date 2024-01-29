@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 const DISCORD_ENDPOINT = (path: string, state: string) =>
     `${DISCORD_API}/oauth2/authorize?${new URLSearchParams({
         client_id: CLIENT_ID,
-        redirect_uri: secrets.DISCORD.CALLBACK,
+        redirect_uri: `${secrets.DOMAIN}/auth/callback`,
         response_type: "code",
         scope: "identify guilds",
         state: state + path,

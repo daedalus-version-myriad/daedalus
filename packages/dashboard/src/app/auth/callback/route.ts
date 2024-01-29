@@ -18,7 +18,7 @@ export async function GET(req: Request) {
             client_id: CLIENT_ID,
             client_secret: secrets.DISCORD.CLIENT.SECRET,
             grant_type: "authorization_code",
-            redirect_uri: secrets.DISCORD.CALLBACK,
+            redirect_uri: `${secrets.DOMAIN}/auth/callback`,
             code,
             scope: "identify guilds",
         }),

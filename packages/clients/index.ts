@@ -24,7 +24,7 @@ export class ClientManager {
             }, sweep);
     }
 
-    private async getBotFromToken(guildId?: string, token?: string) {
+    async getBotFromToken(guildId?: string, token?: string | null) {
         if (!guildId || !token) return await (this.bot ??= this.factory(secrets.DISCORD.TOKEN));
 
         const client = await this.cache.get(guildId);
@@ -41,7 +41,15 @@ export class ClientManager {
 
     async getBots() {
         const entries = await trpc.vanityClientList.query();
-        return [await this.getBot(), ...(await Promise.all(entries.map(({ guild, token }) => this.getBotFromToken(guild, token))))];
+
+        const clients = [await this.getBot()];
+
+        for (const { guild, token } of entries)
+            try {
+                clients.push(await this.getBotFromToken(guild, token));
+            } catch {}
+
+        return clients;
     }
 
     async getBotsWithGuilds(): Promise<Record<string, Client<true>>> {

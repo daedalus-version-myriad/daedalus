@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                     <UserWrapper user={user}>
                         <div className="min-h-[100vh] flex flex-col">
                             <Navbar></Navbar>
-                            <div className="grow">{children}</div>
+                            <div className="grow flex flex-col">{children}</div>
                             <Footer></Footer>
                         </div>
                     </UserWrapper>

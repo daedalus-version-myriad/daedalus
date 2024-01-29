@@ -1,5 +1,6 @@
 export type Secrets = {
     OWNER: string;
+    DOMAIN: string;
     PORTS: {
         API: number;
     };
@@ -15,7 +16,11 @@ export type Secrets = {
             SECRET: string;
         };
         TOKEN: string;
-        CALLBACK: string;
+    };
+    STRIPE: {
+        SECRET_KEY: string;
+        PRICES: Record<`${"PREMIUM" | "CUSTOM"}_${"MONTHLY" | "YEARLY"}`, string>;
+        PRODUCTS: Record<"PREMIUM" | "CUSTOM", string>;
     };
 };
 

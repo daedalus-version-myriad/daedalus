@@ -2,10 +2,33 @@ export type DashboardGuild = {
     id: string;
     name: string;
     owner: boolean;
-    roles: { id: string; name: string; color: number; everyone: boolean; managed: boolean; higher: boolean; position: number }[];
-    channels: { id: string; type: number; position: number; name: string; parent: string | null; readonly: boolean }[];
-    emojis: { id: string; name: string; url: string }[];
-    stickers: { id: string; name: string; url: string }[];
+    roles: {
+        id: string;
+        name: string;
+        color: number;
+        everyone: boolean;
+        managed: boolean;
+        higher: boolean;
+        position: number;
+    }[];
+    channels: {
+        id: string;
+        type: number;
+        position: number;
+        name: string;
+        parent: string | null;
+        readonly: boolean;
+    }[];
+    emojis: {
+        id: string;
+        name: string;
+        url: string;
+    }[];
+    stickers: {
+        id: string;
+        name: string;
+        url: string;
+    }[];
 };
 
 export type GuildSettings = {
@@ -20,4 +43,25 @@ export type GuildSettings = {
     allowlistOnly: boolean;
     allowedChannels: string[];
     blockedChannels: string[];
+};
+
+export type GuildPremiumSettings = {
+    guild: string;
+    keys: { key: string; disabled: boolean | null }[];
+    hasPremium: boolean;
+    hasCustom: boolean;
+    tag: string | null;
+    status: "online" | "idle" | "dnd" | "offline";
+    activityType: "none" | "playing" | "listening-to" | "watching" | "competing-in";
+    activity: string;
+};
+
+export type PremiumStripeSession = {
+    subscriptions: {
+        created: number;
+        product: string;
+        quantity: number;
+        type: "premium" | "custom";
+    }[];
+    url: string;
 };

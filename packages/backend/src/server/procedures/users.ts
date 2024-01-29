@@ -10,7 +10,7 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { proc } from "../trpc";
 
-async function isAdmin(id: string) {
+export async function isAdmin(id: string) {
     return (
         id === secrets.OWNER ||
         (
@@ -93,7 +93,8 @@ export default {
     userGuild: proc
         .input(z.object({ id: snowflake, guild: snowflake }))
         .query(async ({ input: { id, guild: guildId } }): Promise<{ error: string } | DashboardGuild> => {
-            const guild = await (await clients.getBot(guildId)).guilds.fetch(guildId).catch(() => null);
+            const client = await clients.getBot(guildId).catch(() => null);
+            const guild = await client?.guilds.fetch(guildId).catch(() => null);
             if (!guild) return { error: `Could not fetch the server with ID ${guildId}.` };
 
             if (!(await isAdmin(id))) {

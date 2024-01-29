@@ -2,11 +2,18 @@ import { secrets } from "@daedalus/config";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import guildSettings from "./procedures/guild-settings";
 import news from "./procedures/news";
+import premium from "./procedures/premium";
 import users from "./procedures/users";
 import vanityClients from "./procedures/vanity-clients";
 import { router } from "./trpc";
 
-const appRouter = router({ ...guildSettings, ...users, ...news, ...vanityClients });
+const appRouter = router({
+    ...guildSettings,
+    ...news,
+    ...premium,
+    ...users,
+    ...vanityClients,
+});
 
 export type AppRouter = typeof appRouter;
 

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, index, int, mysqlEnum, mysqlTable, primaryKey, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 export const admins = mysqlTable("admins", {
     id: varchar("id", { length: 20 }).notNull().primaryKey(),
@@ -24,6 +24,15 @@ export const guildSettings = mysqlTable("guild_settings", {
     blockedChannels: text("blocked_channels").notNull().default(""),
 });
 
+export const guildPremiumSettings = mysqlTable("guild_premium_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    hasPremium: boolean("has_premium").notNull().default(false),
+    hasCustom: boolean("has_custom").notNull().default(false),
+    status: mysqlEnum("status", ["online", "idle", "dnd", "offline"]).notNull().default("online"),
+    activityType: mysqlEnum("activity_type", ["none", "playing", "listening-to", "watching", "competing-in"]).notNull().default("watching"),
+    activity: varchar("activity", { length: 64 }).notNull().default("for /help"),
+});
+
 export const news = mysqlTable(
     "news",
     {
@@ -40,3 +49,40 @@ export const news = mysqlTable(
         idx_date: index("idx_date").on(t.date),
     }),
 );
+
+export const customers = mysqlTable(
+    "customers",
+    {
+        discord: varchar("discord", { length: 20 }).notNull(),
+        stripe: varchar("stripe", { length: 32 }).notNull().primaryKey(),
+    },
+    (t) => ({
+        idx_discord: index("idx_discord").on(t.discord),
+    }),
+);
+
+export const paymentLinks = mysqlTable("payment_links", {
+    key: varchar("key", { length: 256 }).notNull().primaryKey(),
+    links: text("links").notNull(),
+});
+
+export const premiumKeys = mysqlTable(
+    "premium_keys",
+    {
+        user: varchar("user", { length: 20 }).notNull(),
+        key: varchar("key", { length: 32 }).notNull().unique(),
+        disabled: boolean("disabled").notNull().default(false),
+        time: timestamp("time")
+            .default(sql`CURRENT_TIMESTAMP`)
+            .notNull(),
+    },
+    (t) => ({
+        pk_user_key: primaryKey({ name: "pk_user_key", columns: [t.user, t.key] }),
+        idx_time: index("idx_time").on(t.time),
+    }),
+);
+
+export const premiumKeyBindings = mysqlTable("premium_key_bindings", {
+    key: varchar("key", { length: 32 }).notNull().primaryKey(),
+    guild: varchar("guild", { length: 20 }).notNull(),
+});
