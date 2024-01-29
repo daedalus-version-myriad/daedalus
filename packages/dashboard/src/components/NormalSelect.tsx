@@ -2,20 +2,22 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
-export default function NormalSelect({
+export default function NormalSelect<T extends string>({
     value,
     setValue,
     options,
     placeholder,
+    className = "w-[min-content]",
 }: {
-    value: string;
-    setValue: (t: string) => unknown;
-    options: [string, string][];
+    value: T;
+    setValue: (t: T) => unknown;
+    options: [T, string][];
     placeholder?: string;
+    className?: string;
 }) {
     return (
         <Select value={value} onValueChange={setValue}>
-            <SelectTrigger className="w-[min-content]">
+            <SelectTrigger className={className}>
                 <SelectValue placeholder={placeholder}></SelectValue>
             </SelectTrigger>
             <SelectContent>

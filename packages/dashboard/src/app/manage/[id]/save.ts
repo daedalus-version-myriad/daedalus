@@ -1,6 +1,6 @@
 "use server";
 
-import { getId } from "@/lib/get-user.js";
+import { getId } from "@/lib/get-user";
 import { trpc } from "@daedalus/api";
 import { GuildSettings } from "@daedalus/types";
 

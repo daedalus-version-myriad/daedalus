@@ -3,25 +3,38 @@ import { secrets } from "@daedalus/config";
 import { Events, type Client } from "discord.js";
 
 export class ClientManager {
-    private factory: (token: string) => Promise<Client<true>>;
-    private cache = new Map<string, Promise<Client<true>>>();
+    private factory: (token: string, guild?: string) => Promise<Client<true>>;
+    private cache = new Map<string, Promise<Client<true> | null>>();
     private bot: Promise<Client<true>> | undefined;
 
-    constructor(factory: (token: string) => Promise<Client<true>>, sweep: number = 86400000) {
-        this.factory = factory;
+    constructor({
+        factory,
+        postprocess,
+        sweep = 86400000,
+    }: {
+        factory: () => Client<false>;
+        postprocess?: (client: Client<true>, guild?: string) => unknown;
+        sweep?: number;
+    }) {
+        this.factory = async (token, guild) => {
+            const client = await loginAndReady(factory(), token);
+            postprocess?.(client, guild);
+            return client;
+        };
 
-        if (sweep > 0)
-            setInterval(async () => {
-                for (const { guild, token } of await trpc.vanityClientList.query([...this.cache.keys()])) {
-                    const client = await this.cache.get(guild);
-                    if (!client) continue;
+        if (sweep > 0) setInterval(() => this.sweepClients(), sweep);
+    }
 
-                    if (client.token !== token) {
-                        client.destroy();
-                        this.cache.delete(guild);
-                    }
-                }
-            }, sweep);
+    async sweepClients() {
+        for (const { guild, token } of await trpc.vanityClientList.query([...this.cache.keys()])) {
+            const client = await this.cache.get(guild)?.catch(() => null);
+            if (!client) continue;
+
+            if (client.token !== token) {
+                client.destroy();
+                this.cache.delete(guild);
+            }
+        }
     }
 
     async getBotFromToken(guildId?: string, token?: string | null) {
@@ -30,9 +43,13 @@ export class ClientManager {
         const client = await this.cache.get(guildId);
         if (client?.token === token) return client;
 
-        const promise = this.factory(token);
+        const promise = this.factory(token, guildId).catch(() => null);
         this.cache.set(guildId, promise);
         return await promise;
+    }
+
+    async getDefaultBot() {
+        return (await this.getBotFromToken())!;
     }
 
     async getBot(guildId?: string) {
@@ -42,29 +59,18 @@ export class ClientManager {
     async getBots() {
         const entries = await trpc.vanityClientList.query();
 
-        const clients = [await this.getBot()];
+        const clients = [await this.getDefaultBot()];
 
-        for (const { guild, token } of entries)
-            try {
-                clients.push(await this.getBotFromToken(guild, token));
-            } catch {}
+        for (const { guild, token } of entries) {
+            const client = await this.getBotFromToken(guild, token);
+            if (client) clients.push(client);
+        }
 
         return clients;
     }
-
-    async getBotsWithGuilds(): Promise<Record<string, Client<true>>> {
-        const entries = await trpc.vanityClientList.query();
-
-        return {
-            default: await this.getBot(),
-            ...Object.fromEntries(
-                await Promise.all(entries.map(async ({ guild, token }): Promise<[string, Client<true>]> => [guild, await this.getBotFromToken(guild, token)])),
-            ),
-        };
-    }
 }
 
-export function loginAndReady(client: Client, token: string, timeout: number = 10000) {
+export async function loginAndReady(client: Client, token: string, timeout: number = 10000) {
     const promise = new Promise<Client<true>>((res, rej) => {
         const timer = setTimeout(() => rej(), timeout);
 
@@ -74,7 +80,7 @@ export function loginAndReady(client: Client, token: string, timeout: number = 1
         });
     });
 
-    client.login(token);
+    await client.login(token);
 
-    return promise;
+    return await promise;
 }

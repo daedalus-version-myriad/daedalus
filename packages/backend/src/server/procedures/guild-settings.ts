@@ -1,3 +1,4 @@
+import { secrets } from "@daedalus/config";
 import type { GuildPremiumSettings, GuildSettings } from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
 import { eq } from "drizzle-orm";
@@ -15,7 +16,7 @@ export const NO_PERMISSION = "You do not have permission to manage settings with
 export async function hasPermission(user: string | null, guildId: string) {
     if (!user) return false;
 
-    const client = await clients.getBot(guildId).catch(() => null);
+    const client = await clients.getBot(guildId);
     if (!client) return false;
 
     const guild = await client.guilds.fetch(guildId).catch(() => null);
@@ -104,13 +105,16 @@ export default {
         .query(async ({ input: { id, guild } }): Promise<GuildPremiumSettings> => {
             if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
 
+            const client = await clients.getBot(guild);
+
             return {
                 keys: await db
                     .select({ key: tables.premiumKeyBindings.key, disabled: tables.premiumKeys.disabled })
                     .from(tables.premiumKeyBindings)
                     .leftJoin(tables.premiumKeys, eq(tables.premiumKeyBindings.key, tables.premiumKeys.key))
                     .where(eq(tables.premiumKeyBindings.guild, guild)),
-                tag: (await clients.getBot(guild).catch(() => null))?.user.tag ?? null,
+                usingCustom: client?.token !== secrets.DISCORD.TOKEN,
+                tag: client?.user.tag ?? null,
                 ...((await db.select().from(tables.guildPremiumSettings).where(eq(tables.guildPremiumSettings.guild, guild))).at(0) ?? {
                     guild,
                     hasPremium: false,

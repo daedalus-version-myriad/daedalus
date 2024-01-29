@@ -34,7 +34,7 @@ export default function Navbar() {
                 <div className="center-row">
                     <a href="/" className="center-row gap-4 px-4 py-2 hover:bg-foreground/5">
                         <Image className="rounded" width={48} height={48} src="/favicon.ico" alt="Daedalus Icon"></Image>
-                        <h1 className="text-2xl font-bold">Daedalus</h1>
+                        <h1 className="hidden sm:block text-2xl font-bold">Daedalus</h1>
                     </a>
                     {links.map(([href, icon, label], index) => (
                         <React.Fragment key={`${index}`}>

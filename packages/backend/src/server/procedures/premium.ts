@@ -1,7 +1,7 @@
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getPaymentLinks, getPortalSessions } from "../../../stripe/index.ts";
-import { clients } from "../../bot/index.ts";
+import { clients, setPresence } from "../../bot/index.ts";
 import { db } from "../../db/db.ts";
 import { tables } from "../../db/index.ts";
 import { snowflake } from "../schemas.ts";
@@ -170,5 +170,28 @@ export default {
             } else {
                 await db.delete(tables.tokens).where(eq(tables.tokens.guild, guild));
             }
+        }),
+    setStatus: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                status: z.enum(["online", "idle", "dnd", "invisible"]),
+                activityType: z.enum(["none", "playing", "listening-to", "watching", "competing-in"]),
+                activity: z.string().max(64),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, ...data } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            await db
+                .insert(tables.guildPremiumSettings)
+                .values({ guild, ...data })
+                .onDuplicateKeyUpdate({ set: data });
+
+            const client = await clients.getBot(guild);
+            if (!client) return;
+
+            await setPresence(client, guild);
         }),
 } as const;

@@ -50,8 +50,9 @@ export type GuildPremiumSettings = {
     keys: { key: string; disabled: boolean | null }[];
     hasPremium: boolean;
     hasCustom: boolean;
+    usingCustom: boolean;
     tag: string | null;
-    status: "online" | "idle" | "dnd" | "offline";
+    status: "online" | "idle" | "dnd" | "invisible";
     activityType: "none" | "playing" | "listening-to" | "watching" | "competing-in";
     activity: string;
 };

@@ -1,0 +1,1 @@
+ALTER TABLE `guild_premium_settings` MODIFY COLUMN `status` enum('online','idle','dnd','invisible') NOT NULL DEFAULT 'online';

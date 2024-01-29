@@ -1,12 +1,13 @@
 "use client";
 
+import NormalSelect from "@/components/NormalSelect";
 import Panel from "@/components/Panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GuildPremiumSettings } from "@daedalus/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaInfo, FaXmark } from "react-icons/fa6";
-import { bindKey, bindToken, reloadData, unbindKey } from "./actions";
+import { bindKey, bindToken, reloadData, unbindKey, updateStatus } from "./actions";
 
 export function Body({ data: initial }: { data: GuildPremiumSettings }) {
     const [data, setData] = useState(initial);
@@ -14,6 +15,15 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
     const [infoOpen, setInfoOpen] = useState(false);
     const [customInfoOpen, setCustomInfoOpen] = useState(false);
     const [token, setToken] = useState("");
+
+    const [status, setStatus] = useState(data.status);
+    useEffect(() => setStatus(data.status), [data]);
+
+    const [activityType, setActivityType] = useState(data.activityType);
+    useEffect(() => setActivityType(data.activityType), [data]);
+
+    const [activity, setActivity] = useState(data.activity);
+    useEffect(() => setActivity(data.activity), [data]);
 
     return (
         <>
@@ -23,9 +33,9 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                     {data.hasPremium
                         ? data.hasCustom
                             ? "This server has Daedalus Premium and can use a custom client."
-                            : "This server has Daedalus Premium."
+                            : "This server has Daedalus Premium. Add a custom client token to gain access to custom clients."
                         : data.hasCustom
-                          ? "This server can use a custom client."
+                          ? "This server can use a custom client. Add a premium token to gain access to Daedalus Premium."
                           : "This server has no paid features."}
                 </p>
             </Panel>
@@ -68,9 +78,9 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                         </div>
                     ))}
                 </div>
-                <div className="center-row gap-4">
+                <div className="center-row flex-wrap gap-4">
                     <div>
-                        <Input value={key} onChange={(e) => setKey(e.currentTarget.value)} placeholder="Insert Key Here"></Input>
+                        <Input value={key} className="min-w-48" onChange={(e) => setKey(e.currentTarget.value)} placeholder="Insert Key Here"></Input>
                     </div>
                     <Button
                         variant="outline"
@@ -84,7 +94,7 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                     >
                         Add Key
                     </Button>
-                    <a href="/account/premium" className="link" target="_blank">
+                    <a href="/account/premium" className="link whitespace-nowrap" target="_blank">
                         View your premium keys
                     </a>
                 </div>
@@ -157,9 +167,15 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                                 </p>
                             </>
                         ) : null}
-                        <div className="center-row gap-4">
+                        <div className="center-row flex-wrap gap-4">
                             <div>
-                                <Input type="password" placeholder="Bot Token" value={token} onChange={(e) => setToken(e.currentTarget.value)}></Input>
+                                <Input
+                                    type="password"
+                                    className="min-w-48"
+                                    placeholder="Bot Token"
+                                    value={token}
+                                    onChange={(e) => setToken(e.currentTarget.value)}
+                                ></Input>
                             </div>
                             <Button
                                 variant="outline"
@@ -190,9 +206,49 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                 ) : (
                     <p>Connect a custom client key to gain access to this feature!</p>
                 )}
-            </Panel>
-            <Panel>
-                <pre>{JSON.stringify(data, undefined, 4)}</pre>
+                {data.usingCustom ? (
+                    <>
+                        <h2 className="text-lg">Custom Status</h2>
+                        <div className="center-row flex-wrap gap-4">
+                            <NormalSelect
+                                value={status}
+                                setValue={setStatus}
+                                options={[
+                                    ["online", "Online"],
+                                    ["idle", "Idle"],
+                                    ["dnd", "Do Not Disturb"],
+                                    ["invisible", "Invisible / Offline"],
+                                ]}
+                                className="w-48"
+                            ></NormalSelect>
+                            <NormalSelect
+                                value={activityType}
+                                setValue={setActivityType}
+                                options={[
+                                    ["none", "[No Prefix]"],
+                                    ["playing", "Playing"],
+                                    ["listening-to", "Listening to"],
+                                    ["watching", "Watching"],
+                                    ["competing-in", "Competing in"],
+                                ]}
+                                className="w-48"
+                            ></NormalSelect>
+                            <div>
+                                <Input className="min-w-48" value={activity} onChange={(e) => setActivity(e.currentTarget.value)} maxLength={64}></Input>
+                            </div>
+                            <Button
+                                variant="outline"
+                                onClick={async () => {
+                                    const error = await updateStatus(data.guild, { status, activityType, activity });
+                                    if (error) return alert(error);
+                                    alert("Your bot's status has been updated!");
+                                }}
+                            >
+                                Save
+                            </Button>
+                        </div>
+                    </>
+                ) : null}
             </Panel>
         </>
     );

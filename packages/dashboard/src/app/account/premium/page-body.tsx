@@ -160,7 +160,7 @@ export function AccountPremiumBody({
                                         delete
                                     </Button>
                                     {key in activations ? (
-                                        <span>
+                                        <span className="whitespace-nowrap">
                                             in use by <code>{activations[key]}</code>
                                         </span>
                                     ) : null}

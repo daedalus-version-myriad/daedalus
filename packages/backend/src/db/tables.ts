@@ -28,7 +28,7 @@ export const guildPremiumSettings = mysqlTable("guild_premium_settings", {
     guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
     hasPremium: boolean("has_premium").notNull().default(false),
     hasCustom: boolean("has_custom").notNull().default(false),
-    status: mysqlEnum("status", ["online", "idle", "dnd", "offline"]).notNull().default("online"),
+    status: mysqlEnum("status", ["online", "idle", "dnd", "invisible"]).notNull().default("online"),
     activityType: mysqlEnum("activity_type", ["none", "playing", "listening-to", "watching", "competing-in"]).notNull().default("watching"),
     activity: varchar("activity", { length: 64 }).notNull().default("for /help"),
 });

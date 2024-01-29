@@ -30,10 +30,7 @@ export default function Docs() {
                         <a href="/docs/guides">
                             <Button>Guides</Button>
                         </a>
-                        <p className="prose-lg">
-                            View a list of miscellaneous guides that we have written, including some related to operating a Discord server in general that are
-                            not specific to Daedalus.
-                        </p>
+                        <p className="prose-lg">View a list of miscellaneous guides on how to use certain Daedalus features.</p>
                     </div>
                 </div>
             </Container>
