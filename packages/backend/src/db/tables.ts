@@ -93,11 +93,9 @@ export const accountSettings = mysqlTable(
         user: varchar("user", { length: 20 }).notNull().primaryKey(),
         notifyPremiumOwnedServers: boolean("notify_premium_owned_servers").notNull().default(true),
         notifyPremiumManagedServers: boolean("notify_premium_managed_servers").notNull().default(false),
-        suppressAdminBroadcasts: boolean("suppress_admin_broadcasts").notNull().default(false),
     },
     (t) => ({
         idx_notify_owned: index("idx_notify_owned").on(t.notifyPremiumOwnedServers),
         idx_notify_managed: index("idx_notify_managed").on(t.notifyPremiumManagedServers),
-        idx_suppress_broadcasts: index("idx_suppress_broadcasts").on(t.suppressAdminBroadcasts),
     }),
 );

@@ -51,7 +51,7 @@ export default function ManageHomePage() {
                             ? data.servers.map((guild) => (
                                   <a key={guild.id} href={guild.hasBot ? `/manage/${guild.id}` : `${INVITE_LINK}&guild_id=${guild.id}`}>
                                       <div
-                                          className={`p-4 grid grid-cols-[max-content_1fr] items-center gap-x-4 gap-y-2 h-24 border border-2 rounded ${guild.hasBot ? "bg-secondary/40" : "text-muted-foreground"}`}
+                                          className={`p-4 grid grid-cols-[max-content_1fr] items-center gap-x-4 gap-y-2 h-24 border border-2 rounded ${guild.hasBot ? "bg-secondary dark:bg-secondary/60" : "text-muted-foreground"}`}
                                       >
                                           <div className="row-span-2">
                                               {guild.icon ? (

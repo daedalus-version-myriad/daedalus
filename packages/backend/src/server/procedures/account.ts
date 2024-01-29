@@ -14,14 +14,12 @@ export default {
                     .select({
                         notifyPremiumOwnedServers: tables.accountSettings.notifyPremiumOwnedServers,
                         notifyPremiumManagedServers: tables.accountSettings.notifyPremiumManagedServers,
-                        suppressAdminBroadcasts: tables.accountSettings.suppressAdminBroadcasts,
                     })
                     .from(tables.accountSettings)
                     .where(eq(tables.accountSettings.user, id))
             ).at(0) ?? {
                 notifyPremiumOwnedServers: true,
                 notifyPremiumManagedServers: false,
-                suppressAdminBroadcasts: false,
             }
         );
     }),
@@ -31,7 +29,6 @@ export default {
                 id: snowflake.nullable(),
                 notifyPremiumOwnedServers: z.boolean(),
                 notifyPremiumManagedServers: z.boolean(),
-                suppressAdminBroadcasts: z.boolean(),
             }),
         )
         .mutation(async ({ input: { id, ...data } }) => {

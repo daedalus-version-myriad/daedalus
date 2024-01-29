@@ -30,7 +30,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="fixed w-full center-row justify-between border-b border-border overflow-hidden bg-background/75 backdrop-blur-[2px]">
+            <nav className="fixed w-full center-row justify-between border-b border-border overflow-hidden dark:bg-background/75 backdrop-blur-[2px]">
                 <div className="center-row">
                     <a href="/" className="center-row gap-4 px-4 py-2 hover:bg-foreground/5">
                         <Image className="rounded" width={48} height={48} src="/favicon.ico" alt="Daedalus Icon"></Image>

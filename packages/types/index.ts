@@ -70,5 +70,4 @@ export type PremiumStripeSession = {
 export type AccountSettings = {
     notifyPremiumOwnedServers: boolean;
     notifyPremiumManagedServers: boolean;
-    suppressAdminBroadcasts: boolean;
 };
