@@ -2,8 +2,8 @@ import { ClientManager } from "@daedalus/clients";
 import { secrets } from "@daedalus/config";
 import { ActivityType, Client, IntentsBitField } from "discord.js";
 import { eq } from "drizzle-orm";
-import { db } from "../db/db.ts";
-import { tables } from "../db/index.ts";
+import { tables } from "../db";
+import { db } from "../db/db";
 
 export async function setPresence(client: Client<true>, guild?: string) {
     if (client.token === secrets.DISCORD.TOKEN || !guild)
@@ -44,7 +44,7 @@ export const clients = new ClientManager({
             sweepers: { users: { interval: 3600, filter: () => () => true } },
         }),
     postprocess: setPresence,
-    sweep: 30000,
+    sweep: 3600000,
 });
 
 export const bot: Promise<Client> = clients.getDefaultBot();

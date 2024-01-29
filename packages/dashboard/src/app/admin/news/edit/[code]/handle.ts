@@ -1,6 +1,6 @@
 "use server";
 
-import type { NewsFormData } from "@/forms/admin-news.jsx";
+import type { NewsFormData } from "@/forms/admin-news";
 import { FormHandler } from "@/lib/types";
 import { trpc } from "@daedalus/api";
 import { redirect } from "next/navigation";

@@ -1,6 +1,6 @@
 import { and, eq, inArray } from "drizzle-orm";
+import { tables } from "../../db";
 import { db } from "../../db/db";
-import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { proc } from "../trpc";
 

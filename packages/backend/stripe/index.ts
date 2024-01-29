@@ -1,9 +1,9 @@
 import { secrets } from "@daedalus/config";
 import type { PremiumStripeSession } from "@daedalus/types";
 import { eq, sql } from "drizzle-orm";
-import { db } from "../src/db/db.ts";
-import { tables } from "../src/db/index.ts";
-import stripe from "./stripe.ts";
+import { db } from "../src/db/db";
+import { tables } from "../src/db";
+import stripe from "./stripe";
 
 const { PRICES } = secrets.STRIPE;
 

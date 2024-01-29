@@ -1,13 +1,15 @@
+import { secrets } from "@daedalus/config";
+import { Collection, GuildMember, PermissionFlagsBits, escapeMarkdown, type User } from "discord.js";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
-import { getPaymentLinks, getPortalSessions } from "../../../stripe/index.ts";
-import { clients, setPresence } from "../../bot/index.ts";
-import { db } from "../../db/db.ts";
-import { tables } from "../../db/index.ts";
-import { snowflake } from "../schemas.ts";
-import { proc } from "../trpc.ts";
-import { NO_PERMISSION, hasPermission } from "./guild-settings.ts";
-import { isAdmin } from "./users.ts";
+import { getPaymentLinks, getPortalSessions } from "../../../stripe";
+import { clients, setPresence } from "../../bot";
+import { tables } from "../../db";
+import { db } from "../../db/db";
+import { snowflake } from "../schemas";
+import { proc } from "../trpc";
+import { NO_PERMISSION, hasPermission } from "./guild-settings";
+import { isAdmin } from "./users";
 
 async function recalculateGuild(guild: string) {
     const activeKeys = await db
@@ -19,7 +21,115 @@ async function recalculateGuild(guild: string) {
     const hasPremium = activeKeys.some(({ key }) => key?.startsWith("pk_"));
     const hasCustom = activeKeys.some(({ key }) => key?.startsWith("ck_"));
 
+    const old = (
+        await db
+            .select({ hasPremium: tables.guildPremiumSettings.hasPremium, hasCustom: tables.guildPremiumSettings.hasCustom })
+            .from(tables.guildPremiumSettings)
+            .where(eq(tables.guildPremiumSettings.guild, guild))
+    ).at(0) ?? { hasPremium: false, hasCustom: false };
+
+    if (old.hasPremium === hasPremium && old.hasCustom === hasCustom) return;
+
+    const client = await clients.getBot(guild);
     await db.insert(tables.guildPremiumSettings).values({ guild, hasPremium, hasCustom }).onDuplicateKeyUpdate({ set: { hasPremium, hasCustom } });
+
+    if (!client) return;
+
+    (async () => {
+        try {
+            const obj = await client.guilds.fetch(guild).catch(() => null);
+            if (!obj) return;
+
+            const users: User[] = [];
+
+            const owner = await obj.fetchOwner().catch(() => null);
+
+            if (
+                owner &&
+                ((
+                    await db
+                        .select({ notify: tables.accountSettings.notifyPremiumOwnedServers })
+                        .from(tables.accountSettings)
+                        .where(eq(tables.accountSettings.user, owner.id))
+                ).at(0)?.notify ??
+                    true)
+            )
+                users.push(owner.user);
+
+            const dashboardPermission =
+                (
+                    await db
+                        .select({ dashboardPermission: tables.guildSettings.dashboardPermission })
+                        .from(tables.guildSettings)
+                        .where(eq(tables.guildSettings.guild, guild))
+                ).at(0)?.dashboardPermission ?? "manager";
+
+            const members =
+                dashboardPermission === "owner"
+                    ? new Collection<string, GuildMember>()
+                    : (await obj.members.fetch()).filter(
+                          (member) =>
+                              member.id !== owner?.id &&
+                              member.permissions.has(dashboardPermission === "admin" ? PermissionFlagsBits.Administrator : PermissionFlagsBits.ManageGuild),
+                      );
+
+            const toNotify = await db
+                .select({ id: tables.accountSettings.user })
+                .from(tables.accountSettings)
+                .where(and(eq(tables.accountSettings.notifyPremiumManagedServers, true), inArray(tables.accountSettings.user, [...members.keys()])));
+
+            for (const { id } of toNotify) users.push(members.get(id)!.user);
+
+            for (const user of users)
+                await user
+                    .send({
+                        embeds: [
+                            {
+                                title: "Premium Status Changed",
+                                description: `Hello, ${user}! The premium status of **${escapeMarkdown(obj.name)}** has changed. Please double-check your settings as some changes may affect functionality.\n\nTo stop receiving these notifications, you can disable them at ${secrets.DOMAIN}/account.`,
+                                color: 0x009688,
+                                fields: [
+                                    hasPremium && !old.hasPremium
+                                        ? [
+                                              {
+                                                  name: "Premium has been activated",
+                                                  value: "The increased module limits may cause some previously disabled prompts/actions to start operating again if this server previously had premium.",
+                                              },
+                                          ]
+                                        : [],
+                                    !hasPremium && old.hasPremium
+                                        ? [
+                                              {
+                                                  name: "Premium has been deactivated.",
+                                                  value: "Some items may be disabled due to module limits and multi-target modmail and ticket prompts are no longer available.",
+                                              },
+                                          ]
+                                        : [],
+                                    hasCustom && !old.hasCustom
+                                        ? [
+                                              {
+                                                  name: "The custom client feature has been activated.",
+                                                  value: `You may now set up a custom client at ${secrets.DOMAIN}/manage/${guild}/premium.`,
+                                              },
+                                          ]
+                                        : [],
+                                    !hasCustom && old.hasCustom
+                                        ? [
+                                              {
+                                                  name: "The custom client feature has been deactivated.",
+                                                  value: "Your server will be returned to the base Daedalus client. If you upgrade again, you will need to set up your token again.",
+                                              },
+                                          ]
+                                        : [],
+                                ].flat(),
+                            },
+                        ],
+                    })
+                    .catch(() => null);
+        } finally {
+            if (old.hasCustom && !hasCustom) await db.delete(tables.tokens).where(eq(tables.tokens.guild, guild));
+        }
+    })();
 }
 
 async function recalculateKeysForUser(user: string) {

@@ -66,3 +66,9 @@ export type PremiumStripeSession = {
     }[];
     url: string;
 };
+
+export type AccountSettings = {
+    notifyPremiumOwnedServers: boolean;
+    notifyPremiumManagedServers: boolean;
+    suppressAdminBroadcasts: boolean;
+};

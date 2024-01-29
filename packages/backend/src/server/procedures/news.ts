@@ -1,7 +1,7 @@
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { tables } from "../../db";
 import { db } from "../../db/db";
-import { tables } from "../../db/index";
 import { proc } from "../trpc";
 
 const DEFAULT_LIMIT = 10;

@@ -4,9 +4,9 @@ import type { DashboardGuild } from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
 import { eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
-import { bot, clients } from "../../bot/index";
+import { bot, clients } from "../../bot";
+import { tables } from "../../db";
 import { db } from "../../db/db";
-import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { proc } from "../trpc";
 

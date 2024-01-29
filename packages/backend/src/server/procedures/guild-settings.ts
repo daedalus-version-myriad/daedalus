@@ -3,13 +3,13 @@ import type { GuildPremiumSettings, GuildSettings } from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { clients } from "../../bot/index.ts";
+import { clients } from "../../bot";
+import { tables } from "../../db";
 import { db } from "../../db/db";
-import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { isAdmin } from "./users.ts";
+import { isAdmin } from "./users";
 
 export const NO_PERMISSION = "You do not have permission to manage settings within this guild.";
 
