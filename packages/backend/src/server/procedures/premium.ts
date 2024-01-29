@@ -173,6 +173,8 @@ async function recalculateKeysForUser(user: string) {
         });
     }
 
+    if (enable.length === 0 && disable.length === 0) return;
+
     const guildsToUpdate = await db
         .select({ guild: tables.premiumKeyBindings.guild })
         .from(tables.premiumKeys)
@@ -228,8 +230,18 @@ export default {
         return key;
     }),
     deleteKey: proc.input(z.object({ owner: snowflake, key: z.string().max(32) })).mutation(async ({ input: { owner, key } }) => {
-        await db.delete(tables.premiumKeys).where(and(eq(tables.premiumKeys.user, owner), eq(tables.premiumKeys.key, key)));
-        await recalculateKeysForUser(owner);
+        const { rowsAffected } = await db.delete(tables.premiumKeys).where(and(eq(tables.premiumKeys.user, owner), eq(tables.premiumKeys.key, key)));
+        if (rowsAffected === 0) return;
+
+        const [entry] = await db
+            .select({ guild: tables.premiumKeyBindings.guild })
+            .from(tables.premiumKeyBindings)
+            .where(eq(tables.premiumKeyBindings.key, key));
+
+        if (!entry) return;
+
+        await db.delete(tables.premiumKeyBindings).where(eq(tables.premiumKeyBindings.key, key));
+        await recalculateGuild(entry.guild);
     }),
     bindKey: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake, key: z.string().max(32) })).mutation(async ({ input: { id, guild, key } }) => {
         if (!(await hasPermission(id, guild))) return NO_PERMISSION;
