@@ -1,3 +1,6 @@
 {
-    "name": "@daedalus/logging"
+    "name": "@daedalus/logging",
+    "scripts": {
+        "start": "bun main.ts"
+    }
 }

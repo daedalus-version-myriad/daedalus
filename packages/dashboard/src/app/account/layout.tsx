@@ -1,15 +1,9 @@
 "use client";
 
 import { useUserContext } from "@/context/user";
+import { manageAccountCategories } from "@/lib/data";
 import { redirect, usePathname } from "next/navigation";
 import React from "react";
-import { FaCrown, FaGear } from "react-icons/fa6";
-import { IconType } from "react-icons/lib";
-
-export const categories: [string, IconType, string][] = [
-    ["", FaGear, "Account Settings"],
-    ["/premium", FaCrown, "Premium"],
-];
 
 export default function ManageLayout({ children }: React.PropsWithChildren) {
     const user = useUserContext();
@@ -20,7 +14,7 @@ export default function ManageLayout({ children }: React.PropsWithChildren) {
     return (
         <div className="grid grid-cols-[max-content_1fr]">
             <div className="hidden md:block h-[calc(100vh-8rem)] border-r flex flex-col overflow-y-scroll">
-                {categories.map(([suffix, icon, label]) => (
+                {manageAccountCategories.map(([suffix, icon, label]) => (
                     <a
                         href={`/account${suffix}`}
                         key={suffix}

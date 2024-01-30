@@ -1,15 +1,8 @@
 "use client";
 
+import { manageGuildCategories } from "@/lib/data";
 import { usePathname } from "next/navigation";
 import React from "react";
-import { FaCrown, FaGear, FaList } from "react-icons/fa6";
-import { IconType } from "react-icons/lib";
-
-export const categories: [string, IconType, string][] = [
-    ["", FaGear, "Guild Settings"],
-    ["/premium", FaCrown, "Premium"],
-    ["/logging", FaList, "Logging"],
-];
 
 export default function ManageLayoutBody({ children, id, name }: { children: React.ReactNode; id: string; name: string }) {
     const pathname = usePathname();
@@ -17,7 +10,7 @@ export default function ManageLayoutBody({ children, id, name }: { children: Rea
     return (
         <div className="grid grid-cols-[max-content_1fr]">
             <div className="hidden md:block h-[calc(100vh-8rem)] border-r flex flex-col overflow-y-scroll">
-                {categories.map(([suffix, icon, label]) => (
+                {manageGuildCategories.map(([suffix, icon, label]) => (
                     <a
                         href={`/manage/${id}${suffix}`}
                         key={suffix}

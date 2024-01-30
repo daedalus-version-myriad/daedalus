@@ -1,9 +1,7 @@
 "use client";
 
-import { categories as accountCategories } from "@/app/account/layout";
-import { categories as manageCategories } from "@/app/manage/[id]/layout-body";
 import { useUserContext } from "@/context/user";
-import { INVITE_LINK } from "@/lib/data";
+import { INVITE_LINK, manageAccountCategories, manageGuildCategories } from "@/lib/data";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -103,7 +101,7 @@ export default function Navbar() {
                                     ? ((id) => (
                                           <>
                                               <Separator className="my-4"></Separator>
-                                              {manageCategories.map(([suffix, icon, label]) => (
+                                              {manageGuildCategories.map(([suffix, icon, label]) => (
                                                   <a
                                                       href={`/manage/${id}${suffix}`}
                                                       key={suffix}
@@ -120,7 +118,7 @@ export default function Navbar() {
                                     ? ((id) => (
                                           <>
                                               <Separator className="my-4"></Separator>
-                                              {accountCategories.map(([suffix, icon, label]) => (
+                                              {manageAccountCategories.map(([suffix, icon, label]) => (
                                                   <a
                                                       href={`/account${suffix}`}
                                                       key={suffix}
