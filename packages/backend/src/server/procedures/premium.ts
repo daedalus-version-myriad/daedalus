@@ -10,6 +10,7 @@ import { snowflake } from "../schemas";
 import { proc } from "../trpc";
 import { NO_PERMISSION, hasPermission } from "./guild-settings";
 import { isAdmin } from "./users";
+import { clientUpdateEmitter } from "./vanity-clients.ts";
 
 async function recalculateGuild(guild: string) {
     const activeKeys = await db
@@ -127,7 +128,10 @@ async function recalculateGuild(guild: string) {
                     })
                     .catch(() => null);
         } finally {
-            if (old.hasCustom && !hasCustom) await db.delete(tables.tokens).where(eq(tables.tokens.guild, guild));
+            if (old.hasCustom && !hasCustom) {
+                await db.delete(tables.tokens).where(eq(tables.tokens.guild, guild));
+                clientUpdateEmitter.emit("update", { guild, token: null });
+            }
         }
     })();
 }
@@ -292,6 +296,8 @@ export default {
             } else {
                 await db.delete(tables.tokens).where(eq(tables.tokens.guild, guild));
             }
+
+            clientUpdateEmitter.emit("update", { guild, token });
         }),
     setStatus: proc
         .input(

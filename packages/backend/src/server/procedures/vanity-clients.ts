@@ -1,8 +1,14 @@
+import { observable } from "@trpc/server/observable";
 import { and, eq, inArray } from "drizzle-orm";
+import { EventEmitter } from "events";
 import { tables } from "../../db";
 import { db } from "../../db/db";
 import { snowflake } from "../schemas";
 import { proc } from "../trpc";
+
+type ClientConfig = { guild: string; token: string | null };
+
+export const clientUpdateEmitter = new EventEmitter();
 
 export default {
     vanityClientList: proc.input(snowflake.array().optional()).query(async ({ input: guildIds }) => {
@@ -26,4 +32,11 @@ export default {
 
         return (await db.select({ token: tables.tokens.token }).from(tables.tokens).where(eq(tables.tokens.guild, guildId))).at(0)?.token;
     }),
+    vanityClientHook: proc.subscription(() =>
+        observable<ClientConfig>((emit) => {
+            const hook = (data: ClientConfig) => emit.next(data);
+            clientUpdateEmitter.on("update", hook);
+            return () => clientUpdateEmitter.off("update", hook);
+        }),
+    ),
 } as const;

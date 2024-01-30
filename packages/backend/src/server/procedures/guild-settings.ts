@@ -161,12 +161,12 @@ export default {
                 guild: snowflake,
                 useWebhook: z.boolean(),
                 channel: snowflake.nullable(),
-                webhook: z.string().max(128),
+                webhook: z.string().trim().max(128),
                 ignoredChannels: snowflake.array(),
                 fileOnlyMode: z.boolean(),
                 items: z.record(
                     z.string(),
-                    z.object({ enabled: z.boolean(), useWebhook: z.boolean(), channel: snowflake.nullable(), webhook: z.string().max(128) }),
+                    z.object({ enabled: z.boolean(), useWebhook: z.boolean(), channel: snowflake.nullable(), webhook: z.string().trim().max(128) }),
                 ),
             }),
         )

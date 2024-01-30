@@ -3,6 +3,7 @@ export type Secrets = {
     DOMAIN: string;
     PORTS: {
         API: number;
+        WS: number;
     };
     DATABASE: {
         NAME: string;
