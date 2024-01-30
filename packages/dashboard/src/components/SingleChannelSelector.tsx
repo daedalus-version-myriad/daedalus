@@ -3,20 +3,20 @@ import { channelIcons } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
-import { FaTrash, FaXmark } from "react-icons/fa6";
+import { FaXmark } from "react-icons/fa6";
 import { Button } from "./ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ScrollArea } from "./ui/scroll-area";
 
-export default function MultiChannelSelector({
-    channels: ids,
-    setChannels,
+export default function SingleChannelSelector({
+    channel: id,
+    setChannel,
     types,
     showReadonly = false,
 }: {
-    channels: string[];
-    setChannels: (channel: string[]) => unknown;
+    channel: string | null;
+    setChannel: (channel: string | null) => unknown;
     types?: number[];
     showReadonly?: boolean;
 }) {
@@ -34,8 +34,9 @@ export default function MultiChannelSelector({
         <div className="center-row gap-2 flex-wrap">
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" aria-expanded={open} className="w-[max-content] justify-between">
-                        Select channels
+                    <Button variant="outline" role="combobox" aria-expanded={open} className="center-row gap-1">
+                        {id ? channelIcons[channelMap[id]?.type]?.({}) : null}
+                        {id ? channelMap[id]?.name : "Select a channel"}
                         <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"></CaretSortIcon>
                     </Button>
                 </PopoverTrigger>
@@ -53,14 +54,13 @@ export default function MultiChannelSelector({
                                             value={channel.id + "/" + channel.name}
                                             onSelect={(newChannel) => {
                                                 const newId = newChannel.split("/")[0];
-                                                setChannels(
-                                                    ids.includes(newId) ? ids.filter((x) => x !== newId) : [...ids, newId].sort((x, y) => order[x] - order[y]),
-                                                );
+                                                setChannel(id === newId ? null : newId);
+                                                setOpen(false);
                                             }}
                                         >
                                             <div className="w-4 mr-2 center-col">{channelIcons[channel.type]?.({})}</div>
                                             {channel.name}
-                                            <CheckIcon className={cn("ml-auto h-4 w-4", ids.includes(channel.id) ? "opacity-100" : "opacity-0")}></CheckIcon>
+                                            <CheckIcon className={cn("ml-auto h-4 w-4", channel.id === id ? "opacity-100" : "opacity-0")}></CheckIcon>
                                         </CommandItem>
                                     ))}
                             </CommandGroup>
@@ -76,18 +76,13 @@ export default function MultiChannelSelector({
                                                     value={child.id + "/" + child.name}
                                                     onSelect={(newChannel) => {
                                                         const newId = newChannel.split("/")[0];
-                                                        setChannels(
-                                                            ids.includes(newId)
-                                                                ? ids.filter((x) => x !== newId)
-                                                                : [...ids, newId].sort((x, y) => order[x] - order[y]),
-                                                        );
+                                                        setChannel(id === newId ? null : newId);
+                                                        setOpen(false);
                                                     }}
                                                 >
                                                     <div className="w-4 mr-2 center-col">{channelIcons[child.type]?.({})}</div>
                                                     {child.name}
-                                                    <CheckIcon
-                                                        className={cn("ml-auto h-4 w-4", ids.includes(child.id) ? "opacity-100" : "opacity-0")}
-                                                    ></CheckIcon>
+                                                    <CheckIcon className={cn("ml-auto h-4 w-4", child.id === id ? "opacity-100" : "opacity-0")}></CheckIcon>
                                                 </CommandItem>
                                             ))}
                                     </CommandGroup>
@@ -96,18 +91,9 @@ export default function MultiChannelSelector({
                     </Command>
                 </PopoverContent>
             </Popover>
-            {ids.map((id) => (
-                <Button variant="outline" className="h-9 center-row gap-4" key={id} onClick={() => setChannels(ids.filter((x) => x !== id))}>
+            {id ? (
+                <Button variant="outline" className="h-9" onClick={() => setChannel(null)}>
                     <FaXmark></FaXmark>
-                    <div className="center-row gap-1">
-                        {channelIcons[channelMap[id].type]?.({})} {channelMap[id].name}
-                    </div>
-                </Button>
-            ))}
-            {ids.length > 0 ? (
-                <Button variant="outline" className="h-9 center-row gap-4" onClick={() => setChannels([])}>
-                    <FaTrash color="#ff0000aa"></FaTrash>
-                    Clear Channels
                 </Button>
             ) : null}
         </div>

@@ -33,6 +33,30 @@ export const guildPremiumSettings = mysqlTable("guild_premium_settings", {
     activity: varchar("activity", { length: 64 }).notNull().default("for /help"),
 });
 
+export const guildLoggingSettings = mysqlTable("guild_logging_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    useWebhook: boolean("use_webhook").notNull(),
+    channel: varchar("channel", { length: 20 }),
+    webhook: varchar("webhook", { length: 128 }).notNull(),
+    ignoredChannels: text("ignored_channels").notNull(),
+    fileOnlyMode: boolean("file_only_mode").notNull(),
+});
+
+export const guildLoggingSettingsItems = mysqlTable(
+    "guild_logging_settings_items",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        key: varchar("key", { length: 32 }).notNull(),
+        enabled: boolean("enabled").notNull(),
+        useWebhook: boolean("use_webhook").notNull(),
+        channel: varchar("channel", { length: 20 }),
+        webhook: varchar("webhook", { length: 128 }).notNull(),
+    },
+    (t) => ({
+        pk_guild_key: primaryKey({ name: "pk_guild_key", columns: [t.guild, t.key] }),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {

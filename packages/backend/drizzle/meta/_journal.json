@@ -127,6 +127,20 @@
       "when": 1706566034755,
       "tag": "0017_elite_rhodey",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1706572614934,
+      "tag": "0018_hard_sabretooth",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1706589575973,
+      "tag": "0019_futuristic_machine_man",
+      "breakpoints": true
     }
   ]
 }

@@ -132,12 +132,14 @@ export function Body({ data: initial }: { data: GuildSettings }) {
                             channels={allowedChannels}
                             setChannels={setAllowedChannels}
                             types={[0, 2, 4, 5, 13, 15, 16]}
+                            showReadonly
                         ></MultiChannelSelector>
                         <p>Blocked Channels</p>
                         <MultiChannelSelector
                             channels={blockedChannels}
                             setChannels={setBlockedChannels}
                             types={[0, 2, 4, 5, 13, 15, 16]}
+                            showReadonly
                         ></MultiChannelSelector>
                     </Panel>
                 </div>

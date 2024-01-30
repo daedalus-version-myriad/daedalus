@@ -57,6 +57,20 @@ export type GuildPremiumSettings = {
     activity: string;
 };
 
+type BaseLogSettings = {
+    useWebhook: boolean;
+    channel: string | null;
+    webhook: string;
+};
+
+export type GuildLoggingSettings = {
+    guild: string;
+} & BaseLogSettings & {
+        ignoredChannels: string[];
+        fileOnlyMode: boolean;
+        items: Record<string, { enabled: boolean } & BaseLogSettings>;
+    };
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

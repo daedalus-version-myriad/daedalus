@@ -2,12 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import React from "react";
-import { FaCrown, FaGear } from "react-icons/fa6";
+import { FaCrown, FaGear, FaList } from "react-icons/fa6";
 import { IconType } from "react-icons/lib";
 
 export const categories: [string, IconType, string][] = [
     ["", FaGear, "Guild Settings"],
     ["/premium", FaCrown, "Premium"],
+    ["/logging", FaList, "Logging"],
 ];
 
 export default function ManageLayoutBody({ children, id, name }: { children: React.ReactNode; id: string; name: string }) {

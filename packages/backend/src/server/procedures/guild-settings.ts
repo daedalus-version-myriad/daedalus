@@ -1,5 +1,6 @@
 import { secrets } from "@daedalus/config";
-import type { GuildPremiumSettings, GuildSettings } from "@daedalus/types";
+import { logCategories, logEvents } from "@daedalus/logging";
+import type { GuildLoggingSettings, GuildPremiumSettings, GuildSettings } from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -124,5 +125,64 @@ export default {
                     activity: "for /help",
                 }),
             };
+        }),
+    getLoggingSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildLoggingSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            const rawBase = (await db.select().from(tables.guildLoggingSettings).where(eq(tables.guildLoggingSettings.guild, guild))).at(0) ?? {
+                guild,
+                useWebhook: false,
+                channel: null,
+                webhook: "",
+                ignoredChannels: "",
+                fileOnlyMode: false,
+            };
+
+            const base: GuildLoggingSettings = { ...rawBase, ignoredChannels: decodeArray(rawBase.ignoredChannels), items: {} };
+
+            for (const { guild: _, key, ...data } of await db
+                .select()
+                .from(tables.guildLoggingSettingsItems)
+                .where(eq(tables.guildLoggingSettingsItems.guild, guild))) {
+                base.items[key] = data;
+            }
+
+            for (const key of Object.keys(logCategories)) base.items[key] ??= { enabled: false, useWebhook: false, channel: null, webhook: "" };
+            for (const key of Object.keys(logEvents)) base.items[key] ??= { enabled: true, useWebhook: false, channel: null, webhook: "" };
+
+            return base;
+        }),
+    setLoggingSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                useWebhook: z.boolean(),
+                channel: snowflake.nullable(),
+                webhook: z.string().max(128),
+                ignoredChannels: snowflake.array(),
+                fileOnlyMode: z.boolean(),
+                items: z.record(
+                    z.string(),
+                    z.object({ enabled: z.boolean(), useWebhook: z.boolean(), channel: snowflake.nullable(), webhook: z.string().max(128) }),
+                ),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, items, ignoredChannels, ...raw } }) => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            const data = { ...raw, ignoredChannels: ignoredChannels.join("/") };
+
+            await db
+                .insert(tables.guildLoggingSettings)
+                .values({ guild, ...data })
+                .onDuplicateKeyUpdate({ set: data });
+
+            await db.transaction(async (tx) => {
+                await tx.delete(tables.guildLoggingSettingsItems).where(eq(tables.guildLoggingSettingsItems.guild, guild));
+                await tx.insert(tables.guildLoggingSettingsItems).values(Object.entries(items).map(([key, entry]) => ({ guild, key, ...entry })));
+            });
         }),
 } as const;
