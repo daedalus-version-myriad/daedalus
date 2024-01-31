@@ -1,8 +1,24 @@
 import { trpc } from "@daedalus/api";
-import { DurationStyle, code, embed, expand, formatDuration, mdash, timeinfo } from "@daedalus/bot-utils";
-import { AuditLogEvent, Client, Colors, Events } from "discord.js";
+import { DurationStyle, code, embed, englishList, expand, formatDuration, mdash, timeinfo } from "@daedalus/bot-utils";
+import stickerCache from "@daedalus/bot-utils/sticker-cache";
+import { permissions } from "@daedalus/data";
+import { AuditLogEvent, ChannelType, Client, Colors, Events, MessageFlags } from "discord.js";
 import { invokeLog } from "./lib";
-import { channelUpdate, emojiUpdate, guildScheduledEventUpdate, guildUpdate, handleMemberUpdate, messageBulkDelete, messageDelete } from "./messages";
+import {
+    channelUpdate,
+    emojiUpdate,
+    guildScheduledEventUpdate,
+    guildUpdate,
+    handleMemberUpdate,
+    handleUserUpdate,
+    handleVoiceStateUpdate,
+    messageBulkDelete,
+    messageDelete,
+    messageUpdate,
+    roleUpdate,
+    stickerUpdate,
+    threadUpdate,
+} from "./messages";
 import { audit, auditEntry, channelTypes } from "./utils";
 
 export function addEventHandlers(client: Client) {
@@ -209,5 +225,190 @@ export function addEventHandlers(client: Client) {
             if (channel.isDMBased()) return;
 
             invokeLog("messageDeleteBulk", channel, async () => await messageBulkDelete(messages, await trpc.getFileOnlyMode.query(channel.guild.id)));
+        })
+        .on(Events.MessageReactionAdd, (reaction, user) => {
+            if (!reaction.message.guild) return;
+
+            invokeLog("messageReactionAdd", reaction.message.channel, () => ({
+                embeds: [
+                    {
+                        title: "Reaction Added",
+                        description: `${expand(user)} reacted ${reaction.emoji} to ${reaction.message.url} in ${expand(reaction.message.channel)}`,
+                        color: Colors.Green,
+                        url: reaction.message.url,
+                    },
+                ],
+            }));
+        })
+        .on(Events.MessageReactionRemove, (reaction, user) => {
+            if (!reaction.message.guild) return;
+
+            invokeLog("messageReactionRemove", reaction.message.channel, () => ({
+                embeds: [
+                    {
+                        title: "Reaction Removed",
+                        description: `${expand(user)}'s reaction of ${reaction.emoji} to ${reaction.message.url} in ${expand(
+                            reaction.message.channel,
+                        )} was removed`,
+                        color: Colors.Red,
+                        url: reaction.message.url,
+                    },
+                ],
+            }));
+        })
+        .on(Events.MessageReactionRemoveAll, (message, reactions) => {
+            if (!message.guild) return;
+
+            invokeLog("messageReactionRemove", message.channel, () => ({
+                embeds: [
+                    {
+                        title: "All Reactions Purged",
+                        description: `all reactions on ${message.url} in ${expand(message.channel)} were purged: ${reactions.map((x) => x.emoji).join(" ")}`,
+                        color: Colors.Purple,
+                        url: message.url,
+                    },
+                ],
+            }));
+        })
+        .on(Events.MessageReactionRemoveEmoji, (reaction) => {
+            if (!reaction.message.guild) return;
+
+            invokeLog("messageReactionRemove", reaction.message.channel, () => ({
+                embeds: [
+                    {
+                        title: "Reaction Emoji Purged",
+                        description: `the reaction ${reaction.emoji} on ${reaction.message.url} in ${expand(reaction.message.channel)} was removed`,
+                        color: Colors.Purple,
+                        url: reaction.message.url,
+                    },
+                ],
+            }));
+        })
+        .on(Events.MessageUpdate, (before, after) => {
+            if (before.flags.has(MessageFlags.Loading)) return;
+            if (before.channel.isDMBased() || after.channel.isDMBased()) return;
+
+            invokeLog("messageUpdate", after.channel, async () => await messageUpdate(before, after, await trpc.getFileOnlyMode.query(before.guild!.id)));
+        })
+        .on(Events.GuildRoleCreate, (role) => {
+            invokeLog("roleCreate", role.guild, async () => {
+                const user = await audit(role.guild, AuditLogEvent.RoleCreate, role);
+                const perms = role.permissions.toArray();
+
+                return embed(
+                    "Role Created",
+                    `${expand(user, "System")} created ${expand(role)} with permission${perms.length === 1 ? "" : "s"} ${
+                        perms.length === 0
+                            ? "no permissions"
+                            : `permission${perms.length === 1 ? "" : "s"} ${englishList(perms.map((key) => permissions[key]?.name ?? key))}`
+                    }`,
+                    Colors.Green,
+                );
+            });
+        })
+        .on(Events.GuildRoleDelete, (role) =>
+            invokeLog("roleDelete", role.guild, async () => {
+                const user = await audit(role.guild, AuditLogEvent.RoleDelete, role);
+                const perms = role.permissions.toArray();
+
+                return embed(
+                    "Role Deleted",
+                    `${expand(user, "System")} deleted ${role.name} (\`${role.id}\`) with ${
+                        perms.length === 0
+                            ? "no permissions"
+                            : `permission${perms.length === 1 ? "" : "s"} ${englishList(perms.map((key) => permissions[key]?.name ?? key))}`
+                    }`,
+                    Colors.Red,
+                );
+            }),
+        )
+        .on(Events.GuildRoleUpdate, (before, after) => {
+            invokeLog("roleUpdate", after.guild, async () => await roleUpdate(before, after));
+        })
+        .on(Events.GuildStickerCreate, (sticker) => {
+            if (!sticker.guild) return;
+
+            invokeLog("stickerCreate", sticker.guild, async () => {
+                const user = await audit(sticker.guild!, AuditLogEvent.StickerCreate, sticker);
+                const url = await stickerCache.fetch(sticker);
+
+                return {
+                    embeds: [
+                        {
+                            title: "Sticker Created",
+                            description: `${expand(user, "Unknown User")} created ${sticker.name} (\`${sticker.id}\`)`,
+                            color: Colors.Green,
+                        },
+                    ],
+                    files: url ? [{ attachment: url }] : [],
+                };
+            });
+        })
+        .on(Events.GuildStickerDelete, (sticker) => {
+            if (!sticker.guild) return;
+
+            invokeLog("stickerDelete", sticker.guild, async () => {
+                const user = await audit(sticker.guild!, AuditLogEvent.StickerDelete, sticker);
+                const url = await stickerCache.fetch(sticker);
+
+                return {
+                    embeds: [
+                        {
+                            title: "Sticker Deleted",
+                            description: `${expand(user, "Unknown User")} deleted ${sticker.name} (\`${sticker.id}\`)`,
+                            color: Colors.Red,
+                        },
+                    ],
+                    files: url ? [{ attachment: url }] : [],
+                };
+            });
+        })
+        .on(Events.GuildStickerUpdate, (before, after) => {
+            if (!before.guild || !after.guild) return;
+            invokeLog("stickerUpdate", after.guild, async () => await stickerUpdate(before, after));
+        })
+        .on(Events.ThreadCreate, (thread) => {
+            if (!thread.parent) return;
+            const { parent } = thread;
+
+            invokeLog("threadCreate", parent, async () => {
+                const user = await audit(thread.guild, AuditLogEvent.ThreadCreate, thread);
+                const forum = parent.type === ChannelType.GuildForum;
+
+                return embed(
+                    forum ? "Forum Post Created" : "Thread Created",
+                    `${expand(user, "System")} created ${expand(thread)}${
+                        forum ? "" : ` (${thread.type === ChannelType.PublicThread ? "public" : "private"})`
+                    }`,
+                    Colors.Green,
+                );
+            });
+        })
+        .on(Events.ThreadDelete, (thread) => {
+            if (!thread.parent) return;
+            const { parent } = thread;
+
+            invokeLog("threadDelete", parent, async () => {
+                const user = await audit(thread.guild, AuditLogEvent.ThreadDelete, thread);
+                const forum = parent.type === ChannelType.GuildForum;
+
+                return embed(
+                    forum ? "Forum Post Deleted" : "Thread Deleted",
+                    `${expand(user, "System")} deleted ${thread.name} (\`${thread.id}\`) in ${expand(thread.parent)}${
+                        forum ? "" : ` (${thread.type === ChannelType.PublicThread ? "public" : "private"})`
+                    }`,
+                    Colors.Red,
+                );
+            });
+        })
+        .on(Events.ThreadUpdate, (before, after) => {
+            if (!before.parent || !after.parent) return;
+            invokeLog("threadUpdate", after.parent, async () => await threadUpdate(before, after));
+        })
+        .on(Events.UserUpdate, async (before, after) => {
+            await handleUserUpdate(before, after);
+        })
+        .on(Events.VoiceStateUpdate, async (before, after) => {
+            await handleVoiceStateUpdate(before, after);
         });
 }

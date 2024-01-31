@@ -1,6 +1,21 @@
-import { SpoilerLevel, code, copyMedia, embed, englishList, expand, formatDuration, getMuteRoleId, timeinfo } from "@daedalus/bot-utils";
+import {
+    DurationStyle,
+    SpoilerLevel,
+    code,
+    copyFiles,
+    copyMedia,
+    embed,
+    englishList,
+    expand,
+    formatDuration,
+    getMuteRoleId,
+    timeinfo,
+} from "@daedalus/bot-utils";
+import stickerCache from "@daedalus/bot-utils/sticker-cache";
+import { permissions } from "@daedalus/data";
 import {
     AuditLogEvent,
+    ChannelType,
     Collection,
     Colors,
     Guild,
@@ -10,16 +25,22 @@ import {
     Message,
     OverwriteType,
     PermissionsBitField,
+    Role,
+    Sticker,
+    User,
+    VoiceState,
     escapeMarkdown,
     type APIEmbed,
+    type AnyThreadChannel,
     type GuildChannel,
     type MessageCreateOptions,
     type PartialGuildMember,
     type PartialGuildScheduledEvent,
     type PartialMessage,
+    type PartialUser,
 } from "discord.js";
-import { invokeLog } from "./lib.ts";
-import { archiveDurations, audit, auditEntry, channelTypes, eventStatuses, fieldsFor, to } from "./utils.ts";
+import { invokeLog } from "./lib";
+import { archiveDurations, audit, auditEntry, channelTypes, eventStatuses, fieldsFor, to } from "./utils";
 
 export async function channelUpdate(before: GuildChannel, after: GuildChannel): Promise<MessageCreateOptions[]> {
     for (const section of [0, 1]) {
@@ -502,4 +523,250 @@ export async function messageBulkDelete(messages: Collection<string, Message | P
     }
 
     return [...blocks.map((block) => ({ embeds: [{ title: "Purged Messages", description: block, color: Colors.Purple }] })), ...references];
+}
+
+export async function messageUpdate(before: Message | PartialMessage, after: Message | PartialMessage, fileOnlyMode: boolean): Promise<MessageCreateOptions[]> {
+    if ((fileOnlyMode || (before.content ?? "") === (after.content ?? "")) && before.attachments.size === after.attachments.size) return [];
+
+    const files = copyFiles(before.attachments.filter((attachment) => !after.attachments.has(attachment.id)).toJSON(), SpoilerLevel.HIDE);
+    const long = (before.content?.length ?? 0) > 1024 || (after.content?.length ?? 0) > 1024;
+
+    const embeds: APIEmbed[] = [
+        {
+            title: "Message Updated",
+            description: files.length === 0 ? "" : `${files.length === 1 ? "An attachment was" : "Attachments were"} removed from this message.`,
+            color: Colors.Blue,
+            fields: [
+                fieldsFor(after),
+                fileOnlyMode || long || before.content === after.content
+                    ? []
+                    : [before.content ? { name: "Before", value: before.content } : [], after.content ? { name: "After", value: after.content } : []].flat(),
+            ].flat(),
+            url: after.url,
+        },
+        !fileOnlyMode && long && before.content !== after.content
+            ? [
+                  { title: "Before", description: before.content ?? "", color: Colors.Blue },
+                  { title: "After", description: after.content ?? "", color: Colors.Blue },
+              ]
+            : [],
+    ].flat();
+
+    const length = embeds
+        .map(
+            (e) =>
+                (e.title?.length ?? 0) + (e.description?.length ?? 0) + (e.fields ?? []).map((f) => f.name.length + f.value.length).reduce((x, y) => x + y, 0),
+        )
+        .reduce((x, y) => x + y);
+
+    return length > 6000 ? [{ embeds: [embeds.shift()!], files }, ...embeds.map((embed) => ({ embeds: [embed] }))] : [{ embeds, files }];
+}
+
+export async function roleUpdate(before: Role, after: Role): Promise<MessageCreateOptions | MessageCreateOptions[]> {
+    const user = await audit(after.guild, AuditLogEvent.RoleUpdate, after);
+
+    const rows: string[] = [];
+    let thumbnail: { url: string } | undefined;
+
+    if (before.name !== after.name) rows.push(`- name: ${code(before.name)} ${to} ${code(after.name)}`);
+    if (before.color !== after.color) rows.push(`- color: ${code(before.hexColor)} ${to} ${code(after.hexColor)}`);
+
+    if (before.hoist && !after.hoist) rows.push(`- role no longer appears separately on the member list (unhoisted)`);
+    else if (!before.hoist && after.hoist) rows.push(`- role now appears separately on the member list (hoisted)`);
+
+    if (before.mentionable && !after.mentionable) rows.push(`- role is no longer able to be pinged by everyone`);
+    else if (!before.mentionable && after.mentionable) rows.push(`- role is now able to be pinged by everyone`);
+
+    const afterIcon = after.iconURL();
+
+    if (before.iconURL() !== afterIcon) {
+        if (afterIcon) {
+            rows.push(`- role icon changed to ${afterIcon}`);
+            thumbnail = { url: afterIcon! };
+        } else rows.push(`- role icon removed`);
+    }
+
+    if (!before.permissions.equals(after.permissions)) {
+        const beforePerms = before.permissions.toArray();
+        const afterPerms = after.permissions.toArray();
+
+        const added = afterPerms.filter((x) => !beforePerms.includes(x));
+        const removed = beforePerms.filter((x) => !afterPerms.includes(x));
+
+        rows.push(
+            `- permissions have been changed:\n\`\`\`diff\n${[
+                ...added.map((x) => `+ ${permissions[x]?.name ?? x}`),
+                ...removed.map((x) => `- ${permissions[x]?.name ?? x}`),
+            ].join("\n")}\n\`\`\``,
+        );
+    }
+
+    if (rows.length === 0) return [];
+
+    return {
+        embeds: [
+            {
+                title: "Role Updated",
+                description: `${expand(user, "System")} updated ${expand(after)}\n\n${rows.join("\n")}`,
+                color: Colors.Blue,
+                thumbnail,
+            },
+        ],
+    };
+}
+
+export async function stickerUpdate(before: Sticker, after: Sticker): Promise<MessageCreateOptions | MessageCreateOptions[]> {
+    if (before.name === after.name && before.description === after.description) return [];
+
+    const user = await audit(after.guild!, AuditLogEvent.StickerUpdate, after);
+    const url = await stickerCache.fetch(after);
+
+    return {
+        embeds: [
+            {
+                title: "Sticker Updated",
+                description: `${expand(user, "Unknown User")} updated ${after.name} (\`${after.id}\`)\n${
+                    before.name === after.name ? "" : `\n- name: ${code(before.name)} ${to} ${code(after.name)}`
+                }${
+                    before.description === after.description
+                        ? ""
+                        : `\n- description: ${before.description ? code(before.description) : "(none)"} ${to} ${
+                              after.description ? code(after.description) : "(none)"
+                          }`
+                }`,
+                color: Colors.Blue,
+            },
+        ],
+        files: url ? [{ attachment: url }] : [],
+    };
+}
+
+export async function threadUpdate(before: AnyThreadChannel, after: AnyThreadChannel): Promise<MessageCreateOptions | MessageCreateOptions[]> {
+    const user = await audit(after.guild, AuditLogEvent.ThreadUpdate, after);
+    const rows: string[] = [];
+
+    if (before.name !== after.name) rows.push(`- name: ${code(before.name)} ${to} ${code(after.name)}`);
+
+    if (before.locked && !after.locked) rows.push(`- unlocked`);
+    else if (!before.locked && after.locked) rows.push(`- locked`);
+
+    if (before.archived && !after.archived) rows.push(`- unarchived`);
+    else if (!before.archived && after.archived) rows.push(`- archived`);
+
+    if (before.autoArchiveDuration !== after.autoArchiveDuration)
+        rows.push(
+            `- auto-archive duration: ${code(archiveDurations[before.autoArchiveDuration ?? 0])} ${to} ${code(
+                archiveDurations[after.autoArchiveDuration ?? 0],
+            )}`,
+        );
+
+    if (before.rateLimitPerUser !== after.rateLimitPerUser)
+        rows.push(
+            `- slowmode: ${formatDuration((before.rateLimitPerUser ?? 0) * 1000, DurationStyle.Blank)} ${to} ${formatDuration(
+                (after.rateLimitPerUser ?? 0) * 1000,
+                DurationStyle.Blank,
+            )}`,
+        );
+
+    if (rows.length === 0) return [];
+
+    const forum = after.parent!.type === ChannelType.GuildForum;
+
+    return embed(
+        forum ? "Forum Post Updated" : "Thread Updated",
+        `${expand(user, "System")} updated ${expand(after)}${
+            forum ? "" : ` (${after.type === ChannelType.PublicThread ? "public" : "private"})`
+        }\n\n${rows.join("\n")}`,
+        Colors.Blue,
+    );
+}
+
+export async function handleUserUpdate(before: User | PartialUser, after: User) {
+    const beforeAvatar = before.displayAvatarURL({ size: 256 });
+    const afterAvatar = after.displayAvatarURL({ size: 256 });
+
+    if (beforeAvatar !== afterAvatar || before.username !== after.username) {
+        const members = after.client.guilds.cache.map((guild) => guild.members.cache.get(after.id) ?? []).flat();
+        if (members.length === 0) return;
+
+        if (before.username !== after.username)
+            for (const member of members)
+                invokeLog("guildMemberUpdateName", member.guild, () =>
+                    embed(
+                        "Username Changed",
+                        `${expand(after)} changed their username from ${code(before.username ?? "(unknown)")} to ${code(after.username)}`,
+                        Colors.Blue,
+                    ),
+                );
+
+        if (beforeAvatar !== afterAvatar)
+            for (const member of members)
+                invokeLog("guildMemberUpdateAvatar", member.guild, () => ({
+                    embeds: [
+                        {
+                            title: "User Avatar Changed From...",
+                            description: expand(after),
+                            color: Colors.Blue,
+                            thumbnail: { url: beforeAvatar },
+                        },
+                        {
+                            title: "...To",
+                            color: Colors.Blue,
+                            thumbnail: { url: afterAvatar },
+                        },
+                    ],
+                }));
+    }
+}
+
+export async function handleVoiceStateUpdate(before: VoiceState, after: VoiceState) {
+    if (before.channel)
+        if (after.channel)
+            if (before.channel.id === after.channel.id)
+                invokeLog("voiceStateUpdate", after.channel ?? after.guild, async () => {
+                    const user = await audit(after.guild, AuditLogEvent.MemberUpdate, after.member);
+
+                    const changes: string[] = [];
+
+                    if (before.selfVideo !== after.selfVideo) changes.push(`turned their camera ${after.selfVideo ? "on" : "off"}`);
+                    if (before.streaming !== after.streaming) changes.push(`${after.streaming ? "started" : "stopped"} streaming`);
+                    if (before.selfMute !== after.selfMute) changes.push(`${after.selfMute ? "" : "un"}muted themselves`);
+                    if (before.selfDeaf !== after.selfDeaf) changes.push(`${after.selfDeaf ? "" : "un"}deafened themselves`);
+
+                    if (before.serverMute !== after.serverMute)
+                        changes.push(`was ${after.serverMute ? "suppressed" : "permitted to speak"} by ${expand(user)}`);
+
+                    if (before.serverDeaf !== after.serverDeaf) changes.push(`was server-${after.serverDeaf ? "" : "un"}deafened by ${expand(user)}`);
+                    if (before.suppress !== after.suppress) changes.push(`became ${after.suppress ? "an audience member" : "a speaker"}`);
+
+                    if (changes.length === 0) return [];
+
+                    return embed("Voice State Updated", `${expand(after.member)} ${englishList(changes)}`, Colors.Blue);
+                });
+            else
+                invokeLog("voiceMove", after.channel ?? after.guild, async () => {
+                    const user = await audit(after.guild, AuditLogEvent.MemberMove);
+
+                    return embed(
+                        "Voice Channel Changed",
+                        `${expand(after.member)} ${user ? "was (maybe) " : ""}moved from ${expand(before.channel)} to ${expand(after.channel)}${
+                            user ? ` by ${expand(user)}` : ""
+                        }`,
+                        Colors.Blue,
+                    );
+                });
+        else
+            invokeLog("voiceLeave", before.channel ?? before.guild, async () => {
+                const user = await audit(before.guild, AuditLogEvent.MemberDisconnect);
+
+                return embed(
+                    "Voice Disconnect",
+                    `${expand(before.member)} ${user ? "was (maybe) kicked from" : "left"} ${expand(before.channel)}${user ? ` by ${expand(user)}` : ""}`,
+                    Colors.Red,
+                );
+            });
+    else
+        invokeLog("voiceJoin", after.channel ?? after.guild, () =>
+            embed("Voice Connect", `${expand(after.member)} joined ${expand(after.channel)}`, Colors.Green),
+        );
 }

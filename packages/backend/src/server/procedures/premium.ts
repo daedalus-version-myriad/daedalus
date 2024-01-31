@@ -10,7 +10,7 @@ import { snowflake } from "../schemas";
 import { proc } from "../trpc";
 import { NO_PERMISSION, hasPermission } from "./guild-settings";
 import { isAdmin } from "./users";
-import { clientUpdateEmitter } from "./vanity-clients.ts";
+import { clientUpdateEmitter } from "./vanity-clients";
 
 async function recalculateGuild(guild: string) {
     const activeKeys = await db

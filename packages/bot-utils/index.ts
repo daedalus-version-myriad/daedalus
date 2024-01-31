@@ -19,7 +19,7 @@ import {
     type Guild,
     type PartialMessage,
 } from "discord.js";
-import stickerCache from "./sticker-cache.ts";
+import stickerCache from "./sticker-cache";
 
 export const mdash = "—";
 

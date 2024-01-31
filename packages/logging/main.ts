@@ -17,7 +17,9 @@ new ClientManager({
                 Intents.GuildScheduledEvents |
                 Intents.GuildInvites |
                 Intents.GuildMessages |
-                Intents.MessageContent,
+                Intents.MessageContent |
+                Intents.GuildMessageReactions |
+                Intents.GuildVoiceStates,
             partials: [Partials.Channel, Partials.Message, Partials.Reaction],
         }),
     postprocess: addEventHandlers,
