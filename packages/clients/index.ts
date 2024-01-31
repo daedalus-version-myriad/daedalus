@@ -32,6 +32,8 @@ export class ClientManager {
                 self.getBotFromToken(data.guild, data.token);
             },
         });
+
+        this.getDefaultBot();
     }
 
     async cleanup(guild: string, client: Client) {

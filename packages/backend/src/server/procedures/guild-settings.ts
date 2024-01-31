@@ -171,7 +171,7 @@ export default {
             }),
         )
         .mutation(async ({ input: { id, guild, items, ignoredChannels, ...raw } }) => {
-            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
 
             const data = { ...raw, ignoredChannels: ignoredChannels.join("/") };
 
