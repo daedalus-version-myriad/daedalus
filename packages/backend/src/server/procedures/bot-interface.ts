@@ -11,6 +11,18 @@ export default {
         const [entry] = await db.select({ color: tables.guildSettings.embedColor }).from(tables.guildSettings).where(eq(tables.guildSettings.guild, guild));
         return entry?.color ?? 0x009688;
     }),
+    getMuteRole: proc.input(snowflake).query(async ({ input: guild }) => {
+        const [entry] = await db.select({ id: tables.guildSettings.muteRole }).from(tables.guildSettings).where(eq(tables.guildSettings.guild, guild));
+        return entry?.id ?? null;
+    }),
+    getFileOnlyMode: proc.input(snowflake).query(async ({ input: guild }) => {
+        const [entry] = await db
+            .select({ fileOnlyMode: tables.guildLoggingSettings.fileOnlyMode })
+            .from(tables.guildLoggingSettings)
+            .where(eq(tables.guildLoggingSettings.guild, guild));
+
+        return entry?.fileOnlyMode ?? false;
+    }),
     getLogLocation: proc
         .input(z.object({ guild: snowflake, channels: snowflake.array(), event: z.string() }))
         .output(z.object({ type: z.enum(["webhook", "channel"]), value: z.string() }).nullable())

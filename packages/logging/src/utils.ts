@@ -67,7 +67,8 @@ export const archiveDurations = {
     10080: "7 days",
 };
 
-export const statuses: Record<GuildScheduledEventStatus, string> = {
+export const eventStatuses: Record<GuildScheduledEventStatus | "unknown", string> = {
+    unknown: "Unknown",
     [GuildScheduledEventStatus.Active]: "Active",
     [GuildScheduledEventStatus.Canceled]: "Canceled",
     [GuildScheduledEventStatus.Completed]: "Completed",

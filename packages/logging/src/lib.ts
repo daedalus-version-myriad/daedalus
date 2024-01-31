@@ -1,17 +1,17 @@
 import { trpc } from "@daedalus/api";
-import type { Awaitable, Channel, Guild, MessageCreateOptions } from "discord.js";
+import type { Awaitable, Channel, Guild, InviteGuild, MessageCreateOptions } from "discord.js";
 import { getChannelStack, isAssignedClient } from "../../bot-utils";
 
 type MaybeArray<T> = T | T[];
 
-export async function invokeLog(event: string, context: Channel | Guild, fn: () => Awaitable<MaybeArray<MessageCreateOptions>>) {
-    if (!("bans" in context) && context.isDMBased()) return;
+export async function invokeLog(event: string, context: Channel | Guild | InviteGuild, fn: () => Awaitable<MaybeArray<MessageCreateOptions>>) {
+    if ("isDMBased" in context && context.isDMBased()) return;
 
-    const guild = "bans" in context ? context : context.guild;
+    const guild = "guild" in context ? context.guild : context;
 
-    if (!(await isAssignedClient(context.client, guild))) return;
+    if (!(await isAssignedClient(context.client, guild.id))) return;
 
-    const location = await trpc.getLogLocation.query({ guild: guild.id, event, channels: "bans" in context ? [] : getChannelStack(context) });
+    const location = await trpc.getLogLocation.query({ guild: guild.id, event, channels: "guild" in context ? getChannelStack(context) : [] });
     if (!location) return;
 
     const target = location.type === "webhook" ? location.value : await context.client.channels.fetch(location.value).catch(() => null);

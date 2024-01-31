@@ -1,20 +1,27 @@
 import { trpc } from "@daedalus/api";
 import { secrets } from "@daedalus/config";
 import {
+    Attachment,
     ButtonStyle,
     ChannelType,
     Colors,
     ComponentType,
     GuildChannel,
     GuildMember,
+    Message,
     Role,
     User,
     escapeMarkdown,
+    type AttachmentPayload,
     type BaseMessageOptions,
     type Channel,
     type Client,
     type Guild,
+    type PartialMessage,
 } from "discord.js";
+import stickerCache from "./sticker-cache.ts";
+
+export const mdash = "—";
 
 export async function isAssignedClient(client: Client, guild: Guild | string) {
     const id = typeof guild === "string" ? guild : guild.id;
@@ -24,6 +31,10 @@ export async function isAssignedClient(client: Client, guild: Guild | string) {
 
 export async function getColor(guild: Guild | string) {
     return await trpc.getColor.query(typeof guild === "string" ? guild : guild.id);
+}
+
+export async function getMuteRoleId(guild: Guild | string) {
+    return await trpc.getMuteRole.query(typeof guild === "string" ? guild : guild.id);
 }
 
 export function getChannelStack(channel: Channel): string[] {
@@ -133,4 +144,97 @@ export function formatIdList(ids: string[]): string {
     }
 
     return display;
+}
+
+export enum DurationStyle {
+    Blank,
+    For,
+    Until,
+}
+
+const timescales: [string, number][] = [
+    ["day", 86400],
+    ["hour", 3600],
+    ["minute", 60],
+    ["second", 1],
+];
+
+export function formatDuration(duration: number, style = DurationStyle.For): string {
+    if (duration === Infinity) return "indefinitely";
+
+    duration = Math.round(duration / 1000);
+
+    if (duration < 0) {
+        const core = _formatDuration(-duration);
+        if (style === DurationStyle.Blank) return `negative ${core}`;
+        if (style === DurationStyle.For) return `for negative ${core}`;
+        if (style === DurationStyle.Until) return `until ${core} ago`;
+    }
+
+    if (duration === 0) {
+        if (style === DurationStyle.Blank) return "no time";
+        if (style === DurationStyle.For) return "for no time";
+        if (style === DurationStyle.Until) return "until right now";
+    }
+
+    const core = _formatDuration(duration);
+    if (style === DurationStyle.Blank) return core;
+    if (style === DurationStyle.For) return `for ${core}`;
+    if (style === DurationStyle.Until) return `until ${core} from now`;
+
+    return "??";
+}
+
+function _formatDuration(duration: number): string {
+    if (duration === Infinity) return "indefinitely";
+
+    const parts: string[] = [];
+
+    for (const [name, scale] of timescales) {
+        if (duration >= scale) {
+            const amount = Math.floor(duration / scale);
+            duration %= scale;
+
+            parts.push(`${amount} ${name}${amount === 1 ? "" : "s"}`);
+        }
+    }
+
+    return parts.join(" ");
+}
+
+export enum SpoilerLevel {
+    SHOW = -1,
+    KEEP = 0,
+    HIDE = 1,
+}
+
+export function copyFiles(files: Iterable<Attachment>, spoilerLevel: SpoilerLevel): AttachmentPayload[] {
+    const attachments: AttachmentPayload[] = [];
+
+    for (const attachment of files) {
+        let { name } = attachment;
+        const spoiler = name.startsWith("SPOILER_");
+        name = name.match(/^(SPOILER_)*(.*)$/)![2] || "file";
+        if ((spoilerLevel === SpoilerLevel.KEEP && spoiler) || spoilerLevel === SpoilerLevel.HIDE) name = `SPOILER_${name}`;
+        attachments.push({ attachment: attachment.url, name });
+    }
+
+    return attachments;
+}
+
+export async function copyMedia(message: Message | PartialMessage, spoilerLevel: SpoilerLevel, tracker?: [boolean]): Promise<AttachmentPayload[]> {
+    const attachments = copyFiles(message.attachments.values(), spoilerLevel);
+
+    for (const sticker of message.stickers.values())
+        try {
+            const path = await stickerCache.fetch(sticker);
+
+            if (path) attachments.push({ attachment: path, name: `${spoilerLevel > 0 ? "SPOILER_" : ""}${sticker.name}.${stickerCache.ext(sticker)}` });
+            else throw 0;
+        } catch {
+            attachments.push({ attachment: Buffer.from([]), name: `${spoilerLevel > 0 ? "SPOILER_" : ""}${sticker.name}.${stickerCache.ext(sticker)}` });
+            if (tracker) tracker[0] = true;
+        }
+
+    return attachments;
 }
