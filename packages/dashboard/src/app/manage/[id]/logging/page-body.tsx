@@ -1,5 +1,6 @@
 "use client";
 
+import EnableModule from "@/components/EnableModule";
 import MultiChannelSelector from "@/components/MultiChannelSelector";
 import Panel from "@/components/Panel";
 import { SaveChangesBar } from "@/components/SaveChangesBar";
@@ -15,7 +16,7 @@ import { GuildLoggingSettings } from "@daedalus/types";
 import { useState } from "react";
 import save from "./save";
 
-export function Body({ data: initial }: { data: GuildLoggingSettings }) {
+export function Body({ data: initial, module, disabled }: { data: GuildLoggingSettings; module: string; disabled: boolean }) {
     const [data, setData] = useState<GuildLoggingSettings>(initial);
 
     const [useWebhook, setUseWebhook] = useState<boolean>(data.useWebhook);
@@ -29,6 +30,7 @@ export function Body({ data: initial }: { data: GuildLoggingSettings }) {
 
     return (
         <>
+            <EnableModule guild={data.guild} module={module} disabled={disabled}></EnableModule>
             <Panel>
                 <h1 className="text-xl">Default Log Output Settings</h1>
                 <Label className="center-row gap-4">

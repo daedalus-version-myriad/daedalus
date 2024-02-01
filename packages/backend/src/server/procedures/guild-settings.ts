@@ -44,6 +44,16 @@ export async function hasPermission(user: string | null, guildId: string) {
 }
 
 export default {
+    enableModule: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake, module: z.string().max(32) }))
+        .mutation(async ({ input: { id, guild, module } }) => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            await db
+                .insert(tables.guildModulesSettings)
+                .values({ guild, module, enabled: true })
+                .onDuplicateKeyUpdate({ set: { enabled: true } });
+        }),
     getSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }): Promise<GuildSettings> => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
 
