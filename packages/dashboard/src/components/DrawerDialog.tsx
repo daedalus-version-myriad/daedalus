@@ -25,7 +25,7 @@ export function DrawerDialog({
         return (
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>{trigger}</DialogTrigger>
-                <DialogContent className="max-h-[60vh] overflow-y-scroll">
+                <DialogContent className="max-w-[75vw] max-h-[75vh] overflow-y-scroll">
                     {title || description ? (
                         <DialogHeader>
                             {title ? <DialogTitle>{title}</DialogTitle> : null}

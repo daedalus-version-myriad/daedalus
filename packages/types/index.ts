@@ -1,3 +1,44 @@
+export type IField = {
+    name: string;
+    value: string;
+    inline: boolean;
+};
+
+export type IEmbed = {
+    colorMode: "guild" | "member" | "user" | "fixed";
+    color: number;
+    author: { name: string; iconURL: string; url: string };
+    title: string;
+    description: string;
+    url: string;
+    fields: IField[];
+    image: { url: string };
+    thumbnail: { url: string };
+    footer: { text: string; iconURL: string };
+    showTimestamp: boolean;
+};
+
+export type CustomMessageComponent = [string, ...(string | number | CustomMessageComponent)[]];
+export type CustomMessageText = (string | CustomMessageComponent)[];
+
+export type MessageData = {
+    content: string;
+    embeds: IEmbed[];
+    parsed: {
+        content: CustomMessageText;
+        embeds: (Pick<IEmbed, "colorMode" | "color" | "showTimestamp"> & {
+            author: { name: CustomMessageText; iconURL: CustomMessageText; url: CustomMessageText };
+            title: CustomMessageText;
+            description: CustomMessageText;
+            url: CustomMessageText;
+            fields: { name: CustomMessageText; value: CustomMessageText; inline: boolean }[];
+            image: { url: CustomMessageText };
+            thumbnail: { url: CustomMessageText };
+            footer: { text: CustomMessageText; iconURL: CustomMessageText };
+        })[];
+    };
+};
+
 export type DashboardGuild = {
     id: string;
     name: string;
@@ -87,6 +128,12 @@ export type GuildLoggingSettings = {
         fileOnlyMode: boolean;
         items: Record<string, { enabled: boolean } & BaseLogSettings>;
     };
+
+export type GuildWelcomeSettings = {
+    guild: string;
+    channel: string | null;
+    message: Omit<MessageData, "parsed">;
+};
 
 export type PremiumStripeSession = {
     subscriptions: {

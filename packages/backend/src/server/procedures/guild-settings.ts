@@ -1,14 +1,22 @@
 import { secrets } from "@daedalus/config";
 import { modules } from "@daedalus/data";
 import { logCategories, logEvents } from "@daedalus/logging";
-import type { GuildLoggingSettings, GuildModulesPermissionsSettings, GuildPremiumSettings, GuildSettings } from "@daedalus/types";
+import type {
+    GuildLoggingSettings,
+    GuildModulesPermissionsSettings,
+    GuildPremiumSettings,
+    GuildSettings,
+    GuildWelcomeSettings,
+    MessageData,
+} from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { clients } from "../../bot";
+import { parseMessage } from "../../custom-messages";
 import { tables } from "../../db";
 import { db } from "../../db/db";
-import { snowflake } from "../schemas";
+import { baseMessageData, snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
 import { isAdmin } from "./users";
@@ -276,5 +284,48 @@ export default {
                 await tx.delete(tables.guildLoggingSettingsItems).where(eq(tables.guildLoggingSettingsItems.guild, guild));
                 await tx.insert(tables.guildLoggingSettingsItems).values(Object.entries(items).map(([key, entry]) => ({ guild, key, ...entry })));
             });
+        }),
+    getWelcomeSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildWelcomeSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            const entry = (
+                await db
+                    .select({
+                        guild: tables.guildWelcomeSettings.guild,
+                        channel: tables.guildWelcomeSettings.channel,
+                        message: tables.guildWelcomeSettings.message,
+                    })
+                    .from(tables.guildWelcomeSettings)
+                    .where(eq(tables.guildWelcomeSettings.guild, guild))
+            ).at(0);
+
+            if (entry) return entry as GuildWelcomeSettings;
+
+            return {
+                guild,
+                channel: null,
+                message: { content: "", embeds: [] },
+            };
+        }),
+    setWelcomeSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake, channel: snowflake.nullable(), message: baseMessageData }))
+        .mutation(async ({ input: { id, guild, channel, message } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+            let parsed: MessageData["parsed"];
+
+            try {
+                parsed = parseMessage(message, false);
+            } catch (error) {
+                return `${error}`;
+            }
+
+            const data = { channel, message, parsed };
+
+            await db
+                .insert(tables.guildWelcomeSettings)
+                .values({ guild, ...data })
+                .onDuplicateKeyUpdate({ set: data });
         }),
 } as const;

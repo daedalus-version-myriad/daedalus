@@ -33,6 +33,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/premium", FaCrown, "Premium"],
     ["/modules-permissions", FaScrewdriverWrench, "Modules & Permissions"],
     ["/logging", moduleIcons.logging, "Logging"],
+    ["/welcome", moduleIcons.welcome, "Welcome"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [
