@@ -1,6 +1,6 @@
 import { trpc } from "@daedalus/api";
 import type { Awaitable, Channel, Guild, InviteGuild, MessageCreateOptions } from "discord.js";
-import { getChannelStack, isAssignedClient } from "../../bot-utils";
+import { getChannelStack, isModuleDisabled, isWrongClient } from "../../bot-utils";
 
 type MaybeArray<T> = T | T[];
 
@@ -9,7 +9,8 @@ export async function invokeLog(event: string, context: Channel | Guild | Invite
 
     const guild = "guild" in context ? context.guild : context;
 
-    if (!(await isAssignedClient(context.client, guild.id))) return;
+    if (await isWrongClient(context.client, guild.id)) return;
+    if (await isModuleDisabled(guild.id, "logging")) return;
 
     const location = await trpc.getLogLocation.query({ guild: guild.id, event, channels: "guild" in context ? getChannelStack(context) : [] });
     if (!location) return;

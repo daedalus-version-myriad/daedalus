@@ -23,10 +23,14 @@ import stickerCache from "./sticker-cache";
 
 export const mdash = "—";
 
-export async function isAssignedClient(client: Client, guild: Guild | string) {
+export async function isWrongClient(client: Client, guild: Guild | string) {
     const id = typeof guild === "string" ? guild : guild.id;
     const token = await trpc.vanityClientGet.query(id);
-    return client.token === (token ?? secrets.DISCORD.TOKEN);
+    return client.token !== (token ?? secrets.DISCORD.TOKEN);
+}
+
+export async function isModuleDisabled(guild: Guild | string, module: string) {
+    return !(await trpc.isModuleEnabled.query({ guild: typeof guild === "string" ? guild : guild.id, module }));
 }
 
 export async function getColor(guild: Guild | string) {
@@ -107,16 +111,6 @@ export function idlist(ids: string[]): string {
     }
 
     return display;
-}
-
-export function englishList(list: any[], separator = "and"): string {
-    return list.length === 0
-        ? ""
-        : list.length === 1
-          ? `${list[0]}`
-          : list.length === 2
-            ? `${list[0]} ${separator} ${list[1]}`
-            : `${list.slice(0, -1).join(", ")}, ${separator} ${list[list.length - 1]}`;
 }
 
 export function ordinal(x: number): string {

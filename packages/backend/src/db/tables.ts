@@ -33,6 +33,36 @@ export const guildPremiumSettings = mysqlTable("guild_premium_settings", {
     activity: varchar("activity", { length: 64 }).notNull().default("for /help"),
 });
 
+export const guildModulesSettings = mysqlTable(
+    "guild_modules_settings",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        module: varchar("module", { length: 32 }).notNull(),
+        enabled: boolean("enabled").notNull(),
+    },
+    (t) => ({
+        pk_guild_module: primaryKey({ name: "pk_guild_module", columns: [t.guild, t.module] }),
+    }),
+);
+
+export const guildCommandsSettings = mysqlTable(
+    "guild_commands_settings",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        command: varchar("command", { length: 32 }).notNull(),
+        enabled: boolean("enabled").notNull(),
+        ignoreDefaultPermissions: boolean("ignore_default_permissions").notNull(),
+        allowedRoles: text("allowed_roles").notNull(),
+        blockedRoles: text("blocked_roles").notNull(),
+        restrictChannels: boolean("restrict_channels").notNull(),
+        allowedChannels: text("allowed_channels").notNull(),
+        blockedChannels: text("blocked_channels").notNull(),
+    },
+    (t) => ({
+        pk_guild_command: primaryKey({ name: "pk_guild_command", columns: [t.guild, t.command] }),
+    }),
+);
+
 export const guildLoggingSettings = mysqlTable("guild_logging_settings", {
     guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
     useWebhook: boolean("use_webhook").notNull(),

@@ -1,3 +1,4 @@
+import { modules } from "@daedalus/data";
 import { logEvents } from "@daedalus/logging";
 import { and, eq, or } from "drizzle-orm";
 import { z } from "zod";
@@ -22,6 +23,15 @@ export default {
             .where(eq(tables.guildLoggingSettings.guild, guild));
 
         return entry?.fileOnlyMode ?? false;
+    }),
+    isModuleEnabled: proc.input(z.object({ guild: snowflake, module: z.string() })).query(async ({ input: { guild, module } }) => {
+        const [entry] = await db
+            .select({ enabled: tables.guildModulesSettings.enabled })
+            .from(tables.guildModulesSettings)
+            .where(and(eq(tables.guildModulesSettings.guild, guild), eq(tables.guildModulesSettings.module, module)));
+
+        if (!entry) return modules[module].default ?? true;
+        return entry.enabled;
     }),
     getLogLocation: proc
         .input(z.object({ guild: snowflake, channels: snowflake.array(), event: z.string() }))

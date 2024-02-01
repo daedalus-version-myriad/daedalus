@@ -32,7 +32,7 @@ export default function SingleChannelSelector({
 
     return (
         <div className="center-row gap-2 flex-wrap">
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={open} onOpenChange={setOpen} modal>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={open} className="center-row gap-1">
                         {id ? channelIcons[channelMap[id]?.type]?.({}) : null}

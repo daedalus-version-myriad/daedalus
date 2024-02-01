@@ -1,6 +1,7 @@
 import { secrets } from "@daedalus/config";
+import { modules } from "@daedalus/data";
 import { logCategories, logEvents } from "@daedalus/logging";
-import type { GuildLoggingSettings, GuildPremiumSettings, GuildSettings } from "@daedalus/types";
+import type { GuildLoggingSettings, GuildModulesPermissionsSettings, GuildPremiumSettings, GuildSettings } from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -125,6 +126,87 @@ export default {
                     activity: "for /help",
                 }),
             };
+        }),
+    getModulesPermissionsSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildModulesPermissionsSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            const output: GuildModulesPermissionsSettings = { guild, modules: {}, commands: {} };
+
+            for (const { guild: _, module, ...data } of await db.select().from(tables.guildModulesSettings).where(eq(tables.guildModulesSettings.guild, guild)))
+                output.modules[module] = data;
+
+            for (const { guild: _, command, ...data } of await db
+                .select()
+                .from(tables.guildCommandsSettings)
+                .where(eq(tables.guildCommandsSettings.guild, guild)))
+                output.commands[command] = {
+                    ...data,
+                    allowedRoles: decodeArray(data.allowedRoles),
+                    blockedRoles: decodeArray(data.blockedRoles),
+                    allowedChannels: decodeArray(data.allowedChannels),
+                    blockedChannels: decodeArray(data.blockedChannels),
+                };
+
+            for (const [module, { default: enabled, commands }] of Object.entries(modules)) {
+                output.modules[module] ??= { enabled: enabled ?? true };
+                if (!commands) continue;
+
+                for (const [command, data] of Object.entries(commands))
+                    output.commands[command] ??= {
+                        enabled: data.default ?? true,
+                        ignoreDefaultPermissions: false,
+                        allowedRoles: [],
+                        blockedRoles: [],
+                        restrictChannels: false,
+                        allowedChannels: [],
+                        blockedChannels: [],
+                    };
+            }
+
+            return output;
+        }),
+    setModulesPermissionsSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                modules: z.record(z.string(), z.object({ enabled: z.boolean() })),
+                commands: z.record(
+                    z.string(),
+                    z.object({
+                        enabled: z.boolean(),
+                        ignoreDefaultPermissions: z.boolean(),
+                        allowedRoles: snowflake.array(),
+                        blockedRoles: snowflake.array(),
+                        restrictChannels: z.boolean(),
+                        allowedChannels: snowflake.array(),
+                        blockedChannels: snowflake.array(),
+                    }),
+                ),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, modules, commands } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            await db.transaction(async (tx) => {
+                await tx.delete(tables.guildModulesSettings).where(eq(tables.guildModulesSettings.guild, guild));
+                await tx.delete(tables.guildCommandsSettings).where(eq(tables.guildCommandsSettings.guild, guild));
+
+                await tx.insert(tables.guildModulesSettings).values(Object.entries(modules).map(([module, entry]) => ({ guild, module, ...entry })));
+                await tx.insert(tables.guildCommandsSettings).values(
+                    Object.entries(commands).map(([command, entry]) => ({
+                        guild,
+                        command,
+                        ...entry,
+                        allowedRoles: entry.allowedRoles.join("/"),
+                        blockedRoles: entry.blockedRoles.join("/"),
+                        allowedChannels: entry.allowedChannels.join("/"),
+                        blockedChannels: entry.blockedChannels.join("/"),
+                    })),
+                );
+            });
         }),
     getLoggingSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))

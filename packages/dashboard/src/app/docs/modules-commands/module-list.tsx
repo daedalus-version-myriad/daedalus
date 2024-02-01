@@ -16,7 +16,7 @@ export default function ModuleList() {
 
     return (
         <>
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={open} onOpenChange={setOpen} modal>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={open} className="w-[200px] justify-between">
                         {value ? modules.find((module) => module.value === value)?.label : "Select a module"}

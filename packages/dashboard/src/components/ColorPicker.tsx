@@ -19,7 +19,7 @@ export default function ColorPicker({ color, setColor }: { color: number; setCol
 
     return (
         <div className="center-row gap-2">
-            <Popover>
+            <Popover modal>
                 <PopoverTrigger asChild>
                     <div className="w-[max-content] center-row gap-2">
                         <div className="h-9 w-9 rounded" style={{ backgroundColor: hex }}></div>
