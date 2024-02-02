@@ -18,6 +18,7 @@ export class ClientManager {
         sweep?: number;
     }) {
         this.factory = async (token, guild) => {
+            console.log(`[CM] Producing client for guild ${guild} with token ${token.slice(0, 5)}...${token.slice(-5)}`);
             const client = await loginAndReady(factory(), token);
             postprocess?.(client, guild);
             return client;
@@ -34,6 +35,10 @@ export class ClientManager {
         });
 
         this.getDefaultBot();
+
+        trpc.vanityClientList.query().then(async (entries) => {
+            for (const { guild, token } of entries) await this.getBotFromToken(guild, token);
+        });
     }
 
     async cleanup(guild: string, client: Client) {

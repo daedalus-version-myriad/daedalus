@@ -11,7 +11,7 @@ import save from "./save";
 export function Body({ data: initial }: { data: GuildWelcomeSettings }) {
     const [data, setData] = useState<GuildWelcomeSettings>(initial);
     const [channel, setChannel] = useState<string | null>(data.channel);
-    const [message, setMessage] = useState<Omit<MessageData, "parsed">>(data.message);
+    const [message, setMessage] = useState<MessageData>(data.message);
 
     const updated = { guild: data.guild, channel, message };
 

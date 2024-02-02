@@ -23,7 +23,7 @@ type EditableMessage = {
         })[];
 };
 
-function toEditable(base: Omit<MessageData, "parsed">): EditableMessage {
+function toEditable(base: MessageData): EditableMessage {
     return {
         ...base,
         embeds: base.embeds.map((embed) => ({
@@ -39,7 +39,7 @@ function toEditable(base: Omit<MessageData, "parsed">): EditableMessage {
     };
 }
 
-function fromEditable(base: EditableMessage): Omit<MessageData, "parsed"> {
+function fromEditable(base: EditableMessage): MessageData {
     return {
         ...base,
         embeds: base.embeds.map((embed) => ({
@@ -51,10 +51,7 @@ function fromEditable(base: EditableMessage): Omit<MessageData, "parsed"> {
     };
 }
 
-function useEditableMessage(
-    base: Omit<MessageData, "parsed">,
-    setBase: Dispatch<SetStateAction<Omit<MessageData, "parsed">>>,
-): [EditableMessage, Dispatch<SetStateAction<EditableMessage>>] {
+function useEditableMessage(base: MessageData, setBase: Dispatch<SetStateAction<MessageData>>): [EditableMessage, Dispatch<SetStateAction<EditableMessage>>] {
     const [data, setData] = useState(toEditable(base));
 
     useEffect(() => {
@@ -69,8 +66,8 @@ export default function MessageEditor({
     setData: setBase,
     flat = false,
 }: {
-    data: Omit<MessageData, "parsed">;
-    setData: Dispatch<SetStateAction<Omit<MessageData, "parsed">>>;
+    data: MessageData;
+    setData: Dispatch<SetStateAction<MessageData>>;
     flat?: boolean;
 }) {
     const [data, setData] = useEditableMessage(base, setBase);

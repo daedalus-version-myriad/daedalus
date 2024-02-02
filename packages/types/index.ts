@@ -1,3 +1,5 @@
+import type { Guild, GuildMember, Role, User } from "discord.js";
+
 export type IField = {
     name: string;
     value: string;
@@ -18,25 +20,34 @@ export type IEmbed = {
     showTimestamp: boolean;
 };
 
-export type CustomMessageComponent = [string, ...(string | number | CustomMessageComponent)[]];
+export type CustomMessageContext = { member?: GuildMember | null; user?: User | null; role?: Role | null; guild?: Guild | null };
+export type CustomMessageValue = string | number | CustomMessageValue[];
+export type CustomMessageFunction = {
+    arity: number | [number, number];
+    apply: (ctx: CustomMessageContext, ...args: CustomMessageValue[]) => CustomMessageValue;
+    fetch?: string[];
+};
+
+export type CustomMessageComponent = [string, ...any[]];
 export type CustomMessageText = (string | CustomMessageComponent)[];
 
 export type MessageData = {
     content: string;
     embeds: IEmbed[];
-    parsed: {
-        content: CustomMessageText;
-        embeds: (Pick<IEmbed, "colorMode" | "color" | "showTimestamp"> & {
-            author: { name: CustomMessageText; iconURL: CustomMessageText; url: CustomMessageText };
-            title: CustomMessageText;
-            description: CustomMessageText;
-            url: CustomMessageText;
-            fields: { name: CustomMessageText; value: CustomMessageText; inline: boolean }[];
-            image: { url: CustomMessageText };
-            thumbnail: { url: CustomMessageText };
-            footer: { text: CustomMessageText; iconURL: CustomMessageText };
-        })[];
-    };
+};
+
+export type ParsedMessage = {
+    content: CustomMessageText;
+    embeds: (Pick<IEmbed, "colorMode" | "color" | "showTimestamp"> & {
+        author: { name: CustomMessageText; iconURL: CustomMessageText; url: CustomMessageText };
+        title: CustomMessageText;
+        description: CustomMessageText;
+        url: CustomMessageText;
+        fields: { name: CustomMessageText; value: CustomMessageText; inline: boolean }[];
+        image: { url: CustomMessageText };
+        thumbnail: { url: CustomMessageText };
+        footer: { text: CustomMessageText; iconURL: CustomMessageText };
+    })[];
 };
 
 export type DashboardGuild = {
@@ -132,7 +143,7 @@ export type GuildLoggingSettings = {
 export type GuildWelcomeSettings = {
     guild: string;
     channel: string | null;
-    message: Omit<MessageData, "parsed">;
+    message: MessageData;
 };
 
 export type PremiumStripeSession = {

@@ -1,5 +1,6 @@
 import { modules } from "@daedalus/data";
 import { logEvents } from "@daedalus/logging";
+import type { ParsedMessage } from "@daedalus/types";
 import { and, eq, or } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
@@ -67,4 +68,14 @@ export default {
 
             return null;
         }),
+    getWelcomeConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        const [entry] = await db
+            .select({ channel: tables.guildWelcomeSettings.channel, parsed: tables.guildWelcomeSettings.parsed })
+            .from(tables.guildWelcomeSettings)
+            .where(eq(tables.guildWelcomeSettings.guild, guild));
+
+        if (!entry || !entry.channel) return null;
+
+        return { channel: entry.channel, parsed: entry.parsed as ParsedMessage };
+    }),
 } as const;

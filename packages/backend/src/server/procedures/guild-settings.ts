@@ -1,4 +1,5 @@
 import { secrets } from "@daedalus/config";
+import { parseMessage } from "@daedalus/custom-messages";
 import { modules } from "@daedalus/data";
 import { logCategories, logEvents } from "@daedalus/logging";
 import type {
@@ -7,13 +8,12 @@ import type {
     GuildPremiumSettings,
     GuildSettings,
     GuildWelcomeSettings,
-    MessageData,
+    ParsedMessage,
 } from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { clients } from "../../bot";
-import { parseMessage } from "../../custom-messages";
 import { tables } from "../../db";
 import { db } from "../../db/db";
 import { baseMessageData, snowflake } from "../schemas";
@@ -313,7 +313,7 @@ export default {
         .input(z.object({ id: snowflake.nullable(), guild: snowflake, channel: snowflake.nullable(), message: baseMessageData }))
         .mutation(async ({ input: { id, guild, channel, message } }) => {
             if (!(await hasPermission(id, guild))) return NO_PERMISSION;
-            let parsed: MessageData["parsed"];
+            let parsed: ParsedMessage;
 
             try {
                 parsed = parseMessage(message, false);

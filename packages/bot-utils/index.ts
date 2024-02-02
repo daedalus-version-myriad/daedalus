@@ -1,5 +1,8 @@
 import { trpc } from "@daedalus/api";
 import { secrets } from "@daedalus/config";
+import { formatMessage } from "@daedalus/custom-messages";
+import { logError } from "@daedalus/log-interface";
+import type { CustomMessageContext, ParsedMessage } from "@daedalus/types";
 import {
     Attachment,
     ButtonStyle,
@@ -13,11 +16,14 @@ import {
     User,
     escapeMarkdown,
     type AttachmentPayload,
+    type Awaitable,
     type BaseMessageOptions,
     type Channel,
     type Client,
     type Guild,
+    type MessageCreateOptions,
     type PartialMessage,
+    type TextBasedChannel,
 } from "discord.js";
 import stickerCache from "./sticker-cache";
 
@@ -26,6 +32,9 @@ export const mdash = "—";
 export async function isWrongClient(client: Client, guild: Guild | string) {
     const id = typeof guild === "string" ? guild : guild.id;
     const token = await trpc.vanityClientGet.query(id);
+
+    console.log(token, client.token);
+
     return client.token !== (token ?? secrets.DISCORD.TOKEN);
 }
 
@@ -231,4 +240,93 @@ export async function copyMedia(message: Message | PartialMessage, spoilerLevel:
         }
 
     return attachments;
+}
+
+export async function getTextChannel(guild: Guild, id: string, moduleTitle: string, contextName: string) {
+    const channel = await guild.channels.fetch(id, { force: true }).catch(() => null);
+
+    if (!channel)
+        return await logError(
+            guild.id,
+            `${moduleTitle} Module`,
+            `The ${contextName} channel (<#${id}>) could not be fetched. Please check that the bot has permission to view it, and if it has been deleted, update the settings on the [dashboard](${secrets.DOMAIN}/manage/${guild.id}).`,
+        );
+
+    if (!channel.isTextBased())
+        return await logError(
+            guild.id,
+            `${moduleTitle} Module`,
+            `The ${contextName} channel (${channel}) is not of a valid channel type. This should not be possible unless the data was tampered with outside of the dashboard; please contact support.`,
+        );
+
+    return channel;
+}
+
+export async function sendCustomMessage(
+    location: TextBasedChannel | Message,
+    data: ParsedMessage,
+    moduleTitle: string,
+    errorMessage: string,
+    context?: CustomMessageContext,
+    allowPings?: boolean,
+    pingInReply?: boolean,
+) {
+    const channel = location instanceof Message ? location.channel : location;
+
+    try {
+        const message = await formatMessage(data, context ?? {}, allowPings);
+
+        if (location instanceof Message) {
+            if (pingInReply) (message.allowedMentions ??= {}).repliedUser = true;
+            await location.reply(message);
+        } else await channel.send(message);
+    } catch (error) {
+        if (channel.isDMBased()) return;
+
+        await logError(
+            channel.guild.id,
+            `Custom Message: ${moduleTitle} Module`,
+            `${errorMessage} Check the bot's permissions in ${channel} and ensure your custom message is valid. Here are some details about the error:\n\`\`\`\n${error}\n\`\`\``,
+        );
+    }
+}
+
+export async function sendMessage(channel: TextBasedChannel, data: MessageCreateOptions, moduleTitle: string, errorMessage: string) {
+    try {
+        return await channel.send(data);
+    } catch (error) {
+        if (channel.isDMBased()) return;
+
+        await logError(
+            channel.guild.id,
+            `Sending Message: ${moduleTitle} Module`,
+            `${errorMessage} Check the bot's permissions in ${channel}. Here are some details about the error:\n\`\`\`\n${error}\n\`\`\``,
+        );
+    }
+}
+
+export async function fetchAndSendCustom(
+    guild: Guild,
+    id: string,
+    moduleTitle: string,
+    contextName: string,
+    data: ParsedMessage,
+    errorMessage: string,
+    context?: () => Awaitable<CustomMessageContext>,
+    allowPings?: boolean,
+) {
+    const channel = await getTextChannel(guild, id, moduleTitle, contextName);
+    if (channel) await sendCustomMessage(channel, data, moduleTitle, errorMessage, await context?.(), allowPings);
+}
+
+export async function fetchAndSendMessage(
+    guild: Guild,
+    id: string,
+    moduleTitle: string,
+    contextName: string,
+    data: MessageCreateOptions,
+    errorMessage: string,
+) {
+    const channel = await getTextChannel(guild, id, moduleTitle, contextName);
+    if (channel) await sendMessage(channel, data, moduleTitle, errorMessage);
 }

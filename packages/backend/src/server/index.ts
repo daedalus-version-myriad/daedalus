@@ -39,7 +39,6 @@ wss.on("connection", (ws) => {
 console.log(`WS server listening on localhost:${secrets.PORTS.WS}`);
 
 process.on("SIGTERM", () => {
-    console.log("SIGTERM");
     handler.broadcastReconnectNotification();
     wss.close();
 });

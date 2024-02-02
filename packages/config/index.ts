@@ -4,6 +4,7 @@ export type Secrets = {
     PORTS: {
         API: number;
         WS: number;
+        LOG: number;
     };
     DATABASE: {
         NAME: string;
