@@ -85,7 +85,7 @@ export function Body({ data: initial }: { data: GuildSettings }) {
                     className="text-md"
                     maxLength={1024}
                     placeholder="Ban Footer"
-                    onChange={(e) => setBanFooter(e.currentTarget.value)}
+                    onChange={({ currentTarget: { value } }) => setBanFooter(value)}
                 ></Textarea>
                 <span className="text-muted-foreground">{banFooter.length} / 1024</span>
             </Panel>

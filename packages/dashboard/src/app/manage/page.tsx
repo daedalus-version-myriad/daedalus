@@ -41,7 +41,7 @@ export default function ManageHomePage() {
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl">Manage Your Servers</h1>
             <Container>
                 <div className="center-col gap-4">
-                    <Input placeholder="Filter Servers" onChange={(e) => setQuery(e.currentTarget.value)}></Input>
+                    <Input placeholder="Filter Servers" onChange={({ currentTarget: { value } }) => setQuery(value)}></Input>
                     <Button onClick={load} className="center-row gap-2" disabled={!data}>
                         <FaArrowsRotate></FaArrowsRotate> Reload Servers
                     </Button>

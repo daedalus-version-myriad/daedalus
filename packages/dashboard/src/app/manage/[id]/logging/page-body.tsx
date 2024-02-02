@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { categoryToEventMap, logCategories, logEvents } from "@daedalus/logging";
 import { GuildLoggingSettings } from "@daedalus/types";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import save from "./save";
 
 export function Body({ data: initial, module, disabled }: { data: GuildLoggingSettings; module: string; disabled: boolean }) {
@@ -42,7 +42,7 @@ export function Body({ data: initial, module, disabled }: { data: GuildLoggingSe
                         type="password"
                         placeholder="Webhook URL"
                         value={webhook}
-                        onChange={(e) => setWebhook(e.currentTarget.value)}
+                        onChange={({ currentTarget: { value } }) => setWebhook(value)}
                         maxLength={128}
                     ></Input>
                 ) : (
@@ -68,7 +68,10 @@ export function Body({ data: initial, module, disabled }: { data: GuildLoggingSe
                     <Button
                         variant="outline"
                         onClick={() =>
-                            setItems({ ...items, ...Object.fromEntries(Object.keys(logCategories).map((key) => [key, { ...items[key], enabled: false }])) })
+                            setItems((items) => ({
+                                ...items,
+                                ...Object.fromEntries(Object.keys(logCategories).map((key) => [key, { ...items[key], enabled: false }])),
+                            }))
                         }
                     >
                         Disable All Categories
@@ -76,7 +79,10 @@ export function Body({ data: initial, module, disabled }: { data: GuildLoggingSe
                     <Button
                         variant="outline"
                         onClick={() =>
-                            setItems({ ...items, ...Object.fromEntries(Object.keys(logCategories).map((key) => [key, { ...items[key], enabled: true }])) })
+                            setItems((items) => ({
+                                ...items,
+                                ...Object.fromEntries(Object.keys(logCategories).map((key) => [key, { ...items[key], enabled: true }])),
+                            }))
                         }
                     >
                         Enable All Categories
@@ -130,12 +136,12 @@ function Item({
     name,
 }: {
     items: GuildLoggingSettings["items"];
-    setItems: (updated: GuildLoggingSettings["items"]) => unknown;
+    setItems: Dispatch<SetStateAction<GuildLoggingSettings["items"]>>;
     id: string;
     name: "category" | "event";
 }) {
     function update<T extends keyof GuildLoggingSettings["items"][string]>(key: T, value: GuildLoggingSettings["items"][string][T]) {
-        setItems({ ...items, [id]: { ...items[id], [key]: value } });
+        setItems((items) => ({ ...items, [id]: { ...items[id], [key]: value } }));
     }
 
     return (
@@ -154,7 +160,7 @@ function Item({
                     type="password"
                     placeholder="Webhook URL"
                     value={items[id].webhook}
-                    onChange={(e) => update("webhook", e.currentTarget.value)}
+                    onChange={({ currentTarget: { value } }) => update("webhook", value)}
                     maxLength={128}
                 ></Input>
             ) : (

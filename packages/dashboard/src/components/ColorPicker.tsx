@@ -10,10 +10,6 @@ export default function ColorPicker({ color, setColor, hideButton = false }: { c
     const set = useCallback((raw: string) => (raw.match(/^#[0-9a-f]{6}$/) ? setColor(parseInt(raw.substring(1), 16)) : null), [setColor]);
 
     useEffect(() => {
-        set(input);
-    }, [set, input]);
-
-    useEffect(() => {
         setInput(hex);
     }, [hex]);
 
@@ -31,7 +27,7 @@ export default function ColorPicker({ color, setColor, hideButton = false }: { c
                 </PopoverContent>
             </Popover>
             <div>
-                <Input value={input} onInput={(e) => setInput(e.currentTarget.value)}></Input>
+                <Input value={input} onInput={({ currentTarget: { value } }) => (setInput(value), set(value))}></Input>
             </div>
         </div>
     );

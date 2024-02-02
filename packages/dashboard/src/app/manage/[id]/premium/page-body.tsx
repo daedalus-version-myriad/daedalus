@@ -42,7 +42,7 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
             <Panel>
                 <h1 className="text-xl center-row gap-4">
                     Premium Keys
-                    <Button variant="outline" onClick={() => setInfoOpen(!infoOpen)}>
+                    <Button variant="outline" onClick={() => setInfoOpen((infoOpen) => !infoOpen)}>
                         <FaInfo></FaInfo>
                     </Button>
                 </h1>
@@ -80,7 +80,12 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                 </div>
                 <div className="center-row flex-wrap gap-4">
                     <div>
-                        <Input value={key} className="min-w-48" onChange={(e) => setKey(e.currentTarget.value)} placeholder="Insert Key Here"></Input>
+                        <Input
+                            value={key}
+                            className="min-w-48"
+                            onChange={({ currentTarget: { value } }) => setKey(value)}
+                            placeholder="Insert Key Here"
+                        ></Input>
                     </div>
                     <Button
                         variant="outline"
@@ -102,7 +107,7 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
             <Panel>
                 <h1 className="text-xl center-row gap-4">
                     Custom Client
-                    <Button variant="outline" onClick={() => setCustomInfoOpen(!customInfoOpen)}>
+                    <Button variant="outline" onClick={() => setCustomInfoOpen((customInfoOpen) => !customInfoOpen)}>
                         <FaInfo></FaInfo>
                     </Button>
                 </h1>
@@ -174,7 +179,7 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                                     className="min-w-48"
                                     placeholder="Bot Token"
                                     value={token}
-                                    onChange={(e) => setToken(e.currentTarget.value)}
+                                    onChange={({ currentTarget: { value } }) => setToken(value)}
                                 ></Input>
                             </div>
                             <Button
@@ -234,7 +239,12 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                                 className="w-48"
                             ></NormalSelect>
                             <div>
-                                <Input className="min-w-48" value={activity} onChange={(e) => setActivity(e.currentTarget.value)} maxLength={64}></Input>
+                                <Input
+                                    className="min-w-48"
+                                    value={activity}
+                                    onChange={({ currentTarget: { value } }) => setActivity(value)}
+                                    maxLength={64}
+                                ></Input>
                             </div>
                             <Button
                                 variant="outline"

@@ -27,12 +27,14 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
 
     return (
         <>
-            <Input value={query} placeholder="Find Modules / Commands" onChange={(e) => setQuery(e.currentTarget.value)}></Input>
+            <Input value={query} placeholder="Find Modules / Commands" onChange={({ currentTarget: { value } }) => setQuery(value)}></Input>
             {Object.entries(modules).map(([module, moduleData]) => (
                 <Panel key={module}>
                     <Collapsible
                         open={!closedModules.includes(module)}
-                        onOpenChange={(open) => setClosedModules(open ? closedModules.filter((x) => x !== module) : [...closedModules, module])}
+                        onOpenChange={(open) =>
+                            setClosedModules((closedModules) => (open ? closedModules.filter((x) => x !== module) : [...closedModules, module]))
+                        }
                     >
                         <h1 className="center-row gap-4 text-xl">
                             <CollapsibleTrigger asChild>
@@ -43,7 +45,9 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                             <Switch
                                 className="-ml-2 mr-2"
                                 checked={data.modules[module].enabled}
-                                onCheckedChange={(ch) => setData({ ...data, modules: { ...data.modules, [module]: { ...data.modules[module], enabled: ch } } })}
+                                onCheckedChange={(ch) =>
+                                    setData((data) => ({ ...data, modules: { ...data.modules, [module]: { ...data.modules[module], enabled: ch } } }))
+                                }
                             ></Switch>
                             {moduleIcons[module]?.({})}
                             <b>{moduleData.name}</b>
@@ -85,13 +89,13 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                             <Switch
                                                                 checked={data.commands[command].ignoreDefaultPermissions}
                                                                 onCheckedChange={(ch) =>
-                                                                    setData({
+                                                                    setData((data) => ({
                                                                         ...data,
                                                                         commands: {
                                                                             ...data.commands,
                                                                             [command]: { ...data.commands[command], ignoreDefaultPermissions: ch },
                                                                         },
-                                                                    })
+                                                                    }))
                                                                 }
                                                             ></Switch>
                                                             <p>
@@ -104,13 +108,13 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                         <MultiRoleSelector
                                                             roles={data.commands[command].allowedRoles}
                                                             setRoles={(roles) =>
-                                                                setData({
+                                                                setData((data) => ({
                                                                     ...data,
                                                                     commands: {
                                                                         ...data.commands,
                                                                         [command]: { ...data.commands[command], allowedRoles: roles },
                                                                     },
-                                                                })
+                                                                }))
                                                             }
                                                             showEveryone
                                                             showHigher
@@ -122,13 +126,13 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                         <MultiRoleSelector
                                                             roles={data.commands[command].blockedRoles}
                                                             setRoles={(roles) =>
-                                                                setData({
+                                                                setData((data) => ({
                                                                     ...data,
                                                                     commands: {
                                                                         ...data.commands,
                                                                         [command]: { ...data.commands[command], blockedRoles: roles },
                                                                     },
-                                                                })
+                                                                }))
                                                             }
                                                             showEveryone
                                                             showHigher
@@ -141,13 +145,13 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                             <Switch
                                                                 checked={data.commands[command].restrictChannels}
                                                                 onCheckedChange={(ch) =>
-                                                                    setData({
+                                                                    setData((data) => ({
                                                                         ...data,
                                                                         commands: {
                                                                             ...data.commands,
                                                                             [command]: { ...data.commands[command], restrictChannels: ch },
                                                                         },
-                                                                    })
+                                                                    }))
                                                                 }
                                                             ></Switch>
                                                             <p>
@@ -165,13 +169,13 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                         <MultiChannelSelector
                                                             channels={data.commands[command].allowedChannels}
                                                             setChannels={(channels) =>
-                                                                setData({
+                                                                setData((data) => ({
                                                                     ...data,
                                                                     commands: {
                                                                         ...data.commands,
                                                                         [command]: { ...data.commands[command], allowedChannels: channels },
                                                                     },
-                                                                })
+                                                                }))
                                                             }
                                                             types={[0, 2, 4, 5, 13, 15, 16]}
                                                             showReadonly
@@ -180,13 +184,13 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                         <MultiChannelSelector
                                                             channels={data.commands[command].blockedChannels}
                                                             setChannels={(channels) =>
-                                                                setData({
+                                                                setData((data) => ({
                                                                     ...data,
                                                                     commands: {
                                                                         ...data.commands,
                                                                         [command]: { ...data.commands[command], blockedChannels: channels },
                                                                     },
-                                                                })
+                                                                }))
                                                             }
                                                             types={[0, 2, 4, 5, 13, 15, 16]}
                                                             showReadonly
@@ -197,10 +201,10 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                     className="-ml-2 mr-2"
                                                     checked={data.commands[command].enabled}
                                                     onCheckedChange={(ch) =>
-                                                        setData({
+                                                        setData((data) => ({
                                                             ...data,
                                                             commands: { ...data.commands, [command]: { ...data.commands[command], enabled: ch } },
-                                                        })
+                                                        }))
                                                     }
                                                 ></Switch>
                                                 {commandIcons[command]?.({})}

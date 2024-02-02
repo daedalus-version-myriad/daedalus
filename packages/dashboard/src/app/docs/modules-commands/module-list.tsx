@@ -33,7 +33,7 @@ export default function ModuleList() {
                                     key={module.value}
                                     value={module.value}
                                     onSelect={(currentValue) => {
-                                        setValue(currentValue === value ? "" : currentValue);
+                                        setValue((value) => (currentValue === value ? "" : currentValue));
                                         setOpen(false);
                                     }}
                                 >
