@@ -1,4 +1,5 @@
 import { secrets } from "@daedalus/config";
+import { PremiumTier, premiumBenefits, type PremiumBenefits } from "@daedalus/data";
 import { Collection, GuildMember, PermissionFlagsBits, escapeMarkdown, type User } from "discord.js";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -11,6 +12,18 @@ import { proc } from "../trpc";
 import { NO_PERMISSION, hasPermission } from "./guild-settings";
 import { isAdmin } from "./users";
 import { clientUpdateEmitter } from "./vanity-clients";
+
+export async function getLimit(guild: string, key: keyof PremiumBenefits) {
+    const [entry] = await db.select({ value: tables.limitOverrides[key] }).from(tables.limitOverrides).where(eq(tables.limitOverrides.guild, guild));
+    if (entry && entry.value !== null) return entry.value;
+
+    const [premiumEntry] = await db
+        .select({ premium: tables.guildPremiumSettings.hasPremium })
+        .from(tables.guildPremiumSettings)
+        .where(eq(tables.guildPremiumSettings.guild, guild));
+
+    return premiumBenefits[premiumEntry?.premium ? PremiumTier.PREMIUM : PremiumTier.FREE][key];
+}
 
 async function recalculateGuild(guild: string) {
     const activeKeys = await db
@@ -321,5 +334,18 @@ export default {
             if (!client) return;
 
             await setPresence(client, guild);
+        }),
+    getLimit: proc
+        .input(
+            z.object({ id: snowflake.nullable(), guild: snowflake, key: z.string() }) as z.ZodType<{
+                id: string | null;
+                guild: string;
+                key: keyof PremiumBenefits;
+            }>,
+        )
+        .query(async ({ input: { id, guild, key } }) => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            return await getLimit(guild, key);
         }),
 } as const;

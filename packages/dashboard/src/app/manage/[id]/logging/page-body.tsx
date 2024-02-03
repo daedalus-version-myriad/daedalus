@@ -11,8 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { textTypes } from "@/lib/data";
 import { categoryToEventMap, logCategories, logEvents } from "@daedalus/logging";
 import { GuildLoggingSettings } from "@daedalus/types";
+import _ from "lodash";
 import { Dispatch, SetStateAction, useState } from "react";
 import save from "./save";
 
@@ -46,7 +48,7 @@ export function Body({ data: initial, module, disabled }: { data: GuildLoggingSe
                         maxLength={128}
                     ></Input>
                 ) : (
-                    <SingleChannelSelector channel={channel} setChannel={setChannel} types={[0, 2, 5, 10, 11, 12, 13]}></SingleChannelSelector>
+                    <SingleChannelSelector channel={channel} setChannel={setChannel} types={textTypes}></SingleChannelSelector>
                 )}
                 <Separator></Separator>
                 <h1 className="text-xl">Ignored Channels</h1>
@@ -110,7 +112,7 @@ export function Body({ data: initial, module, disabled }: { data: GuildLoggingSe
                 </Accordion>
             </Panel>
             <SaveChangesBar
-                unsaved={JSON.stringify(updated) !== JSON.stringify(data)}
+                unsaved={!_.isEqual(updated, data)}
                 reset={() => {
                     setUseWebhook(data.useWebhook);
                     setChannel(data.channel);
@@ -164,11 +166,7 @@ function Item({
                     maxLength={128}
                 ></Input>
             ) : (
-                <SingleChannelSelector
-                    channel={items[id].channel}
-                    setChannel={(ch) => update("channel", ch)}
-                    types={[0, 2, 5, 10, 11, 12, 13]}
-                ></SingleChannelSelector>
+                <SingleChannelSelector channel={items[id].channel} setChannel={(ch) => update("channel", ch)} types={textTypes}></SingleChannelSelector>
             )}
         </div>
     );

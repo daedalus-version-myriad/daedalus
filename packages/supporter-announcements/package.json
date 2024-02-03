@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/supporter-announcements",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

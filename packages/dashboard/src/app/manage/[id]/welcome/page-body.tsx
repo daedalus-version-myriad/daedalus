@@ -4,7 +4,9 @@ import MessageEditor from "@/components/MessageEditor";
 import Panel from "@/components/Panel";
 import { SaveChangesBar } from "@/components/SaveChangesBar";
 import SingleChannelSelector from "@/components/SingleChannelSelector";
+import { textTypes } from "@/lib/data";
 import { GuildWelcomeSettings, MessageData } from "@daedalus/types";
+import _ from "lodash";
 import { useState } from "react";
 import save from "./save";
 
@@ -19,12 +21,12 @@ export function Body({ data: initial }: { data: GuildWelcomeSettings }) {
         <>
             <Panel>
                 <h1 className="text-xl">Welcome Channel</h1>
-                <SingleChannelSelector channel={channel} setChannel={setChannel} showReadonly types={[0, 2, 5, 10, 11, 12, 13]}></SingleChannelSelector>
+                <SingleChannelSelector channel={channel} setChannel={setChannel} showReadonly types={textTypes}></SingleChannelSelector>
                 <h1 className="text-xl">Message Data</h1>
                 <MessageEditor data={message} setData={setMessage}></MessageEditor>
             </Panel>
             <SaveChangesBar
-                unsaved={JSON.stringify(updated) !== JSON.stringify(data)}
+                unsaved={!_.isEqual(updated, data)}
                 reset={() => {
                     setChannel(data.channel);
                     setMessage(data.message);

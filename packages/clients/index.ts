@@ -13,7 +13,7 @@ export class ClientManager {
         postprocess,
         sweep = 86400000,
     }: {
-        factory: () => Client<false>;
+        factory: () => Client<boolean>;
         postprocess?: (client: Client<true>, guild?: string) => unknown;
         sweep?: number;
     }) {

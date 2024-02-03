@@ -146,6 +146,16 @@ export type GuildWelcomeSettings = {
     message: MessageData;
 };
 
+export type GuildSupporterAnnouncementsSettings = {
+    guild: string;
+    announcements: {
+        useBoosts: boolean;
+        role: string | null;
+        channel: string | null;
+        message: MessageData;
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

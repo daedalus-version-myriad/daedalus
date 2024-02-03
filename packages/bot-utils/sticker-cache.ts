@@ -59,4 +59,4 @@ class StickerCache {
     }
 }
 
-export default new StickerCache("./sticker-cache");
+export default new StickerCache("../../sticker-cache");

@@ -7,6 +7,7 @@ import type {
     GuildModulesPermissionsSettings,
     GuildPremiumSettings,
     GuildSettings,
+    GuildSupporterAnnouncementsSettings,
     GuildWelcomeSettings,
     ParsedMessage,
 } from "@daedalus/types";
@@ -327,5 +328,47 @@ export default {
                 .insert(tables.guildWelcomeSettings)
                 .values({ guild, ...data })
                 .onDuplicateKeyUpdate({ set: data });
+        }),
+    getSupporterAnnouncementsSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildSupporterAnnouncementsSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            const entries = await db
+                .select({
+                    useBoosts: tables.guildSupporterAnnouncementsItems.useBoosts,
+                    role: tables.guildSupporterAnnouncementsItems.role,
+                    channel: tables.guildSupporterAnnouncementsItems.channel,
+                    message: tables.guildSupporterAnnouncementsItems.message,
+                })
+                .from(tables.guildSupporterAnnouncementsItems)
+                .where(eq(tables.guildSupporterAnnouncementsItems.guild, guild));
+
+            return { guild, announcements: entries } as GuildSupporterAnnouncementsSettings;
+        }),
+    setSupporterAnnouncementsSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                announcements: z
+                    .object({ useBoosts: z.boolean(), role: snowflake.nullable(), channel: snowflake.nullable(), message: baseMessageData })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, announcements } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+            let withParsed: (GuildSupporterAnnouncementsSettings["announcements"][number] & { guild: string; parsed: ParsedMessage })[];
+
+            try {
+                withParsed = await Promise.all(announcements.map((data) => ({ guild, ...data, parsed: parseMessage(data.message, false) })));
+            } catch (error) {
+                return `${error}`;
+            }
+
+            await db.transaction(async (tx) => {
+                await tx.delete(tables.guildSupporterAnnouncementsItems).where(eq(tables.guildSupporterAnnouncementsItems.guild, guild));
+                if (withParsed.length > 0) await tx.insert(tables.guildSupporterAnnouncementsItems).values(withParsed);
+            });
         }),
 } as const;

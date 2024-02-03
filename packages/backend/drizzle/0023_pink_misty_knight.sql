@@ -1,0 +1,22 @@
+CREATE TABLE `limit_overrides` (
+	`guild` varchar(20) NOT NULL,
+	`supporter_announcements_count_limit` int,
+	`xp_bonus_channel_count_limit` int,
+	`xp_bonus_role_count_limit` int,
+	`xp_reward_count_limit` int,
+	`reaction_roles_count_limit` int,
+	`purge_at_once_limit` int,
+	`automod_count_limit` int,
+	`stats_channels_count_limit` int,
+	`autoresponder_count_limit` int,
+	`modmail_target_count_limit` int,
+	`ticket_prompt_count_limit` int,
+	`ticket_target_count_limit` int,
+	`reddit_feeds_count_limit` int,
+	`count_count_limit` int,
+	`customize_xp_backgrounds` boolean,
+	`multi_modmail` boolean,
+	`multi_tickets` boolean,
+	`customize_ticket_open_message` boolean,
+	CONSTRAINT `limit_overrides_guild` PRIMARY KEY(`guild`)
+);

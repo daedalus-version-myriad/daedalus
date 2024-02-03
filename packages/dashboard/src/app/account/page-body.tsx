@@ -5,6 +5,7 @@ import { SaveChangesBar } from "@/components/SaveChangesBar";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { AccountSettings } from "@daedalus/types";
+import _ from "lodash";
 import { useState } from "react";
 import save from "./save";
 
@@ -30,7 +31,7 @@ export function AccountRootBody(initial: AccountSettings) {
                 </Label>
             </Panel>
             <SaveChangesBar
-                unsaved={JSON.stringify(updated) !== JSON.stringify(data)}
+                unsaved={!_.isEqual(updated, data)}
                 reset={() => {
                     setNotifyOwned(data.notifyPremiumOwnedServers);
                     setNotifyManaged(data.notifyPremiumManagedServers);

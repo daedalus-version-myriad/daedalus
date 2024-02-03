@@ -10,7 +10,9 @@ import SingleRoleSelector from "@/components/SingleRoleSelector";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { textAndFoldersTypes } from "@/lib/data";
 import { GuildSettings } from "@daedalus/types";
+import _ from "lodash";
 import { useState } from "react";
 import save from "./save";
 
@@ -131,21 +133,21 @@ export function Body({ data: initial }: { data: GuildSettings }) {
                         <MultiChannelSelector
                             channels={allowedChannels}
                             setChannels={setAllowedChannels}
-                            types={[0, 2, 4, 5, 13, 15, 16]}
+                            types={textAndFoldersTypes}
                             showReadonly
                         ></MultiChannelSelector>
                         <p>Blocked Channels</p>
                         <MultiChannelSelector
                             channels={blockedChannels}
                             setChannels={setBlockedChannels}
-                            types={[0, 2, 4, 5, 13, 15, 16]}
+                            types={textAndFoldersTypes}
                             showReadonly
                         ></MultiChannelSelector>
                     </Panel>
                 </div>
             </Panel>
             <SaveChangesBar
-                unsaved={JSON.stringify(updated) !== JSON.stringify(data)}
+                unsaved={!_.isEqual(updated, data)}
                 reset={() => {
                     setDashboardPermission(data.dashboardPermission);
                     setEmbedColor(data.embedColor);

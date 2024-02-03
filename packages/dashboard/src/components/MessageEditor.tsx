@@ -51,7 +51,7 @@ function fromEditable(base: EditableMessage): MessageData {
     };
 }
 
-function useEditableMessage(base: MessageData, setBase: Dispatch<SetStateAction<MessageData>>): [EditableMessage, Dispatch<SetStateAction<EditableMessage>>] {
+function useEditableMessage(base: MessageData, setBase: (message: MessageData) => unknown): [EditableMessage, Dispatch<SetStateAction<EditableMessage>>] {
     const [data, setData] = useState(toEditable(base));
 
     useEffect(() => {
@@ -67,7 +67,7 @@ export default function MessageEditor({
     flat = false,
 }: {
     data: MessageData;
-    setData: Dispatch<SetStateAction<MessageData>>;
+    setData: (message: MessageData) => unknown;
     flat?: boolean;
 }) {
     const [data, setData] = useEditableMessage(base, setBase);

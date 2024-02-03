@@ -1,7 +1,3 @@
-export function isUnequal<T extends object>(current: T, original: T, fields: (keyof T)[]) {
-    return fields.some((field) => JSON.stringify(current[field]) !== JSON.stringify(original[field]));
-}
-
 export function without<T>(array: T[], index: number) {
     return [...array.slice(0, index), ...array.slice(index + 1)];
 }

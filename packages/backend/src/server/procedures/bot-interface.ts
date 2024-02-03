@@ -7,6 +7,7 @@ import { db } from "../../db/db";
 import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { proc } from "../trpc";
+import { getLimit } from "./premium.ts";
 
 export default {
     getColor: proc.input(snowflake).query(async ({ input: guild }) => {
@@ -78,4 +79,18 @@ export default {
 
         return { channel: entry.channel, parsed: entry.parsed as ParsedMessage };
     }),
+    getSupporterAnnouncementsConfig: proc
+        .input(snowflake)
+        .query(async ({ input: guild }): Promise<{ useBoosts: boolean; role: string | null; channel: string | null; parsed: ParsedMessage }[]> => {
+            return (await db
+                .select({
+                    useBoosts: tables.guildSupporterAnnouncementsItems.useBoosts,
+                    role: tables.guildSupporterAnnouncementsItems.role,
+                    channel: tables.guildSupporterAnnouncementsItems.channel,
+                    parsed: tables.guildSupporterAnnouncementsItems.parsed,
+                })
+                .from(tables.guildSupporterAnnouncementsItems)
+                .where(eq(tables.guildSupporterAnnouncementsItems.guild, guild))
+                .limit((await getLimit(guild, "supporterAnnouncementsCountLimit")) as number)) as any;
+        }),
 } as const;

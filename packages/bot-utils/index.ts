@@ -33,8 +33,6 @@ export async function isWrongClient(client: Client, guild: Guild | string) {
     const id = typeof guild === "string" ? guild : guild.id;
     const token = await trpc.vanityClientGet.query(id);
 
-    console.log(token, client.token);
-
     return client.token !== (token ?? secrets.DISCORD.TOKEN);
 }
 

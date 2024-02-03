@@ -8,7 +8,11 @@ process.on("uncaughtException", console.error);
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers }),
+    factory: () =>
+        new Client({
+            intents: Intents.Guilds | Intents.GuildMembers,
+            sweepers: { guildMembers: { filter: () => () => true, interval: 3600 } },
+        }),
     postprocess: (client) =>
         client.on(Events.GuildMemberAdd, async (member) => {
             if (member.user.bot) return;

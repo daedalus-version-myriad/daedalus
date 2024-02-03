@@ -94,6 +94,15 @@ export const guildWelcomeSettings = mysqlTable("guild_welcome_settings", {
     parsed: json("parsed").notNull(),
 });
 
+export const guildSupporterAnnouncementsItems = mysqlTable("guild_supporter_announcements_items", {
+    guild: varchar("guild", { length: 20 }).notNull(),
+    useBoosts: boolean("use_boosts").notNull(),
+    role: varchar("role", { length: 20 }),
+    channel: varchar("channel", { length: 20 }),
+    message: json("message").notNull(),
+    parsed: json("parsed").notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {
@@ -160,3 +169,25 @@ export const accountSettings = mysqlTable(
         idx_notify_managed: index("idx_notify_managed").on(t.notifyPremiumManagedServers),
     }),
 );
+
+export const limitOverrides = mysqlTable("limit_overrides", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    supporterAnnouncementsCountLimit: int("supporter_announcements_count_limit"),
+    xpBonusChannelCountLimit: int("xp_bonus_channel_count_limit"),
+    xpBonusRoleCountLimit: int("xp_bonus_role_count_limit"),
+    xpRewardCountLimit: int("xp_reward_count_limit"),
+    reactionRolesCountLimit: int("reaction_roles_count_limit"),
+    purgeAtOnceLimit: int("purge_at_once_limit"),
+    automodCountLimit: int("automod_count_limit"),
+    statsChannelsCountLimit: int("stats_channels_count_limit"),
+    autoresponderCountLimit: int("autoresponder_count_limit"),
+    modmailTargetCountLimit: int("modmail_target_count_limit"),
+    ticketPromptCountLimit: int("ticket_prompt_count_limit"),
+    ticketTargetCountLimit: int("ticket_target_count_limit"),
+    redditFeedsCountLimit: int("reddit_feeds_count_limit"),
+    countCountLimit: int("count_count_limit"),
+    customizeXpBackgrounds: boolean("customize_xp_backgrounds"),
+    multiModmail: boolean("multi_modmail"),
+    multiTickets: boolean("multi_tickets"),
+    customizeTicketOpenMessage: boolean("customize_ticket_open_message"),
+});

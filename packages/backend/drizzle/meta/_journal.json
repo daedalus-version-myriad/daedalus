@@ -155,6 +155,20 @@
       "when": 1706815770056,
       "tag": "0021_graceful_mother_askani",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1706910099006,
+      "tag": "0022_silky_nocturne",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1706912155064,
+      "tag": "0023_pink_misty_knight",
+      "breakpoints": true
     }
   ]
 }
