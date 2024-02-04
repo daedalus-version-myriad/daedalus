@@ -8,7 +8,7 @@ import SingleRoleSelector from "@/components/SingleRoleSelector";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { textTypes } from "@/lib/data";
-import { clone, without } from "@/lib/processors";
+import { clone, removeIndex } from "@/lib/processors";
 import { GuildSupporterAnnouncementsSettings } from "@daedalus/types";
 import _ from "lodash";
 import { useState } from "react";
@@ -38,7 +38,7 @@ export function Body({ data: initial, limit }: { data: GuildSupporterAnnouncemen
                     }
                     showClone={announcements.length < limit}
                     clone={() => setAnnouncements((announcements) => clone(announcements, i))}
-                    del={() => setAnnouncements((announcements) => without(announcements, i))}
+                    del={() => setAnnouncements((announcements) => removeIndex(announcements, i))}
                 ></Item>
             ))}
             {announcements.length < limit ? (

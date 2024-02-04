@@ -35,15 +35,25 @@ function key(server: { hasBot: boolean; owner: boolean; permissions: string; fea
 }
 
 export default {
-    userGet: proc.input(snowflake).query(async ({ input: id }) => {
-        const user = await (await bot).users.fetch(id).catch(() => null);
+    userGet: proc.input(z.object({ id: snowflake, guild: snowflake.optional() })).query(async ({ input: { id, guild: guildId } }) => {
+        const client = (await clients.getBot(guildId).catch(() => null)) ?? (await bot);
+
+        const user = await client.users.fetch(id).catch(() => null);
         if (!user) return null;
+
+        let owner = id === secrets.OWNER;
+
+        if (!owner && guildId) {
+            const guild = await client.guilds.fetch(guildId).catch(() => null);
+            if (guild?.ownerId === id) owner = true;
+        }
 
         return {
             id,
             name: user.displayName,
             image: user.displayAvatarURL({ forceStatic: true, size: 64 }),
             admin: await isAdmin(id),
+            owner,
         };
     }),
     userGuilds: proc.input(z.object({ id: snowflake, token: z.string() })).query(async ({ input: { id, token } }) => {

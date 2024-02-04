@@ -1,6 +1,6 @@
 "use client";
 
-import { clone, swap, without } from "@/lib/processors";
+import { clone, swap, removeIndex } from "@/lib/processors";
 import { IEmbed, IField, MessageData } from "@daedalus/types";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FaChevronDown, FaChevronRight, FaChevronUp, FaCopy, FaPencil, FaPlus, FaTrash } from "react-icons/fa6";
@@ -139,7 +139,7 @@ function Core({ data, setData }: { data: EditableMessage; setData: Dispatch<SetS
                                                 <FaCopy></FaCopy>
                                             </Button>
                                         ) : null}
-                                        <Button variant="ghost" onClick={() => setData((data) => ({ ...data, embeds: without(data.embeds, i) }))}>
+                                        <Button variant="ghost" onClick={() => setData((data) => ({ ...data, embeds: removeIndex(data.embeds, i) }))}>
                                             <FaTrash></FaTrash>
                                         </Button>
                                     </div>
@@ -340,7 +340,7 @@ function Core({ data, setData }: { data: EditableMessage; setData: Dispatch<SetS
                                                                             <Button
                                                                                 variant="ghost"
                                                                                 onClick={() =>
-                                                                                    setEmbed((embed) => ({ ...embed, fields: without(embed.fields, i) }))
+                                                                                    setEmbed((embed) => ({ ...embed, fields: removeIndex(embed.fields, i) }))
                                                                                 }
                                                                             >
                                                                                 <FaTrash></FaTrash>

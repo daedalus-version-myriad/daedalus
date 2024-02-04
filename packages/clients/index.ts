@@ -83,7 +83,7 @@ export class ClientManager {
         return (await this.getBotFromToken())!;
     }
 
-    async getBot(guildId?: string) {
+    async getBot(guildId?: string): Promise<Client<true> | null> {
         return await this.getBotFromToken(guildId, guildId && (await trpc.vanityClientGet.query(guildId)));
     }
 

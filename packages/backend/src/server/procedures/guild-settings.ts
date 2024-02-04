@@ -9,6 +9,7 @@ import type {
     GuildSettings,
     GuildSupporterAnnouncementsSettings,
     GuildWelcomeSettings,
+    GuildXpSettings,
     ParsedMessage,
 } from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
@@ -24,8 +25,22 @@ import { isAdmin } from "./users";
 
 export const NO_PERMISSION = "You do not have permission to manage settings within this guild.";
 
+export async function isOwner(user: string | null, guildId: string) {
+    if (!user) return false;
+    if (user === secrets.OWNER) return true;
+
+    const client = await clients.getBot(guildId);
+    if (!client) return false;
+
+    const guild = await client.guilds.fetch(guildId).catch(() => null);
+    if (!guild) return false;
+
+    return guild.ownerId === user;
+}
+
 export async function hasPermission(user: string | null, guildId: string) {
     if (!user) return false;
+    if (user === secrets.OWNER) return true;
 
     const client = await clients.getBot(guildId);
     if (!client) return false;
@@ -93,8 +108,15 @@ export default {
             z.object({
                 id: snowflake.nullable(),
                 guild: snowflake,
-                dashboardPermission: z.enum(["owner", "admin", "manager"]),
-                embedColor: z.number().int().min(0).max(0xffffff),
+                dashboardPermission: z.enum(["owner", "admin", "manager"], {
+                    invalid_type_error: "Dashboard permission must be one of owner, admin, or manager.",
+                    required_error: "Dashboard permission must be specified.",
+                }),
+                embedColor: z
+                    .number()
+                    .int("Embed color must be an integer.")
+                    .min(0, "Embed color must not be negative.")
+                    .max(0xffffff, "Embed color must not exceed #FFFFFF."),
                 muteRole: snowflake.nullable(),
                 banFooter: z.string().max(1024),
                 modOnly: z.boolean(),
@@ -262,7 +284,7 @@ export default {
                 guild: snowflake,
                 useWebhook: z.boolean(),
                 channel: snowflake.nullable(),
-                webhook: z.string().trim().max(128),
+                webhook: z.string().trim().max(128, "Webhooks should not be longer than 128 characters."),
                 ignoredChannels: snowflake.array(),
                 fileOnlyMode: z.boolean(),
                 items: z.record(
@@ -370,5 +392,109 @@ export default {
                 await tx.delete(tables.guildSupporterAnnouncementsItems).where(eq(tables.guildSupporterAnnouncementsItems.guild, guild));
                 if (withParsed.length > 0) await tx.insert(tables.guildSupporterAnnouncementsItems).values(withParsed);
             });
+        }),
+    getXpSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }): Promise<GuildXpSettings> => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+        const entry = (await db.select().from(tables.guildXpSettings).where(eq(tables.guildXpSettings.guild, guild))).at(0) ?? {
+            guild,
+            blockedChannels: "",
+            blockedRoles: "",
+            bonusChannels: "",
+            bonusRoles: "",
+            rankCardBackground: "",
+            announceLevelUp: false,
+            announceInChannel: false,
+            announceChannel: null,
+            announcementBackground: "",
+            rewards: "",
+        };
+
+        return {
+            ...entry,
+            guild,
+            blockedChannels: decodeArray(entry.blockedChannels),
+            blockedRoles: decodeArray(entry.blockedRoles),
+            bonusChannels: decodeArray(entry.bonusChannels).map((s) => {
+                const [id, num] = s.split(":");
+                return { channel: id === "null" ? null : id, multiplier: num === "null" ? null : +num };
+            }),
+            bonusRoles: decodeArray(entry.bonusRoles).map((s) => {
+                const [id, num] = s.split(":");
+                return { role: id === "null" ? null : id, multiplier: num === "null" ? null : +num };
+            }),
+            rewards: decodeArray(entry.rewards).map((s) => {
+                const [text, voice, role, removeOnHigher, dmOnReward] = s.split(":");
+                return {
+                    text: text === "null" ? null : +text,
+                    voice: voice === "null" ? null : +voice,
+                    role: role === "null" ? null : role,
+                    removeOnHigher: removeOnHigher === "true",
+                    dmOnReward: dmOnReward === "true",
+                };
+            }),
+        };
+    }),
+    setXpSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                blockedChannels: snowflake.array(),
+                blockedRoles: snowflake.array(),
+                bonusChannels: z
+                    .object({
+                        channel: snowflake.nullable(),
+                        multiplier: z
+                            .number()
+                            .min(0, "Bonus channel multipliers should be between 0 and 10.")
+                            .max(10, "Bonus channel multipliers should be between 0 and 10.")
+                            .nullable(),
+                    })
+                    .array(),
+                bonusRoles: z
+                    .object({
+                        role: snowflake.nullable(),
+                        multiplier: z
+                            .number()
+                            .min(0, "Bonus role multipliers should be between 0 and 10.")
+                            .max(10, "Bonus role multipliers should be between 0 and 10.")
+                            .nullable(),
+                    })
+                    .array(),
+                rankCardBackground: z.string(),
+                announceLevelUp: z.boolean(),
+                announceInChannel: z.boolean(),
+                announceChannel: snowflake.nullable(),
+                announcementBackground: z.string(),
+                rewards: z
+                    .object({
+                        text: z.number().int("Level reward levels must be integers.").min(1, "Level reward levels should be positive.").nullable(),
+                        voice: z.number().int("Level reward levels must be integers.").min(1, "Level reward levels should be positive.").nullable(),
+                        role: snowflake.nullable(),
+                        removeOnHigher: z.boolean(),
+                        dmOnReward: z.boolean(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, blockedChannels, blockedRoles, bonusChannels, bonusRoles, rewards, ...data } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            const toInsert = {
+                ...data,
+                blockedChannels: blockedChannels.join("/"),
+                blockedRoles: blockedRoles.join("/"),
+                bonusChannels: bonusChannels.map(({ channel, multiplier }) => `${channel}:${multiplier}`).join("/"),
+                bonusRoles: bonusRoles.map(({ role, multiplier }) => `${role}:${multiplier}`).join("/"),
+                rewards: rewards
+                    .map(({ text, voice, role, removeOnHigher, dmOnReward }) => `${text}:${voice}:${role}:${removeOnHigher}:${dmOnReward}`)
+                    .join("/"),
+            };
+
+            await db
+                .insert(tables.guildXpSettings)
+                .values({ guild, ...toInsert })
+                .onDuplicateKeyUpdate({ set: toInsert });
         }),
 } as const;

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { FaInfo, FaXmark } from "react-icons/fa6";
 import { bindKey, bindToken, reloadData, unbindKey, updateStatus } from "./actions";
 
-export function Body({ data: initial }: { data: GuildPremiumSettings }) {
+export function Body({ data: initial, owner }: { data: GuildPremiumSettings; owner: boolean }) {
     const [data, setData] = useState(initial);
     const [key, setKey] = useState<string>("");
     const [infoOpen, setInfoOpen] = useState(false);
@@ -172,46 +172,54 @@ export function Body({ data: initial }: { data: GuildPremiumSettings }) {
                                 </p>
                             </>
                         ) : null}
-                        <div className="center-row flex-wrap gap-4">
-                            <div>
-                                <Input
-                                    type="password"
-                                    className="min-w-48"
-                                    placeholder="Bot Token"
-                                    value={token}
-                                    onChange={({ currentTarget: { value } }) => setToken(value)}
-                                ></Input>
+                        {owner ? (
+                            <div className="center-row flex-wrap gap-4">
+                                <div>
+                                    <Input
+                                        type="password"
+                                        className="min-w-48"
+                                        placeholder="Bot Token"
+                                        value={token}
+                                        onChange={({ currentTarget: { value } }) => setToken(value)}
+                                    ></Input>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    onClick={async () => {
+                                        const error = await bindToken(data.guild, token.trim());
+                                        if (error) return alert(error);
+                                        setData(await reloadData(data.guild));
+                                        setToken("");
+                                    }}
+                                    disabled={token.trim().length === 0}
+                                >
+                                    Set Token
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="center-row gap-2 text-[#ff0000] dark:text-[#aa0000]"
+                                    onClick={async () => {
+                                        if (!confirm("Are you sure you want to reset back to the main Daedalus client?")) return;
+                                        const error = await bindToken(data.guild, null);
+                                        if (error) return alert(error);
+                                        setData(await reloadData(data.guild));
+                                    }}
+                                >
+                                    <FaXmark></FaXmark> Reset Client
+                                </Button>
                             </div>
-                            <Button
-                                variant="outline"
-                                onClick={async () => {
-                                    const error = await bindToken(data.guild, token.trim());
-                                    if (error) return alert(error);
-                                    setData(await reloadData(data.guild));
-                                    setToken("");
-                                }}
-                                disabled={token.trim().length === 0}
-                            >
-                                Set Token
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="center-row gap-2 text-[#ff0000] dark:text-[#aa0000]"
-                                onClick={async () => {
-                                    if (!confirm("Are you sure you want to reset back to the main Daedalus client?")) return;
-                                    const error = await bindToken(data.guild, null);
-                                    if (error) return alert(error);
-                                    setData(await reloadData(data.guild));
-                                }}
-                            >
-                                <FaXmark></FaXmark> Reset Client
-                            </Button>
-                        </div>
+                        ) : (
+                            <p>
+                                <span className="text-muted-foreground">
+                                    Only the server owner can reconfigure the active client and change the client&apos;s status.
+                                </span>
+                            </p>
+                        )}
                     </>
                 ) : (
                     <p>Connect a custom client key to gain access to this feature!</p>
                 )}
-                {data.usingCustom ? (
+                {owner && data.usingCustom ? (
                     <>
                         <h2 className="text-lg">Custom Status</h2>
                         <div className="center-row flex-wrap gap-4">

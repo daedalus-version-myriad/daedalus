@@ -169,6 +169,13 @@
       "when": 1706912155064,
       "tag": "0023_pink_misty_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1706997581170,
+      "tag": "0024_slow_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

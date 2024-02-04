@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const snowflake = z.string().regex(/^[1-9][0-9]{16,19}$/);
+export const snowflake = z.string().regex(/^[1-9][0-9]{16,19}$/, "Discord IDs must be 17-20 digit numbers.");
 
 const fieldData = z.object({
     name: z.string(),
@@ -10,12 +10,12 @@ const fieldData = z.object({
 
 const embedData = z.object({
     colorMode: z.enum(["guild", "member", "user", "fixed"]),
-    color: z.number().int().min(0).max(0xffffff),
+    color: z.number().int("Colors must be integers.").min(0, "Colors must not be negative.").max(0xffffff, "Colors must not exceed #FFFFFF."),
     author: z.object({ name: z.string(), iconURL: z.string(), url: z.string() }),
     title: z.string(),
     description: z.string(),
     url: z.string(),
-    fields: fieldData.array().max(25),
+    fields: fieldData.array().max(25, "Only up to 25 fields per embed are allowed."),
     image: z.object({ url: z.string() }),
     thumbnail: z.object({ url: z.string() }),
     footer: z.object({ text: z.string(), iconURL: z.string() }),
@@ -24,5 +24,5 @@ const embedData = z.object({
 
 export const baseMessageData = z.object({
     content: z.string(),
-    embeds: embedData.array().max(10),
+    embeds: embedData.array().max(10, "Only up to 10 embeds per message are allowed."),
 });

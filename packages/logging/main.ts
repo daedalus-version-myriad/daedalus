@@ -6,7 +6,7 @@ import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { Client, IntentsBitField, Partials } from "discord.js";
 import { z } from "zod";
 import { addEventHandlers } from "./src/events";
-import { invokeLog } from "./src/lib.ts";
+import { invokeLog } from "./src/lib";
 
 process.on("uncaughtException", console.error);
 

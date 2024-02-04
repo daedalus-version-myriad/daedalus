@@ -9,7 +9,7 @@ import { tables } from "../../db";
 import { db } from "../../db/db";
 import { snowflake } from "../schemas";
 import { proc } from "../trpc";
-import { NO_PERMISSION, hasPermission } from "./guild-settings";
+import { NO_PERMISSION, hasPermission, isOwner } from "./guild-settings";
 import { isAdmin } from "./users";
 import { clientUpdateEmitter } from "./vanity-clients";
 
@@ -286,7 +286,7 @@ export default {
     bindToken: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake, token: z.string().nullable() }))
         .mutation(async ({ input: { id, guild, token } }) => {
-            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+            if (!(await isOwner(id, guild))) return NO_PERMISSION;
 
             if (token) {
                 if (
@@ -319,11 +319,11 @@ export default {
                 guild: snowflake,
                 status: z.enum(["online", "idle", "dnd", "invisible"]),
                 activityType: z.enum(["none", "playing", "listening-to", "watching", "competing-in"]),
-                activity: z.string().max(64),
+                activity: z.string().max(64, "Status activity text must be at most 64 characters."),
             }),
         )
         .mutation(async ({ input: { id, guild, ...data } }) => {
-            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+            if (!(await isOwner(id, guild))) return NO_PERMISSION;
 
             await db
                 .insert(tables.guildPremiumSettings)

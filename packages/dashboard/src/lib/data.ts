@@ -38,6 +38,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/logging", moduleIcons.logging, "Logging"],
     ["/welcome", moduleIcons.welcome, "Welcome"],
     ["/supporter-announcements", moduleIcons["supporter-announcements"], "Supporter Announcements"],
+    ["/xp", moduleIcons.xp, "XP"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

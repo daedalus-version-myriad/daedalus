@@ -25,9 +25,9 @@ export async function getId(token?: string): Promise<string | null> {
     return id ?? null;
 }
 
-export default async function getUser(token?: string): Promise<User | null> {
+export default async function getUser(token?: string, guild?: string): Promise<User | null> {
     const id = await getId(token);
     if (id === null) return null;
 
-    return await trpc.userGet.query(id);
+    return await trpc.userGet.query({ id, guild });
 }

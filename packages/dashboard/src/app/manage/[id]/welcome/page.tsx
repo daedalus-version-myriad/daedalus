@@ -6,7 +6,7 @@ import { trpc } from "@daedalus/api";
 import { Suspense } from "react";
 import { Body } from "./page-body";
 
-export default async function ManageModulesPermissions({ params: { id } }: { params: { id: string } }) {
+export default async function ManageWelcome({ params: { id } }: { params: { id: string } }) {
     return (
         <Suspense fallback={<LoadingManagePage></LoadingManagePage>}>
             <Main id={id}></Main>

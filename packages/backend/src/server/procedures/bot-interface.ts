@@ -7,7 +7,7 @@ import { db } from "../../db/db";
 import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { proc } from "../trpc";
-import { getLimit } from "./premium.ts";
+import { getLimit } from "./premium";
 
 export default {
     getColor: proc.input(snowflake).query(async ({ input: guild }) => {

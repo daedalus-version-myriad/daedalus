@@ -5,6 +5,7 @@ export type User = {
     name: string;
     image: string;
     admin: boolean;
+    owner: boolean;
 };
 
 export type PartialGuild = {

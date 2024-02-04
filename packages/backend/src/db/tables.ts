@@ -103,6 +103,20 @@ export const guildSupporterAnnouncementsItems = mysqlTable("guild_supporter_anno
     parsed: json("parsed").notNull(),
 });
 
+export const guildXpSettings = mysqlTable("guild_xp_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    blockedChannels: text("blocked_channels").notNull(),
+    blockedRoles: text("blocked_roles").notNull(),
+    bonusChannels: text("bonus_channels").notNull(),
+    bonusRoles: text("bonus_roles").notNull(),
+    rankCardBackground: varchar("rank_card_background", { length: 1024 }).notNull(),
+    announceLevelUp: boolean("announce_level_up").notNull(),
+    announceInChannel: boolean("announce_in_channel").notNull(),
+    announceChannel: varchar("announce_channel", { length: 20 }),
+    announcementBackground: varchar("announcement_background", { length: 1024 }).notNull(),
+    rewards: text("rewards").notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {
