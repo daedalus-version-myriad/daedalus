@@ -32,9 +32,9 @@ export const premiumBenefits: Record<PremiumTier, PremiumBenefits> = {
         automodCountLimit: 10,
         statsChannelsCountLimit: 5,
         autoresponderCountLimit: 10,
-        modmailTargetCountLimit: 1,
+        modmailTargetCountLimit: -1,
         ticketPromptCountLimit: 3,
-        ticketTargetCountLimit: 1,
+        ticketTargetCountLimit: -1,
         redditFeedsCountLimit: 3,
         countCountLimit: 3,
     },
@@ -56,3 +56,23 @@ export const premiumBenefits: Record<PremiumTier, PremiumBenefits> = {
         countCountLimit: 10,
     },
 };
+
+export const benefitList: [string, boolean | number, boolean | number][] = (
+    [
+        ["customizeXpBackgrounds", "Customize XP Card Backgrounds"],
+        ["multiModmail", "Multi-Target Modmail"],
+        ["multiTickets", "Multi-Target Tickets"],
+        ["customizeTicketOpenMessage", "Custom Ticket On-Open Message"],
+        ["supporterAnnouncementsCountLimit", "Supporter Announcements"],
+        ["reactionRolesCountLimit", "Reaction Roles"],
+        ["purgeAtOnceLimit", "/purge Message Count Limit"],
+        ["automodCountLimit", "Automod Rules"],
+        ["statsChannelsCountLimit", "Stats Channels"],
+        ["autoresponderCountLimit", "Autoresponder Triggers"],
+        ["modmailTargetCountLimit", "Modmail Targets"],
+        ["ticketPromptCountLimit", "Ticket Prompts"],
+        ["ticketTargetCountLimit", "Ticket Targets (Per Prompt)"],
+        ["redditFeedsCountLimit", "Reddit Feeds"],
+        ["countCountLimit", "Count-Up Channels"],
+    ] as [keyof PremiumBenefits, string][]
+).map(([key, title]) => [title, premiumBenefits[PremiumTier.FREE][key], premiumBenefits[PremiumTier.PREMIUM][key]]);

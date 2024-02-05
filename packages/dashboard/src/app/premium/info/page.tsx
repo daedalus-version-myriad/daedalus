@@ -1,11 +1,12 @@
 import Container from "@/components/Container";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { benefitList } from "@daedalus/data";
 import { FaCheck, FaXmark } from "react-icons/fa6";
 
 export default function PremiumInfo() {
     return (
         <Container>
-            <div className="mt-8 flex flex-col gap-4">
+            <div className="my-8 flex flex-col gap-4">
                 <h1 className="text-2xl">How Premium Works</h1>
                 <p>
                     Premium subscriptions are purchased through{" "}
@@ -27,9 +28,9 @@ export default function PremiumInfo() {
                     When a premium subscription ends, your premium key will stop working. If you purchase another subscription, your key will resume, but it is
                     recommended to delete them if you don&apos;s plan to re-enable it soon.
                 </p>
+                <span></span>
                 <h1 className="text-2xl">Premium Specifics</h1>
-                <Table>
-                    <TableCaption>All available premium benefits</TableCaption>
+                <Table className="min-w-[max-content]">
                     <TableHeader>
                         <TableRow>
                             <TableHead></TableHead>
@@ -38,50 +39,18 @@ export default function PremiumInfo() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow>
-                            <TableCell>
-                                <b>Custom XP Card Backgrounds</b>
-                            </TableCell>
-                            <TableCell>
-                                <FaXmark></FaXmark>
-                            </TableCell>
-                            <TableCell>
-                                <FaCheck></FaCheck>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                <b>Multi-Target Modmail</b>
-                            </TableCell>
-                            <TableCell>
-                                <FaXmark></FaXmark>
-                            </TableCell>
-                            <TableCell>
-                                <FaCheck></FaCheck>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                <b>Multi-Target Tickets</b>
-                            </TableCell>
-                            <TableCell>
-                                <FaXmark></FaXmark>
-                            </TableCell>
-                            <TableCell>
-                                <FaCheck></FaCheck>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                <b>Customize Ticket On-Open Message</b>
-                            </TableCell>
-                            <TableCell>
-                                <FaXmark></FaXmark>
-                            </TableCell>
-                            <TableCell>
-                                <FaCheck></FaCheck>
-                            </TableCell>
-                        </TableRow>
+                        {benefitList.map(([title, low, high]) => (
+                            <TableRow key={title}>
+                                <TableCell>
+                                    <span className="text-lg">{title}</span>
+                                </TableCell>
+                                {[low, high].map((x) => (
+                                    <TableCell key={`${title}/${x}`}>
+                                        {x === false ? <FaXmark></FaXmark> : x === true ? <FaCheck></FaCheck> : x === -1 ? <>&mdash;</> : x}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
             </div>
