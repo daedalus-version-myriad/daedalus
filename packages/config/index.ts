@@ -5,7 +5,6 @@ export type Secrets = {
         API: number;
         WS: number;
         LOG: number;
-        RENDERER: number;
     };
     DATABASE: {
         NAME: string;
@@ -27,6 +26,7 @@ export type Secrets = {
     };
     ASSETS: {
         XP_LEVELUP_IMAGE: string;
+        XP_RANK_CARD_IMAGE: string;
     };
 };
 

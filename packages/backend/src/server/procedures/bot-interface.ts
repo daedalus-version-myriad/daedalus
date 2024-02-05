@@ -1,11 +1,12 @@
-import { modules, type PremiumBenefits } from "@daedalus/data";
+import { commandMap, modules, type PremiumBenefits } from "@daedalus/data";
 import { logEvents } from "@daedalus/logging";
 import type { ParsedMessage } from "@daedalus/types";
-import { and, eq, inArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
+import { decodeArray } from "../transformations.ts";
 import { proc } from "../trpc";
 import { getXpSettings, transformXpSettings } from "./guild-settings";
 import { getLimit } from "./premium";
@@ -35,6 +36,63 @@ export default {
 
         if (!entry) return modules[module].default ?? true;
         return entry.enabled;
+    }),
+    getGlobalCommandSettings: proc.input(snowflake).query(async ({ input: guild }) => {
+        const entry = (
+            await db
+                .select({
+                    modOnly: tables.guildSettings.modOnly,
+                    allowedRoles: tables.guildSettings.allowedRoles,
+                    blockedRoles: tables.guildSettings.blockedRoles,
+                    allowlistOnly: tables.guildSettings.allowlistOnly,
+                    allowedChannels: tables.guildSettings.allowedChannels,
+                    blockedChannels: tables.guildSettings.blockedChannels,
+                })
+                .from(tables.guildSettings)
+                .where(eq(tables.guildSettings.guild, guild))
+        ).at(0) ?? {
+            modOnly: false,
+            allowedRoles: "",
+            blockedRoles: "",
+            allowlistOnly: false,
+            allowedChannels: "",
+            blockedChannels: "",
+        };
+
+        return {
+            modOnly: entry.modOnly,
+            allowedRoles: decodeArray(entry.allowedRoles),
+            blockedRoles: decodeArray(entry.blockedRoles),
+            allowlistOnly: entry.allowlistOnly,
+            allowedChannels: decodeArray(entry.allowedChannels),
+            blockedChannels: decodeArray(entry.blockedChannels),
+        };
+    }),
+    getCommandPermissionSettings: proc.input(z.object({ guild: snowflake, command: z.string() })).query(async ({ input: { guild, command } }) => {
+        const entry = (
+            await db
+                .select()
+                .from(tables.guildCommandsSettings)
+                .where(and(eq(tables.guildCommandsSettings.guild, guild), eq(tables.guildCommandsSettings.command, command)))
+        ).at(0) ?? {
+            enabled: commandMap[command].default ?? true,
+            ignoreDefaultPermissions: false,
+            allowedRoles: "",
+            blockedRoles: "",
+            restrictChannels: false,
+            allowedChannels: "",
+            blockedChannels: "",
+        };
+
+        return {
+            enabled: entry.enabled,
+            ignoreDefaultPermissions: entry.ignoreDefaultPermissions,
+            allowedRoles: decodeArray(entry.allowedRoles),
+            blockedRoles: decodeArray(entry.blockedRoles),
+            restrictChannels: entry.restrictChannels,
+            allowedChannels: decodeArray(entry.allowedChannels),
+            blockedChannels: decodeArray(entry.blockedChannels),
+        };
     }),
     obtainLimit: proc
         .input(z.object({ guild: snowflake, key: z.string() }) as z.ZodType<{ guild: string; key: keyof PremiumBenefits }>)
@@ -71,6 +129,52 @@ export default {
                     voice: entry.voiceTotal,
                 },
             };
+        }),
+    getXpRank: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        const { text, voice } = (
+            await db
+                .select({ text: tables.xp.textTotal, voice: tables.xp.voiceTotal })
+                .from(tables.xp)
+                .where(and(eq(tables.xp.guild, guild), eq(tables.xp.user, user)))
+        ).at(0) ?? { text: 0, voice: 0 };
+
+        const [{ count: textRank }] = await db
+            .select({ count: sql<number>`COUNT(*) + 1` })
+            .from(tables.xp)
+            .where(and(eq(tables.xp.guild, guild), ne(tables.xp.user, user), gt(tables.xp.textTotal, text)));
+
+        const [{ count: voiceRank }] = await db
+            .select({ count: sql<number>`COUNT(*) + 1` })
+            .from(tables.xp)
+            .where(and(eq(tables.xp.guild, guild), ne(tables.xp.user, user), gt(tables.xp.voiceTotal, voice)));
+
+        return { text, voice, textRank, voiceRank };
+    }),
+    getXpSize: proc.input(snowflake).query(async ({ input: guild }) => {
+        const [{ count }] = await db
+            .select({ count: sql<number>`COUNT(*)` })
+            .from(tables.xp)
+            .where(eq(tables.xp.guild, guild));
+
+        return count;
+    }),
+    getXpTop: proc
+        .input(
+            z.object({
+                guild: snowflake,
+                key: z.enum(["textDaily", "textWeekly", "textMonthly", "textTotal", "voiceDaily", "voiceWeekly", "voiceMonthly", "voiceTotal"]),
+                page: z.number().int().min(1),
+                limit: z.number().int().min(1),
+            }),
+        )
+        .query(async ({ input: { guild, key, page, limit } }) => {
+            return await db
+                .select({ user: tables.xp.user, amount: tables.xp[key] })
+                .from(tables.xp)
+                .where(eq(tables.xp.guild, guild))
+                .orderBy(desc(tables.xp[key]))
+                .offset((page - 1) * limit)
+                .limit(limit);
         }),
     increaseXp: proc
         .input(z.object({ guild: snowflake, user: snowflake, text: z.number().optional().default(0), voice: z.number().optional().default(0) }))

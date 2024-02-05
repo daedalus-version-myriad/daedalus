@@ -222,5 +222,13 @@ export const xp = mysqlTable(
     },
     (t) => ({
         pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
+        idx_text_daily: index("idx_text_daily").on(t.textDaily),
+        idx_text_weekly: index("idx_text_weekly").on(t.textWeekly),
+        idx_text_monthly: index("idx_text_monthly").on(t.textMonthly),
+        idx_text_total: index("idx_text_total").on(t.textTotal),
+        idx_voice_daily: index("idx_voice_daily").on(t.voiceDaily),
+        idx_voice_weekly: index("idx_voice_weekly").on(t.voiceWeekly),
+        idx_voice_monthly: index("idx_voice_monthly").on(t.voiceMonthly),
+        idx_voice_total: index("idx_voice_total").on(t.voiceTotal),
     }),
 );
