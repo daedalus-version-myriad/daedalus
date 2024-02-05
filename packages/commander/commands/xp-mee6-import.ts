@@ -1,6 +1,5 @@
-import { getColor } from "@daedalus/bot-utils";
+import { getColor, type Commands } from "@daedalus/bot-utils";
 import { ComponentType, type BaseMessageOptions } from "discord.js";
-import type { Commands } from "../lib.ts";
 
 export default (x: Commands) =>
     x.slash((x) =>

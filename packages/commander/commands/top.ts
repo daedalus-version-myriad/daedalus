@@ -1,8 +1,7 @@
 import { trpc } from "@daedalus/api";
-import { getColor, mdash } from "@daedalus/bot-utils";
+import { defer, getColor, mdash, type Commands } from "@daedalus/bot-utils";
 import { xpToLevel } from "@daedalus/xp";
 import type { APIEmbedField } from "discord.js";
-import { defer, type Commands } from "../lib.ts";
 
 export default (x: Commands) =>
     x.slash((x) =>

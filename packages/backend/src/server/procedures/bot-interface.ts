@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
-import { decodeArray } from "../transformations.ts";
+import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
 import { getXpSettings, transformXpSettings } from "./guild-settings";
 import { getLimit } from "./premium";
@@ -206,6 +206,9 @@ export default {
                     },
                 });
         }),
+    resetXp: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
+        await db.delete(tables.xp).where(and(eq(tables.xp.guild, guild), eq(tables.xp.user, user)));
+    }),
     getLogLocation: proc
         .input(z.object({ guild: snowflake, channels: snowflake.array(), event: z.string() }))
         .output(z.object({ type: z.enum(["webhook", "channel"]), value: z.string() }).nullable())

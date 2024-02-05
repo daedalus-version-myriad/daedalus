@@ -1,8 +1,7 @@
 import { trpc } from "@daedalus/api";
-import { getColor } from "@daedalus/bot-utils";
+import { defer, getColor, type Commands } from "@daedalus/bot-utils";
 import { secrets } from "@daedalus/config";
 import { xpToLevel } from "@daedalus/xp";
-import { defer, type Commands } from "../lib.ts";
 
 export default (x: Commands) =>
     x.slash((x) =>

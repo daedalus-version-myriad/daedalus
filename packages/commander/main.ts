@@ -1,12 +1,11 @@
-import { isWrongClient, template } from "@daedalus/bot-utils";
+import { checkPermissions, isWrongClient, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
 import { ApplicationCommandOptionType, Client, IntentsBitField } from "discord.js";
-import rank from "./commands/rank.ts";
-import { check } from "./permissions.ts";
-import top from "./commands/top.ts";
-import xpReset from "./commands/xp-reset.ts";
-import xpMee6Import from "./commands/xp-mee6-import.ts";
+import rank from "./commands/rank";
+import top from "./commands/top";
+import xpMee6Import from "./commands/xp-mee6-import";
+import xpReset from "./commands/xp-reset";
 
 process.on("uncaughtException", console.error);
 
@@ -27,7 +26,7 @@ const argentium = new Argentium()
                 let denied = false;
 
                 if ((_.isChatInputCommand() || _.isAutocomplete()) && _.commandName !== "admin") {
-                    const deny = await check(_.user, _.commandName, _.channel!);
+                    const deny = await checkPermissions(_.user, _.commandName, _.channel!);
 
                     if (deny) {
                         quit(deny);
@@ -47,12 +46,10 @@ const argentium = new Argentium()
     )
     .onCommandError((e, { _ }) => {
         const id = crypto.randomUUID();
-
         console.error(`${id}`, e);
 
         return template.error(
             `An unexpected error occurred. We sincerely apologize for this issue. Please contact support if this issue persists. This error has ID \`${id}\`.`,
-            true,
         );
     });
 

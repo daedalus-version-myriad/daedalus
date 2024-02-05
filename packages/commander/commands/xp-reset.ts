@@ -1,5 +1,4 @@
-import { template } from "@daedalus/bot-utils";
-import type { Commands } from "../lib.ts";
+import { template, type Commands } from "@daedalus/bot-utils";
 
 export default (x: Commands) =>
     x.slash((x) =>
@@ -8,6 +7,8 @@ export default (x: Commands) =>
             .description("irreversibly reset a user's XP to 0")
             .userOption("user", "the user to reset", { required: true })
             .fn(async ({ _, user }) =>
-                template.confirm(`Confirm that you want to reset ${user}'s XP. This action is **irreversible**.`, _.user.id, `xp/reset:${user.id}`),
+                template.confirm(`Confirm that you want to reset ${user}'s XP. This action is **irreversible**.`, _.user.id, `xp/reset:${user.id}`, {
+                    ephemeral: false,
+                }),
             ),
     );
