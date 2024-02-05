@@ -73,7 +73,7 @@ export const template = {
         key: string,
         { yesLabel, noLabel, ephemeral }: { yesLabel?: string; noLabel?: string; ephemeral?: boolean } = {},
     ): BaseMessageOptions => ({
-        ...embed("Confirm", body, 0xaa4477, ephemeral),
+        ...embed("Confirm", body, Colors.DarkVividPink, ephemeral),
         components: [
             {
                 type: ComponentType.ActionRow,

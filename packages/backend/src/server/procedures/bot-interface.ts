@@ -209,6 +209,20 @@ export default {
     resetXp: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
         await db.delete(tables.xp).where(and(eq(tables.xp.guild, guild), eq(tables.xp.user, user)));
     }),
+    importXp: proc
+        .input(z.object({ guild: snowflake, entries: z.object({ id: snowflake, xp: z.number() }).array(), mode: z.string() }))
+        .mutation(async ({ input: { guild, entries, mode } }) => {
+            await db.transaction(async (tx): Promise<void> => {
+                if (mode === "replace")
+                    await tx.update(tables.xp).set({ textDaily: 0, textWeekly: 0, textMonthly: 0, textTotal: 0 }).where(eq(tables.xp.guild, guild));
+
+                for (const { id, xp } of entries)
+                    await tx
+                        .insert(tables.xp)
+                        .values({ guild, user: id, textTotal: xp })
+                        .onDuplicateKeyUpdate({ set: mode === "keep" ? { user: sql`user` } : { textTotal: sql`text_total + ${xp}` } });
+            });
+        }),
     getLogLocation: proc
         .input(z.object({ guild: snowflake, channels: snowflake.array(), event: z.string() }))
         .output(z.object({ type: z.enum(["webhook", "channel"]), value: z.string() }).nullable())
