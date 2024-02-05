@@ -67,6 +67,63 @@ export async function hasPermission(user: string | null, guildId: string) {
             : true;
 }
 
+export function transformXpSettings(data: {
+    guild: string;
+    blockedChannels: string;
+    blockedRoles: string;
+    bonusChannels: string;
+    bonusRoles: string;
+    rankCardBackground: string;
+    announceLevelUp: boolean;
+    announceInChannel: boolean;
+    announceChannel: string | null;
+    announcementBackground: string;
+    rewards: string;
+}): GuildXpSettings {
+    return {
+        ...data,
+        guild: data.guild,
+        blockedChannels: decodeArray(data.blockedChannels),
+        blockedRoles: decodeArray(data.blockedRoles),
+        bonusChannels: decodeArray(data.bonusChannels).map((s) => {
+            const [id, num] = s.split(":");
+            return { channel: id === "null" ? null : id, multiplier: num === "null" ? null : +num };
+        }),
+        bonusRoles: decodeArray(data.bonusRoles).map((s) => {
+            const [id, num] = s.split(":");
+            return { role: id === "null" ? null : id, multiplier: num === "null" ? null : +num };
+        }),
+        rewards: decodeArray(data.rewards).map((s) => {
+            const [text, voice, role, removeOnHigher, dmOnReward] = s.split(":");
+            return {
+                text: text === "null" ? null : +text,
+                voice: voice === "null" ? null : +voice,
+                role: role === "null" ? null : role,
+                removeOnHigher: removeOnHigher === "true",
+                dmOnReward: dmOnReward === "true",
+            };
+        }),
+    };
+}
+
+export async function getXpSettings(guild: string): Promise<GuildXpSettings> {
+    return transformXpSettings(
+        (await db.select().from(tables.guildXpSettings).where(eq(tables.guildXpSettings.guild, guild))).at(0) ?? {
+            guild,
+            blockedChannels: "",
+            blockedRoles: "",
+            bonusChannels: "",
+            bonusRoles: "",
+            rankCardBackground: "",
+            announceLevelUp: false,
+            announceInChannel: false,
+            announceChannel: null,
+            announcementBackground: "",
+            rewards: "",
+        },
+    );
+}
+
 export default {
     enableModule: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake, module: z.string().max(32) }))
@@ -395,45 +452,7 @@ export default {
         }),
     getXpSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }): Promise<GuildXpSettings> => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
-
-        const entry = (await db.select().from(tables.guildXpSettings).where(eq(tables.guildXpSettings.guild, guild))).at(0) ?? {
-            guild,
-            blockedChannels: "",
-            blockedRoles: "",
-            bonusChannels: "",
-            bonusRoles: "",
-            rankCardBackground: "",
-            announceLevelUp: false,
-            announceInChannel: false,
-            announceChannel: null,
-            announcementBackground: "",
-            rewards: "",
-        };
-
-        return {
-            ...entry,
-            guild,
-            blockedChannels: decodeArray(entry.blockedChannels),
-            blockedRoles: decodeArray(entry.blockedRoles),
-            bonusChannels: decodeArray(entry.bonusChannels).map((s) => {
-                const [id, num] = s.split(":");
-                return { channel: id === "null" ? null : id, multiplier: num === "null" ? null : +num };
-            }),
-            bonusRoles: decodeArray(entry.bonusRoles).map((s) => {
-                const [id, num] = s.split(":");
-                return { role: id === "null" ? null : id, multiplier: num === "null" ? null : +num };
-            }),
-            rewards: decodeArray(entry.rewards).map((s) => {
-                const [text, voice, role, removeOnHigher, dmOnReward] = s.split(":");
-                return {
-                    text: text === "null" ? null : +text,
-                    voice: voice === "null" ? null : +voice,
-                    role: role === "null" ? null : role,
-                    removeOnHigher: removeOnHigher === "true",
-                    dmOnReward: dmOnReward === "true",
-                };
-            }),
-        };
+        return await getXpSettings(guild);
     }),
     setXpSettings: proc
         .input(

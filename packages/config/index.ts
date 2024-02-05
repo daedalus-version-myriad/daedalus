@@ -5,6 +5,7 @@ export type Secrets = {
         API: number;
         WS: number;
         LOG: number;
+        RENDERER: number;
     };
     DATABASE: {
         NAME: string;
@@ -23,6 +24,9 @@ export type Secrets = {
         SECRET_KEY: string;
         PRICES: Record<`${"PREMIUM" | "CUSTOM"}_${"MONTHLY" | "YEARLY"}`, string>;
         PRODUCTS: Record<"PREMIUM" | "CUSTOM", string>;
+    };
+    ASSETS: {
+        XP_LEVELUP_IMAGE: string;
     };
 };
 

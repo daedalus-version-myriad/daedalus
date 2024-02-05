@@ -1,6 +1,7 @@
 import { trpc } from "@daedalus/api";
 import { secrets } from "@daedalus/config";
 import { formatMessage } from "@daedalus/custom-messages";
+import type { PremiumBenefits } from "@daedalus/data";
 import { logError } from "@daedalus/log-interface";
 import type { CustomMessageContext, ParsedMessage } from "@daedalus/types";
 import {
@@ -28,6 +29,7 @@ import {
 import stickerCache from "./sticker-cache";
 
 export const mdash = "—";
+export const to = "→";
 
 export async function isWrongClient(client: Client, guild: Guild | string) {
     const id = typeof guild === "string" ? guild : guild.id;
@@ -327,4 +329,8 @@ export async function fetchAndSendMessage(
 ) {
     const channel = await getTextChannel(guild, id, moduleTitle, contextName);
     if (channel) await sendMessage(channel, data, moduleTitle, errorMessage);
+}
+
+export async function obtainLimit(guild: string, key: keyof PremiumBenefits) {
+    return await trpc.obtainLimit.query({ guild, key });
 }

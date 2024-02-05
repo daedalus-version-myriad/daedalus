@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, float, index, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 export const admins = mysqlTable("admins", {
     id: varchar("id", { length: 20 }).notNull().primaryKey(),
@@ -205,3 +205,22 @@ export const limitOverrides = mysqlTable("limit_overrides", {
     multiTickets: boolean("multi_tickets"),
     customizeTicketOpenMessage: boolean("customize_ticket_open_message"),
 });
+
+export const xp = mysqlTable(
+    "xp_amounts",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        textDaily: float("text_daily").notNull(),
+        textWeekly: float("text_weekly").notNull(),
+        textMonthly: float("text_monthly").notNull(),
+        textTotal: float("text_total").notNull(),
+        voiceDaily: float("voice_daily").notNull(),
+        voiceWeekly: float("voice_weekly").notNull(),
+        voiceMonthly: float("voice_monthly").notNull(),
+        voiceTotal: float("voice_total").notNull(),
+    },
+    (t) => ({
+        pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
+    }),
+);

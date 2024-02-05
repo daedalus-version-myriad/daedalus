@@ -71,6 +71,7 @@ export const modules: ModuleData = {
                 ],
             },
         },
+        default: false,
     },
     "reaction-roles": {
         name: "Reaction Roles",

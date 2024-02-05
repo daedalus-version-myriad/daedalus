@@ -1,8 +1,5 @@
 export type LimitKey =
     | "supporterAnnouncementsCount"
-    | "xpBonusChannelCount"
-    | "xpBonusRoleCount"
-    | "xpRewardCount"
     | "reactionRolesCount"
     | "purgeAtOnce"
     | "automodCount"
@@ -30,9 +27,6 @@ export const premiumBenefits: Record<PremiumTier, PremiumBenefits> = {
         multiTickets: false,
         customizeTicketOpenMessage: false,
         supporterAnnouncementsCountLimit: 3,
-        xpBonusChannelCountLimit: 10,
-        xpBonusRoleCountLimit: 5,
-        xpRewardCountLimit: 10,
         reactionRolesCountLimit: 10,
         purgeAtOnceLimit: 100,
         automodCountLimit: 10,
@@ -50,9 +44,6 @@ export const premiumBenefits: Record<PremiumTier, PremiumBenefits> = {
         multiTickets: true,
         customizeTicketOpenMessage: true,
         supporterAnnouncementsCountLimit: 25,
-        xpBonusChannelCountLimit: 200,
-        xpBonusRoleCountLimit: 200,
-        xpRewardCountLimit: 200,
         reactionRolesCountLimit: 50,
         purgeAtOnceLimit: 2000,
         automodCountLimit: 50,

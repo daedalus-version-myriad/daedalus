@@ -6,10 +6,12 @@ import Panel from "@/components/Panel";
 import { SaveChangesBar } from "@/components/SaveChangesBar";
 import SingleChannelSelector from "@/components/SingleChannelSelector";
 import SingleRoleSelector from "@/components/SingleRoleSelector";
+import XpTechIssueAlert from "@/components/XpTechIssueAlert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { textTypes } from "@/lib/data";
 import { applyIndex, removeIndex } from "@/lib/processors";
 import { GuildXpSettings } from "@daedalus/types";
 import _ from "lodash";
@@ -73,6 +75,7 @@ export function Body({ data: initial }: { data: GuildXpSettings }) {
                             <SingleChannelSelector
                                 channel={channel}
                                 setChannel={(channel) => setBonusChannels((channels) => applyIndex(channels, i, (d) => ({ ...d, channel })))}
+                                showReadonly
                             ></SingleChannelSelector>
                             <Input
                                 type="number"
@@ -109,6 +112,9 @@ export function Body({ data: initial }: { data: GuildXpSettings }) {
                             <SingleRoleSelector
                                 role={role}
                                 setRole={(role) => setBonusRoles((roles) => applyIndex(roles, i, (d) => ({ ...d, role })))}
+                                showEveryone
+                                showHigher
+                                showManaged
                             ></SingleRoleSelector>
                             <Input
                                 type="number"
@@ -136,6 +142,10 @@ export function Body({ data: initial }: { data: GuildXpSettings }) {
                     <Switch checked={announceInChannel} onCheckedChange={setAnnounceInChannel}></Switch>
                     <p>Announce in the channel where the user leveled up</p>
                 </Label>
+                {announceInChannel ? null : (
+                    <SingleChannelSelector channel={announceChannel} setChannel={setAnnounceChannel} types={textTypes}></SingleChannelSelector>
+                )}
+                <XpTechIssueAlert></XpTechIssueAlert>
                 <h2 className="text-lg">Rank Card Background</h2>
                 <Input
                     value={rankCardBackground}

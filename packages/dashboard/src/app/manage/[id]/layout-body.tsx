@@ -21,7 +21,7 @@ export default function ManageLayoutBody({ children, id, name }: { children: Rea
                 ))}
             </div>
             <div className="md:hidden"></div>
-            <div className="mb-12 h-[calc(100vh-8rem)] p-8 bg-muted/20 overflow-y-scroll">
+            <div className="pb-[5.25rem] h-[calc(100vh-8rem)] p-8 bg-muted/20 overflow-y-scroll">
                 <p className="text-lg mb-4 text-muted-foreground">
                     Managing <b>{name}</b>
                 </p>

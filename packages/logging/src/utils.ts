@@ -41,8 +41,6 @@ export async function audit(guild: Guild, type: GuildAuditLogsResolvable, target
     return (await auditEntry(guild, type, target, key))?.executor;
 }
 
-export const to = "→";
-
 export const channelTypes: Record<ChannelType, string> = {
     [ChannelType.AnnouncementThread]: "announcement thread",
     [ChannelType.DM]: "DM channel",

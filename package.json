@@ -33,6 +33,7 @@
     "@planetscale/database": "^1.14.0",
     "@trpc/client": "next",
     "@trpc/server": "next",
+    "canvas": "^2.11.2",
     "discord.js": "^14.14.1",
     "drizzle-orm": "^0.29.3",
     "lodash": "^4.17.21",
