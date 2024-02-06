@@ -1,5 +1,6 @@
 "use client";
 
+import EnableModule from "@/components/EnableModule";
 import MessageEditor from "@/components/MessageEditor";
 import Panel from "@/components/Panel";
 import { SaveChangesBar } from "@/components/SaveChangesBar";
@@ -8,14 +9,14 @@ import SingleRoleSelector from "@/components/SingleRoleSelector";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { textTypes } from "@/lib/data";
-import { clone, removeIndex } from "@/lib/processors";
+import { applyIndex, clone, removeIndex } from "@/lib/processors";
 import { GuildSupporterAnnouncementsSettings } from "@daedalus/types";
 import _ from "lodash";
 import { useState } from "react";
 import { FaCopy, FaPlus, FaTrash } from "react-icons/fa6";
 import save from "./save";
 
-export function Body({ data: initial, limit }: { data: GuildSupporterAnnouncementsSettings; limit: number }) {
+export function Body({ data: initial, limit, disabled }: { data: GuildSupporterAnnouncementsSettings; limit: number; disabled: boolean }) {
     const [data, setData] = useState<GuildSupporterAnnouncementsSettings>(initial);
     const [announcements, setAnnouncements] = useState<GuildSupporterAnnouncementsSettings["announcements"]>(structuredClone(data.announcements));
 
@@ -23,6 +24,7 @@ export function Body({ data: initial, limit }: { data: GuildSupporterAnnouncemen
 
     return (
         <>
+            <EnableModule guild={data.guild} module="supporter-announcements" disabled={disabled}></EnableModule>
             {announcements.length > limit ? (
                 <p>
                     <b>Warning:</b> You have too many supporter announcements ({announcements.length} &gt; {limit}). The ones at the bottom of the list are
@@ -33,9 +35,7 @@ export function Body({ data: initial, limit }: { data: GuildSupporterAnnouncemen
                 <Item
                     key={`${i}`}
                     announcement={announcement}
-                    setAnnouncement={(fn) =>
-                        setAnnouncements((announcements) => [...announcements.slice(0, i), fn(announcement), ...announcements.slice(i + 1)])
-                    }
+                    setAnnouncement={(fn) => setAnnouncements((announcements) => applyIndex(announcements, i, fn))}
                     showClone={announcements.length < limit}
                     clone={() => setAnnouncements((announcements) => clone(announcements, i))}
                     del={() => setAnnouncements((announcements) => removeIndex(announcements, i))}

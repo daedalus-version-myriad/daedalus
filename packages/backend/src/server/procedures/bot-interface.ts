@@ -1,6 +1,6 @@
 import { commandMap, modules, type PremiumBenefits } from "@daedalus/data";
 import { logEvents } from "@daedalus/logging";
-import type { ParsedMessage } from "@daedalus/types";
+import type { GuildReactionRolesSettings, ParsedMessage } from "@daedalus/types";
 import { and, desc, eq, gt, inArray, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
@@ -300,5 +300,11 @@ export default {
     }),
     getAllXpConfigs: proc.input(snowflake.array()).query(async ({ input: guilds }) => {
         return (await db.select().from(tables.guildXpSettings).where(inArray(tables.guildXpSettings.guild, guilds))).map(transformXpSettings);
+    }),
+    getReactionRoleEntries: proc.input(z.object({ guild: snowflake })).query(async ({ input: { guild } }) => {
+        return (await db
+            .select()
+            .from(tables.guildReactionRolesItems)
+            .where(and(eq(tables.guildReactionRolesItems.guild, guild)))) as ({ guild: string } & GuildReactionRolesSettings["prompts"][number])[];
     }),
 } as const;

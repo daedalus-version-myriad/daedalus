@@ -23,7 +23,7 @@ new ClientManager({
             } catch (error) {
                 console.error(path, error);
                 return void (await interaction
-                    .reply(template.error("That interaction's handler is not implemented yet. Please contact support."))
+                    .reply(template.error(`That interaction's handler is not implemented yet (path: \`${path}\`). Please contact support.`))
                     .catch(() => null));
             }
 

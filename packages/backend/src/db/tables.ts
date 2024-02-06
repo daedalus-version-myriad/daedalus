@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, float, index, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, float, index, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, unique, varchar } from "drizzle-orm/mysql-core";
 
 export const admins = mysqlTable("admins", {
     id: varchar("id", { length: 20 }).notNull().primaryKey(),
@@ -94,14 +94,20 @@ export const guildWelcomeSettings = mysqlTable("guild_welcome_settings", {
     parsed: json("parsed").notNull(),
 });
 
-export const guildSupporterAnnouncementsItems = mysqlTable("guild_supporter_announcements_items", {
-    guild: varchar("guild", { length: 20 }).notNull(),
-    useBoosts: boolean("use_boosts").notNull(),
-    role: varchar("role", { length: 20 }),
-    channel: varchar("channel", { length: 20 }),
-    message: json("message").notNull(),
-    parsed: json("parsed").notNull(),
-});
+export const guildSupporterAnnouncementsItems = mysqlTable(
+    "guild_supporter_announcements_items",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        useBoosts: boolean("use_boosts").notNull(),
+        role: varchar("role", { length: 20 }),
+        channel: varchar("channel", { length: 20 }),
+        message: json("message").notNull(),
+        parsed: json("parsed").notNull(),
+    },
+    (t) => ({
+        idx_guild: index("idx_guild").on(t.guild),
+    }),
+);
 
 export const guildXpSettings = mysqlTable("guild_xp_settings", {
     guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
@@ -116,6 +122,29 @@ export const guildXpSettings = mysqlTable("guild_xp_settings", {
     announcementBackground: varchar("announcement_background", { length: 1024 }).notNull(),
     rewards: text("rewards").notNull(),
 });
+
+export const guildReactionRolesItems = mysqlTable(
+    "guild_reaction_roles_items",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        id: float("id").notNull(),
+        name: varchar("name", { length: 128 }).notNull(),
+        addToExisting: boolean("add_to_existing").notNull(),
+        channel: varchar("channel", { length: 20 }),
+        message: varchar("message", { length: 20 }),
+        url: varchar("url", { length: 128 }).notNull(),
+        style: mysqlEnum("style", ["dropdown", "buttons", "reactions"]).notNull(),
+        type: mysqlEnum("type", ["normal", "unique", "verify", "lock"]).notNull(),
+        dropdownData: json("dropdown_data").notNull(),
+        buttonData: json("button_data").notNull(),
+        reactionData: json("reaction_data").notNull(),
+        promptMessage: json("prompt_message").notNull(),
+        error: text("error"),
+    },
+    (t) => ({
+        unq_guild_id: unique("unq_guild_id").on(t.guild, t.id),
+    }),
+);
 
 export const news = mysqlTable(
     "news",

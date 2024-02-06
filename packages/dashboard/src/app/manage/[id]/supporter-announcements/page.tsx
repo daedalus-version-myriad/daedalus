@@ -18,5 +18,11 @@ async function Main({ id }: { id: string }) {
     const user = await getId();
 
     const data = await trpc.getSupporterAnnouncementsSettings.query({ id: user, guild: id });
-    return <Body data={data} limit={(await trpc.getLimit.query({ id: user, guild: id, key: "supporterAnnouncementsCountLimit" })) as number}></Body>;
+    return (
+        <Body
+            data={data}
+            limit={(await trpc.getLimit.query({ id: user, guild: id, key: "supporterAnnouncementsCountLimit" })) as number}
+            disabled={!(await trpc.isModuleEnabled.query({ guild: id, module: "supporter-announcements" }))}
+        ></Body>
+    );
 }

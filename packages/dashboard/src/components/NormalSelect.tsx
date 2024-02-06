@@ -1,6 +1,5 @@
 "use client";
 
-import { Dispatch, SetStateAction } from "react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 export default function NormalSelect<T extends string>({
@@ -11,7 +10,7 @@ export default function NormalSelect<T extends string>({
     className = "w-[min-content]",
 }: {
     value: T;
-    setValue: Dispatch<SetStateAction<T>>;
+    setValue: (t: T) => unknown;
     options: [T, string][];
     placeholder?: string;
     className?: string;

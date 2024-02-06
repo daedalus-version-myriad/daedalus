@@ -1,5 +1,6 @@
 "use client";
 
+import EnableModule from "@/components/EnableModule";
 import MultiChannelSelector from "@/components/MultiChannelSelector";
 import MultiRoleSelector from "@/components/MultiRoleSelector";
 import Panel from "@/components/Panel";
@@ -19,7 +20,7 @@ import React, { useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa6";
 import save from "./save";
 
-export function Body({ data: initial }: { data: GuildXpSettings }) {
+export function Body({ data: initial, disabled }: { data: GuildXpSettings; disabled: boolean }) {
     const [data, setData] = useState<GuildXpSettings>(initial);
 
     const [blockedChannels, setBlockedChannels] = useState<string[]>(data.blockedChannels);
@@ -49,6 +50,7 @@ export function Body({ data: initial }: { data: GuildXpSettings }) {
 
     return (
         <>
+            <EnableModule guild={data.guild} module="xp" disabled={disabled}></EnableModule>
             <Panel>
                 <h1 className="text-xl">Blocked Channels</h1>
                 <MultiChannelSelector channels={blockedChannels} setChannels={setBlockedChannels} showReadonly></MultiChannelSelector>

@@ -16,5 +16,5 @@ export default async function ManageXp({ params: { id } }: { params: { id: strin
 
 async function Main({ id }: { id: string }) {
     const data = await trpc.getXpSettings.query({ id: await getId(), guild: id });
-    return <Body data={data}></Body>;
+    return <Body data={data} disabled={!(await trpc.isModuleEnabled.query({ guild: id, module: "xp" }))}></Body>;
 }

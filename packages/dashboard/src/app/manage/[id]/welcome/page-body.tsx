@@ -1,5 +1,6 @@
 "use client";
 
+import EnableModule from "@/components/EnableModule";
 import MessageEditor from "@/components/MessageEditor";
 import Panel from "@/components/Panel";
 import { SaveChangesBar } from "@/components/SaveChangesBar";
@@ -10,7 +11,7 @@ import _ from "lodash";
 import { useState } from "react";
 import save from "./save";
 
-export function Body({ data: initial }: { data: GuildWelcomeSettings }) {
+export function Body({ data: initial, disabled }: { data: GuildWelcomeSettings; disabled: boolean }) {
     const [data, setData] = useState<GuildWelcomeSettings>(initial);
     const [channel, setChannel] = useState<string | null>(data.channel);
     const [message, setMessage] = useState<MessageData>(data.message);
@@ -19,6 +20,7 @@ export function Body({ data: initial }: { data: GuildWelcomeSettings }) {
 
     return (
         <>
+            <EnableModule guild={data.guild} module="welcome" disabled={disabled}></EnableModule>
             <Panel>
                 <h1 className="text-xl">Welcome Channel</h1>
                 <SingleChannelSelector channel={channel} setChannel={setChannel} showReadonly types={textTypes}></SingleChannelSelector>

@@ -99,6 +99,19 @@ export class ClientManager {
 
         return clients;
     }
+
+    async getBotsWithGuilds() {
+        const entries = await trpc.vanityClientList.query();
+
+        const clients: [Client, string | null][] = [[await this.getDefaultBot(), null]];
+
+        for (const { guild, token } of entries) {
+            const client = await this.getBotFromToken(guild, token);
+            if (client) clients.push([client, guild]);
+        }
+
+        return clients;
+    }
 }
 
 export async function loginAndReady(client: Client, token: string, timeout: number = 10000) {

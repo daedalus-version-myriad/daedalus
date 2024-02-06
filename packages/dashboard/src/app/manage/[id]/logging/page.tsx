@@ -16,5 +16,5 @@ export default async function ManageLogging({ params: { id } }: { params: { id: 
 
 async function Main({ id }: { id: string }) {
     const data = await trpc.getLoggingSettings.query({ id: await getId(), guild: id });
-    return <Body data={data} module="logging" disabled={!(await trpc.isModuleEnabled.query({ guild: id, module: "logging" }))}></Body>;
+    return <Body data={data} disabled={!(await trpc.isModuleEnabled.query({ guild: id, module: "logging" }))}></Body>;
 }

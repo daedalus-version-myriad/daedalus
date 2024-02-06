@@ -14,7 +14,7 @@ export default function ManageLayoutBody({ children, id, name }: { children: Rea
                     <a
                         href={`/manage/${id}${suffix}`}
                         key={suffix}
-                        className={`px-4 py-2 center-row gap-4 ${pathname.endsWith(`${id}${suffix}`) ? "bg-muted" : ""}`}
+                        className={`px-4 py-2 center-row gap-4 ${pathname.match(`/manage/${id}${suffix || "$"}`) ? "bg-muted" : ""}`}
                     >
                         {icon({})} {label}
                     </a>

@@ -15,6 +15,14 @@ export default async function ManageWelcome({ params: { id } }: { params: { id: 
 }
 
 async function Main({ id }: { id: string }) {
-    const data = await trpc.getWelcomeSettings.query({ id: await getId(), guild: id });
-    return <Body data={data} disabled={!(await trpc.isModuleEnabled.query({ guild: id, module: "welcome" }))}></Body>;
+    const user = await getId();
+
+    const data = await trpc.getReactionRolesSettings.query({ id: user, guild: id });
+    return (
+        <Body
+            data={data}
+            limit={(await trpc.getLimit.query({ id: user, guild: id, key: "reactionRolesCountLimit" })) as number}
+            disabled={!(await trpc.isModuleEnabled.query({ guild: id, module: "reaction-roles" }))}
+        ></Body>
+    );
 }

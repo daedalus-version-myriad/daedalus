@@ -1,5 +1,6 @@
 import { moduleIcons } from "@/app/manage/[id]/modules-permissions/icons";
 import { CLIENT_ID } from "@daedalus/config/public";
+import data from "@emoji-mart/data";
 import {
     FaBullhorn,
     FaComments,
@@ -39,9 +40,13 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/welcome", moduleIcons.welcome, "Welcome"],
     ["/supporter-announcements", moduleIcons["supporter-announcements"], "Supporter Announcements"],
     ["/xp", moduleIcons.xp, "XP"],
+    ["/reaction-roles", moduleIcons["reaction-roles"], "Reaction Roles"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [
     ["", FaGear, "Account Settings"],
     ["/premium", FaCrown, "Premium"],
 ];
+
+export const emojiList: string[] = (data as any).categories.flatMap(({ emojis }: { emojis: string[] }) => emojis);
+export const nameMap: Record<string, string> = Object.fromEntries(Object.values((data as any).emojis).map((emoji: any) => [emoji.skins[0].native, emoji.name]));

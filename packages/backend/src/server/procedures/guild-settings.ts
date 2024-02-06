@@ -6,14 +6,16 @@ import type {
     GuildLoggingSettings,
     GuildModulesPermissionsSettings,
     GuildPremiumSettings,
+    GuildReactionRolesSettings,
     GuildSettings,
     GuildSupporterAnnouncementsSettings,
     GuildWelcomeSettings,
     GuildXpSettings,
     ParsedMessage,
 } from "@daedalus/types";
-import { PermissionFlagsBits } from "discord.js";
+import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMessageOptions } from "discord.js";
 import { eq } from "drizzle-orm";
+import _ from "lodash";
 import { z } from "zod";
 import { clients } from "../../bot";
 import { tables } from "../../db";
@@ -123,6 +125,13 @@ export async function getXpSettings(guild: string): Promise<GuildXpSettings> {
         },
     );
 }
+
+const buttonStyles = {
+    gray: ButtonStyle.Secondary,
+    blue: ButtonStyle.Primary,
+    green: ButtonStyle.Success,
+    red: ButtonStyle.Danger,
+} as const;
 
 export default {
     enableModule: proc
@@ -515,5 +524,232 @@ export default {
                 .insert(tables.guildXpSettings)
                 .values({ guild, ...toInsert })
                 .onDuplicateKeyUpdate({ set: toInsert });
+        }),
+    getReactionRolesSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildReactionRolesSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            const entries = await db.select().from(tables.guildReactionRolesItems).where(eq(tables.guildReactionRolesItems.guild, guild));
+
+            return { guild, prompts: entries.map(({ guild: _, ...entry }) => entry as any) };
+        }),
+    setReactionRolesSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                prompts: z
+                    .object({
+                        id: z.number(),
+                        name: z.string().max(128),
+                        addToExisting: z.boolean(),
+                        channel: snowflake.nullable(),
+                        message: snowflake.nullable(),
+                        url: z.string().max(128),
+                        style: z.enum(["dropdown", "buttons", "reactions"]),
+                        type: z.enum(["normal", "unique", "verify", "lock"]),
+                        dropdownData: z
+                            .object({
+                                emoji: z.string().nullable(),
+                                role: snowflake.nullable(),
+                                label: z.string().max(100),
+                                description: z.string().max(100),
+                            })
+                            .array()
+                            .max(25),
+                        buttonData: z
+                            .object({
+                                emoji: z.string().nullable(),
+                                role: snowflake.nullable(),
+                                color: z.enum(["gray", "blue", "green", "red"]),
+                                label: z.string().max(80),
+                            })
+                            .array()
+                            .max(5)
+                            .array()
+                            .max(5),
+                        reactionData: z.object({ emoji: z.string().nullable(), role: snowflake.nullable() }).array().max(20),
+                        promptMessage: baseMessageData,
+                        error: z.string().nullable(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, prompts } }): Promise<[string | null, GuildReactionRolesSettings]> => {
+            if (!(await hasPermission(id, guild))) return [NO_PERMISSION, { guild, prompts }];
+
+            const entryMap = Object.fromEntries(
+                (await db.select().from(tables.guildReactionRolesItems).where(eq(tables.guildReactionRolesItems.guild, guild))).map(({ guild: _, ...data }) => [
+                    data.id,
+                    data as GuildReactionRolesSettings["prompts"][number],
+                ]),
+            );
+
+            const client = await clients.getBot(guild);
+            const obj = await client?.guilds.fetch(guild);
+
+            for (const prompt of prompts) {
+                if (prompt.id === -1) prompt.id = Date.now() + Math.random();
+
+                try {
+                    if (!client)
+                        throw "Could not load the client for this guild. If you are using a custom client, please make sure its token is valid. If not, please contact support.";
+                    if (!obj) throw "Could not load this guild. Please make sure the bot is in the server.";
+                    if (!prompt.addToExisting && !prompt.channel) throw "No channel was set for this prompt. It was still saved but cannot be posted.";
+
+                    if (prompt.style === "reactions" || prompt.addToExisting) {
+                        if (prompt.reactionData.length === 0) throw "At least one reaction is required.";
+                        if (prompt.reactionData.some((x) => !x.role)) throw "All reactions' roles must be specified.";
+                    } else if (prompt.style === "dropdown") {
+                        if (prompt.dropdownData.length === 0) throw "At least one dropdown option is required.";
+                        if (prompt.dropdownData.some((x) => !x.role)) throw "All options' roles must be specified.";
+                    } else if (prompt.style === "buttons") {
+                        if (prompt.buttonData.length === 0) throw "At least one button row is required.";
+                        if (prompt.buttonData.some((x) => x.length === 0)) throw "At least one button is required per row.";
+                        if (prompt.buttonData.some((x) => x.some((x) => !x.role))) throw "All buttons' roles must be specified.";
+                    }
+
+                    if (prompt.addToExisting) {
+                        const match = prompt.url.match(/(\d+)\/(\d+)\/(\d+)/);
+                        if (!match) throw "Invalid message URL.";
+
+                        const [, gid, cid, mid] = match;
+                        if (gid !== guild) throw "Message URL must point to a message in this server.";
+
+                        const channel = await obj.channels.fetch(cid).catch(() => null);
+                        if (!channel?.isTextBased()) throw "Invalid message URL / channel cannot be accessed.";
+
+                        const message = await channel.messages.fetch(mid).catch(() => null);
+                        if (!message) throw "Invalid message URL (message does not exist in the channel).";
+
+                        try {
+                            for (const { emoji } of prompt.reactionData) if (emoji && !message.reactions.cache.has(emoji)) await message.react(emoji);
+                        } catch {
+                            throw "Adding reactions failed. Ensure all emoji exist and the bot has permission to use them.";
+                        }
+                    } else {
+                        const data = (post: boolean): BaseMessageOptions => ({
+                            ...(!post && prompt.id in entryMap && _.isEqual(prompt.promptMessage, entryMap[prompt.id].promptMessage)
+                                ? {}
+                                : prompt.promptMessage),
+                            components:
+                                prompt.style === "dropdown"
+                                    ? [
+                                          {
+                                              type: ComponentType.ActionRow,
+                                              components: [
+                                                  {
+                                                      type: ComponentType.StringSelect,
+                                                      customId: "::reaction-roles/dropdown",
+                                                      options: prompt.dropdownData.map((x, i) => ({
+                                                          label: x.label,
+                                                          value: `${i}`,
+                                                          description: x.description || undefined,
+                                                          emoji: x.emoji || undefined,
+                                                      })),
+                                                      minValues: prompt.type === "lock" ? 1 : 0,
+                                                      maxValues: prompt.type === "unique" || prompt.type === "lock" ? 1 : prompt.dropdownData.length,
+                                                  },
+                                              ],
+                                          },
+                                      ]
+                                    : prompt.style === "buttons"
+                                      ? prompt.buttonData.map((row, ri) => ({
+                                            type: ComponentType.ActionRow,
+                                            components: row.map((x, i) => ({
+                                                type: ComponentType.Button,
+                                                style: buttonStyles[x.color],
+                                                customId: `::reaction-roles/button:${ri}:${i}`,
+                                                emoji: x.emoji || undefined,
+                                                label: x.label || undefined,
+                                            })),
+                                        }))
+                                      : [],
+                        });
+
+                        let message: Message | undefined;
+
+                        const shouldPost = () =>
+                            !_.isEqual(
+                                ...([prompt, entryMap[prompt.id]].map((x) => [
+                                    x.promptMessage,
+                                    x.style,
+                                    x.type,
+                                    x.style === "dropdown"
+                                        ? x.dropdownData.map((x) => ({ ...x, role: null }))
+                                        : x.style === "buttons"
+                                          ? x.buttonData.map((x) => x.map((x) => ({ ...x, role: null })))
+                                          : null,
+                                ]) as [any, any]),
+                            );
+
+                        if (prompt.id in entryMap) {
+                            if (prompt.channel === entryMap[prompt.id].channel) {
+                                const channel = await obj.channels.fetch(prompt.channel!).catch(() => null);
+                                if (!channel?.isTextBased()) throw "Could not fetch channel.";
+
+                                let edit = false;
+
+                                try {
+                                    message = await channel.messages.fetch({ message: entryMap[prompt.id].message!, force: true });
+                                    edit = true;
+                                } catch {
+                                    message = await channel.send(data(true)).catch((error) => {
+                                        throw `Could neither fetch the messaeg in #${channel.name} to edit nor send a new one: ${error}`;
+                                    });
+                                }
+
+                                if (edit && shouldPost()) await message.edit(data(false));
+                            } else {
+                                try {
+                                    const channel = await obj.channels.fetch(entryMap[prompt.id].channel!);
+                                    if (!channel?.isTextBased()) throw 0;
+                                    await (await channel.messages.fetch(entryMap[prompt.id].message!)).delete();
+                                } catch {}
+                            }
+                        }
+
+                        if (!message) {
+                            const channel = await obj.channels.fetch(prompt.channel!).catch(() => null);
+                            if (!channel?.isTextBased()) throw "Could not fetch channel.";
+
+                            message = await channel.send(data(true)).catch(() => {
+                                throw `Could not send message in #${channel.name}.`;
+                            });
+                        }
+
+                        prompt.message = message.id;
+
+                        if (prompt.style === "reactions")
+                            try {
+                                for (const { emoji } of prompt.reactionData) if (emoji && !message.reactions.cache.has(emoji!)) await message.react(emoji);
+                            } catch {
+                                throw "Adding reactions failed. Ensure all emoji exist and the bot has permission to use them.";
+                            }
+                    }
+
+                    prompt.error = null;
+                } catch (error) {
+                    if (typeof error !== "string") console.error(error);
+                    prompt.error = `${error}`;
+                }
+            }
+
+            if (obj)
+                for (const entry of Object.values(entryMap))
+                    if (!prompts.some((prompt) => prompt.id === entry.id))
+                        try {
+                            const channel = await obj?.channels.fetch(entry.channel!);
+                            if (!channel?.isTextBased()) throw 0;
+                            await (await channel.messages.fetch(entry.message!)).delete();
+                        } catch {}
+
+            await db.transaction(async (tx) => {
+                await tx.delete(tables.guildReactionRolesItems).where(eq(tables.guildReactionRolesItems.guild, guild));
+                if (prompts.length > 0) await tx.insert(tables.guildReactionRolesItems).values(prompts.map((prompt) => ({ guild, ...prompt })));
+            });
+
+            return [null, { guild, prompts }];
         }),
 } as const;

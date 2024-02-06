@@ -93,8 +93,14 @@ export default {
                   if (threshold === "manager") return !!(BigInt(permissions) & PermissionFlagsBits.ManageGuild);
               });
 
-        const bots = await clients.getBots();
-        const guildsWithBot = new Set((await Promise.all(bots.map(async (bot) => (await bot.guilds.fetch()).map((guild) => guild.id)))).flat());
+        const bots = await clients.getBotsWithGuilds();
+        const guildsWithBot = new Set<string>();
+
+        for (const [bot, guild] of bots) {
+            if (guild) {
+                if (await bot.guilds.fetch(guild).catch(() => null)) guildsWithBot.add(guild);
+            } else for (const { id } of (await bot.guilds.fetch()).values()) guildsWithBot.add(id);
+        }
 
         for (const guild of filtered) guild.hasBot = guildsWithBot.has(guild.id);
 

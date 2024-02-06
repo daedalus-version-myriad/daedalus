@@ -170,6 +170,25 @@ export type GuildXpSettings = {
     rewards: { text: number | null; voice: number | null; role: string | null; removeOnHigher: boolean; dmOnReward: boolean }[];
 };
 
+export type GuildReactionRolesSettings = {
+    guild: string;
+    prompts: {
+        id: number;
+        name: string;
+        addToExisting: boolean;
+        channel: string | null;
+        message: string | null;
+        url: string;
+        style: "dropdown" | "buttons" | "reactions";
+        type: "normal" | "unique" | "verify" | "lock";
+        dropdownData: { emoji: string | null; role: string | null; label: string; description: string }[];
+        buttonData: { emoji: string | null; role: string | null; color: "gray" | "blue" | "green" | "red"; label: string }[][];
+        reactionData: { emoji: string | null; role: string | null }[];
+        promptMessage: MessageData;
+        error: string | null;
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

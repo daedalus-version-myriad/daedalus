@@ -1,6 +1,6 @@
 "use client";
 
-import { clone, swap, removeIndex } from "@/lib/processors";
+import { clone, removeIndex, swap } from "@/lib/processors";
 import { IEmbed, IField, MessageData } from "@daedalus/types";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FaChevronDown, FaChevronRight, FaChevronUp, FaCopy, FaPencil, FaPlus, FaTrash } from "react-icons/fa6";
@@ -65,22 +65,26 @@ export default function MessageEditor({
     data: base,
     setData: setBase,
     flat = false,
+    static: isStatic = false,
 }: {
     data: MessageData;
     setData: (message: MessageData) => unknown;
     flat?: boolean;
+    static?: boolean;
 }) {
     const [data, setData] = useEditableMessage(base, setBase);
 
     return (
         <div className="flex flex-col gap-2">
-            <p>
-                See{" "}
-                <a href="/docs/guides/custom-messages" className="link">
-                    the docs
-                </a>{" "}
-                for how to format custom messages.
-            </p>
+            {isStatic ? null : (
+                <p>
+                    See{" "}
+                    <a href="/docs/guides/custom-messages" className="link">
+                        the docs
+                    </a>{" "}
+                    for how to format custom messages.
+                </p>
+            )}
             <div>
                 {flat ? (
                     <Core data={data} setData={setData}></Core>
@@ -149,7 +153,7 @@ function Core({ data, setData }: { data: EditableMessage; setData: Dispatch<SetS
                                         <h3 className="text-lg">Color:</h3>
                                         <NormalSelect
                                             value={embed.colorMode}
-                                            setValue={(mode) => setEmbed((embed) => ({ ...embed, colorMode: mode as IEmbed["colorMode"] }))}
+                                            setValue={(colorMode) => setEmbed((embed) => ({ ...embed, colorMode }))}
                                             options={[
                                                 ["guild", "Use Guild Default"],
                                                 ["member", "Use Member Highlight Color"],

@@ -18,7 +18,7 @@ import _ from "lodash";
 import { Dispatch, SetStateAction, useState } from "react";
 import save from "./save";
 
-export function Body({ data: initial, module, disabled }: { data: GuildLoggingSettings; module: string; disabled: boolean }) {
+export function Body({ data: initial, disabled }: { data: GuildLoggingSettings; disabled: boolean }) {
     const [data, setData] = useState<GuildLoggingSettings>(initial);
 
     const [useWebhook, setUseWebhook] = useState<boolean>(data.useWebhook);
@@ -32,7 +32,7 @@ export function Body({ data: initial, module, disabled }: { data: GuildLoggingSe
 
     return (
         <>
-            <EnableModule guild={data.guild} module={module} disabled={disabled}></EnableModule>
+            <EnableModule guild={data.guild} module="logging" disabled={disabled}></EnableModule>
             <Panel>
                 <h1 className="text-xl">Default Log Output Settings</h1>
                 <Label className="center-row gap-4">
