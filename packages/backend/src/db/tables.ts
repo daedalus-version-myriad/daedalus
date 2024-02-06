@@ -146,6 +146,27 @@ export const guildReactionRolesItems = mysqlTable(
     }),
 );
 
+export const guildStarboardSettings = mysqlTable("guild_starboard_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    reaction: varchar("reaction", { length: 20 }),
+    channel: varchar("channel", { length: 20 }),
+    threshold: int("threshold").notNull(),
+});
+
+export const guildStarboardOverrides = mysqlTable(
+    "guild_starboard_overrides",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        channel: varchar("channel", { length: 20 }).notNull(),
+        enabled: boolean("enabled").notNull(),
+        target: varchar("target", { length: 20 }),
+        threshold: int("threshold"),
+    },
+    (t) => ({
+        pk_guild_channel: primaryKey({ name: "pk_guild_channel", columns: [t.guild, t.channel] }),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {
@@ -261,3 +282,8 @@ export const xp = mysqlTable(
         idx_voice_total: index("idx_voice_total").on(t.voiceTotal),
     }),
 );
+
+export const starboardLinks = mysqlTable("starboard_links", {
+    source: varchar("source", { length: 20 }).notNull().primaryKey(),
+    target: varchar("target", { length: 20 }).notNull(),
+});

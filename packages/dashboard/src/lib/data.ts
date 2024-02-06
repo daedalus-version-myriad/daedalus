@@ -19,7 +19,6 @@ import { IconType } from "react-icons/lib";
 export const INVITE_LINK = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&permissions=1428010036470&scope=applications.commands+bot`;
 
 export const textTypes = [0, 2, 5, 13, 15, 16];
-export const textAndFoldersTypes = [...textTypes, 4];
 
 export const channelIcons: Record<number, IconType> = {
     0: FaHashtag,
@@ -41,6 +40,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/supporter-announcements", moduleIcons["supporter-announcements"], "Supporter Announcements"],
     ["/xp", moduleIcons.xp, "XP"],
     ["/reaction-roles", moduleIcons["reaction-roles"], "Reaction Roles"],
+    ["/starboard", moduleIcons.starboard, "Starboard"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

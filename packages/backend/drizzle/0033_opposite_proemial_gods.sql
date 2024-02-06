@@ -1,0 +1,1 @@
+ALTER TABLE `starboard_links` ADD `target` varchar(20) NOT NULL;

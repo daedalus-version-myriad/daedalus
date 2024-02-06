@@ -10,7 +10,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { textAndFoldersTypes } from "@/lib/data";
 import { modules, permissions } from "@daedalus/data";
 import { englishList } from "@daedalus/formatting";
 import { GuildModulesPermissionsSettings } from "@daedalus/types";
@@ -179,7 +178,6 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                                     },
                                                                 }))
                                                             }
-                                                            types={textAndFoldersTypes}
                                                             showReadonly
                                                         ></MultiChannelSelector>
                                                         <p>Blocked Channels</p>
@@ -194,7 +192,6 @@ export function Body({ data: initial }: { data: GuildModulesPermissionsSettings 
                                                                     },
                                                                 }))
                                                             }
-                                                            types={textAndFoldersTypes}
                                                             showReadonly
                                                         ></MultiChannelSelector>
                                                     </Panel>

@@ -8,7 +8,7 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { getXpSettings, transformXpSettings } from "./guild-settings";
+import { getStarboardSettings, getXpSettings, transformXpSettings } from "./guild-settings";
 import { getLimit } from "./premium";
 
 export default {
@@ -306,5 +306,28 @@ export default {
             .select()
             .from(tables.guildReactionRolesItems)
             .where(and(eq(tables.guildReactionRolesItems.guild, guild)))) as ({ guild: string } & GuildReactionRolesSettings["prompts"][number])[];
+    }),
+    getStarboardConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getStarboardSettings(guild);
+    }),
+    getStarlink: proc.input(snowflake).query(async ({ input: source }) => {
+        return (
+            (await db.select({ target: tables.starboardLinks.target }).from(tables.starboardLinks).where(eq(tables.starboardLinks.source, source))).at(0)
+                ?.target ?? null
+        );
+    }),
+    getStarlinks: proc.input(snowflake.array()).query(async ({ input: sources }) => {
+        return (
+            await db.select({ target: tables.starboardLinks.target }).from(tables.starboardLinks).where(inArray(tables.starboardLinks.source, sources))
+        ).map((x) => x.target);
+    }),
+    purgeStarlink: proc.input(snowflake).mutation(async ({ input: source }) => {
+        await db.delete(tables.starboardLinks).where(eq(tables.starboardLinks.source, source));
+    }),
+    purgeStarlinksByTargets: proc.input(snowflake.array()).mutation(async ({ input: targets }) => {
+        await db.delete(tables.starboardLinks).where(inArray(tables.starboardLinks.target, targets));
+    }),
+    addStarlink: proc.input(z.object({ source: snowflake, target: snowflake })).mutation(async ({ input: { source, target } }) => {
+        await db.insert(tables.starboardLinks).values({ source, target }).onDuplicateKeyUpdate({ set: { target } });
     }),
 } as const;

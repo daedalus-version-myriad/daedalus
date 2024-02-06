@@ -10,7 +10,6 @@ import SingleRoleSelector from "@/components/SingleRoleSelector";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { textAndFoldersTypes } from "@/lib/data";
 import { GuildSettings } from "@daedalus/types";
 import _ from "lodash";
 import { useState } from "react";
@@ -130,19 +129,9 @@ export function Body({ data: initial }: { data: GuildSettings }) {
                             </span>
                         </p>
                         <p>Allowed Channels</p>
-                        <MultiChannelSelector
-                            channels={allowedChannels}
-                            setChannels={setAllowedChannels}
-                            types={textAndFoldersTypes}
-                            showReadonly
-                        ></MultiChannelSelector>
+                        <MultiChannelSelector channels={allowedChannels} setChannels={setAllowedChannels} showReadonly></MultiChannelSelector>
                         <p>Blocked Channels</p>
-                        <MultiChannelSelector
-                            channels={blockedChannels}
-                            setChannels={setBlockedChannels}
-                            types={textAndFoldersTypes}
-                            showReadonly
-                        ></MultiChannelSelector>
+                        <MultiChannelSelector channels={blockedChannels} setChannels={setBlockedChannels} showReadonly></MultiChannelSelector>
                     </Panel>
                 </div>
             </Panel>

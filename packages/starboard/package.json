@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/starboard",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

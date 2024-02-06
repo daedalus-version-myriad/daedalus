@@ -8,6 +8,7 @@ import type {
     GuildPremiumSettings,
     GuildReactionRolesSettings,
     GuildSettings,
+    GuildStarboardSettings,
     GuildSupporterAnnouncementsSettings,
     GuildWelcomeSettings,
     GuildXpSettings,
@@ -124,6 +125,27 @@ export async function getXpSettings(guild: string): Promise<GuildXpSettings> {
             rewards: "",
         },
     );
+}
+
+export async function getStarboardSettings(guild: string): Promise<GuildStarboardSettings> {
+    const entry = (await db.select().from(tables.guildStarboardSettings).where(eq(tables.guildStarboardSettings.guild, guild))).at(0) ?? {
+        guild,
+        reaction: "⭐",
+        channel: null,
+        threshold: 5,
+    };
+
+    const overrides = await db
+        .select({
+            channel: tables.guildStarboardOverrides.channel,
+            enabled: tables.guildStarboardOverrides.enabled,
+            target: tables.guildStarboardOverrides.target,
+            threshold: tables.guildStarboardOverrides.threshold,
+        })
+        .from(tables.guildStarboardOverrides)
+        .where(eq(tables.guildStarboardOverrides.guild, guild));
+
+    return { ...entry, overrides };
 }
 
 const buttonStyles = {
@@ -767,5 +789,44 @@ export default {
             });
 
             return [null, { guild, prompts }];
+        }),
+    getStarboardSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildStarboardSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            return await getStarboardSettings(guild);
+        }),
+    setStarboardSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                reaction: z.string().nullable(),
+                channel: snowflake.nullable(),
+                threshold: z.number().int().min(2, "The starboard threshold must be at least 2."),
+                overrides: z
+                    .object({
+                        channel: snowflake.nullable(),
+                        enabled: z.boolean(),
+                        target: snowflake.nullable(),
+                        threshold: z.number().int().min(2, "Starboard override thresholds must be at least 2.").nullable(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, overrides, ...data } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+            if (overrides.some((x) => x.channel === null)) return "All overrides must specify the channel on the left side.";
+
+            await db.transaction(async (tx) => {
+                await tx
+                    .insert(tables.guildStarboardSettings)
+                    .values({ guild, ...data })
+                    .onDuplicateKeyUpdate({ set: data });
+
+                await tx.delete(tables.guildStarboardOverrides).where(eq(tables.guildStarboardOverrides.guild, guild));
+                if (overrides.length > 0) await tx.insert(tables.guildStarboardOverrides).values(overrides.map((x) => ({ guild, ...x, channel: x.channel! })));
+            });
         }),
 } as const;

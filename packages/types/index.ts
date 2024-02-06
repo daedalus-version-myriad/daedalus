@@ -189,6 +189,19 @@ export type GuildReactionRolesSettings = {
     }[];
 };
 
+export type GuildStarboardSettings = {
+    guild: string;
+    reaction: string | null;
+    channel: string | null;
+    threshold: number;
+    overrides: {
+        channel: string | null;
+        enabled: boolean;
+        target: string | null;
+        threshold: number | null;
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;
