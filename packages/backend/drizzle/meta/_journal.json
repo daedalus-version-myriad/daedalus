@@ -204,6 +204,20 @@
       "when": 1707196939105,
       "tag": "0028_huge_smasher",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1707239296225,
+      "tag": "0029_green_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1707239512439,
+      "tag": "0030_magical_lyja",
+      "breakpoints": true
     }
   ]
 }

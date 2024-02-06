@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/reaction-roles-reactions",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

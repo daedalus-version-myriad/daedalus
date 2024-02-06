@@ -19,7 +19,7 @@ export default async function (button: ButtonInteraction, _row: string, _col: st
 
     if (!entry) return;
     if (entry.error) throw "This reaction role prompt is out of sync due to an error with its last save. Server management can fix this on the dashboard.";
-    if (entry.style !== "buttons") return;
+    if (entry.addToExisting || entry.style !== "buttons") return;
 
     if (row >= entry.buttonData.length || col >= entry.buttonData[row].length)
         throw `Index error: row ${row} / col ${col} is not valid for this prompt. Please report this to support.`;

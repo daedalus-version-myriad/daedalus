@@ -2,8 +2,8 @@ export function removeIndex<T>(array: T[], index: number) {
     return [...array.slice(0, index), ...array.slice(index + 1)];
 }
 
-export function clone<T>(array: T[], index: number) {
-    return [...array.slice(0, index), structuredClone(array[index]), ...array.slice(index)];
+export function clone<T>(array: T[], index: number, fn: (t: T) => T = (t) => t) {
+    return [...array.slice(0, index), fn(structuredClone(array[index])), ...array.slice(index)];
 }
 
 export function swap<T>(array: T[], x: number, y: number) {

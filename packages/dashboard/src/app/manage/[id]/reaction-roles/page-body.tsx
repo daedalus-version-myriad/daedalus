@@ -75,7 +75,7 @@ export function Body({ data: initial, limit, disabled }: { data: GuildReactionRo
                                 )}
                                 <b className="mr-2">{prompt.name}</b>
                                 <Item prompt={prompt} setPrompt={(fn) => setPrompts((prompts) => applyIndex(prompts, i, fn))}></Item>
-                                <Button variant="outline" onClick={() => setPrompts((prompts) => clone(prompts, i))}>
+                                <Button variant="outline" onClick={() => setPrompts((prompts) => clone(prompts, i, (p) => ({ ...p, id: -1 })))}>
                                     <FaCopy></FaCopy>
                                 </Button>
                                 <Button variant="outline" onClick={() => setPrompts((prompts) => removeIndex(prompts, i))}>

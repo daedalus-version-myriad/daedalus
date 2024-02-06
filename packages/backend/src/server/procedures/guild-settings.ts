@@ -553,8 +553,8 @@ export default {
                             .object({
                                 emoji: z.string().nullable(),
                                 role: snowflake.nullable(),
-                                label: z.string().max(100),
-                                description: z.string().max(100),
+                                label: z.string().trim().max(100),
+                                description: z.string().trim().max(100),
                             })
                             .array()
                             .max(25),
@@ -563,7 +563,7 @@ export default {
                                 emoji: z.string().nullable(),
                                 role: snowflake.nullable(),
                                 color: z.enum(["gray", "blue", "green", "red"]),
-                                label: z.string().max(80),
+                                label: z.string().trim().max(80),
                             })
                             .array()
                             .max(5)
@@ -579,6 +579,8 @@ export default {
         .mutation(async ({ input: { id, guild, prompts } }): Promise<[string | null, GuildReactionRolesSettings]> => {
             if (!(await hasPermission(id, guild))) return [NO_PERMISSION, { guild, prompts }];
 
+            let inc = 0;
+
             const entryMap = Object.fromEntries(
                 (await db.select().from(tables.guildReactionRolesItems).where(eq(tables.guildReactionRolesItems.guild, guild))).map(({ guild: _, ...data }) => [
                     data.id,
@@ -590,7 +592,7 @@ export default {
             const obj = await client?.guilds.fetch(guild);
 
             for (const prompt of prompts) {
-                if (prompt.id === -1) prompt.id = Date.now() + Math.random();
+                if (prompt.id === -1) prompt.id = Date.now() * 100 + Math.floor(Math.random() * (100 - inc)) + inc++;
 
                 try {
                     if (!client)
@@ -600,14 +602,25 @@ export default {
 
                     if (prompt.style === "reactions" || prompt.addToExisting) {
                         if (prompt.reactionData.length === 0) throw "At least one reaction is required.";
+                        if (prompt.reactionData.some((x) => !x.emoji)) throw "All reactions' emoji must be specified.";
                         if (prompt.reactionData.some((x) => !x.role)) throw "All reactions' roles must be specified.";
+                        if (new Set(prompt.reactionData.map((x) => x.emoji)).size < prompt.reactionData.length) throw "All reactions' emoji must be unique.";
+                        if (new Set(prompt.reactionData.map((x) => x.role)).size < prompt.reactionData.length) throw "All reactions' roles must be unique.";
                     } else if (prompt.style === "dropdown") {
                         if (prompt.dropdownData.length === 0) throw "At least one dropdown option is required.";
+                        if (prompt.dropdownData.some((x) => !x.label)) throw "All options must have a label.";
                         if (prompt.dropdownData.some((x) => !x.role)) throw "All options' roles must be specified.";
+                        if (new Set(prompt.dropdownData.map((x) => x.role)).size < prompt.dropdownData.length) throw "All options' roles must be unique.";
                     } else if (prompt.style === "buttons") {
                         if (prompt.buttonData.length === 0) throw "At least one button row is required.";
                         if (prompt.buttonData.some((x) => x.length === 0)) throw "At least one button is required per row.";
+                        if (prompt.buttonData.some((x) => x.some((x) => !x.emoji && !x.label))) throw "All buttons must have either an emoji or a label.";
                         if (prompt.buttonData.some((x) => x.some((x) => !x.role))) throw "All buttons' roles must be specified.";
+                        if (
+                            new Set(prompt.buttonData.flatMap((x) => x.map((x) => x.role))).size <
+                            prompt.buttonData.map((x) => x.length).reduce((x, y) => x + y)
+                        )
+                            throw "All buttons' roles must be unique.";
                     }
 
                     if (prompt.addToExisting) {
@@ -628,6 +641,9 @@ export default {
                         } catch {
                             throw "Adding reactions failed. Ensure all emoji exist and the bot has permission to use them.";
                         }
+
+                        prompt.channel = channel.id;
+                        prompt.message = message.id;
                     } else {
                         const data = (post: boolean): BaseMessageOptions => ({
                             ...(!post && prompt.id in entryMap && _.isEqual(prompt.promptMessage, entryMap[prompt.id].promptMessage)
@@ -738,7 +754,7 @@ export default {
 
             if (obj)
                 for (const entry of Object.values(entryMap))
-                    if (!prompts.some((prompt) => prompt.id === entry.id))
+                    if (!entry.addToExisting && !prompts.some((prompt) => prompt.id === entry.id))
                         try {
                             const channel = await obj?.channels.fetch(entry.channel!);
                             if (!channel?.isTextBased()) throw 0;

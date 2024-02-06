@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, float, index, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, unique, varchar } from "drizzle-orm/mysql-core";
+import { bigint, boolean, float, index, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, unique, varchar } from "drizzle-orm/mysql-core";
 
 export const admins = mysqlTable("admins", {
     id: varchar("id", { length: 20 }).notNull().primaryKey(),
@@ -127,7 +127,7 @@ export const guildReactionRolesItems = mysqlTable(
     "guild_reaction_roles_items",
     {
         guild: varchar("guild", { length: 20 }).notNull(),
-        id: float("id").notNull(),
+        id: bigint("id", { mode: "number" }).notNull(),
         name: varchar("name", { length: 128 }).notNull(),
         addToExisting: boolean("add_to_existing").notNull(),
         channel: varchar("channel", { length: 20 }),
