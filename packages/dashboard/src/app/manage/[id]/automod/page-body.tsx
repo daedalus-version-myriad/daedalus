@@ -2,7 +2,7 @@
 
 import { DrawerDialog } from "@/components/DrawerDialog";
 import EnableModule from "@/components/EnableModule";
-import ListInput from "@/components/ListInput";
+import ListInput, { snowflakeFilter } from "@/components/ListInput";
 import MultiChannelSelector from "@/components/MultiChannelSelector";
 import MultiRoleSelector from "@/components/MultiRoleSelector";
 import NormalSelect from "@/components/NormalSelect";
@@ -213,6 +213,22 @@ function Item({
                                           ? null
                                           : "Terms must be at least three characters long.";
                                 }}
+                                limit={1000}
+                            ></ListInput>
+                        </>
+                    ) : rule.type === "blocked-stickers" ? (
+                        <>
+                            <p>
+                                <span className="text-muted-foreground">
+                                    Enter the IDs of stickers to block here. To get a sticker&apos;s ID, you can enable Daedalus&apos; message logging and post
+                                    the sticker and then delete it, and the log output will contain the sticker&apos;s ID.
+                                </span>
+                            </p>
+                            <ListInput
+                                list={rule.blockedStickersData.ids}
+                                setList={(ids) => setRule((rule) => ({ ...rule, blockedStickersData: { ids } }))}
+                                filter={snowflakeFilter}
+                                limit={1000}
                             ></ListInput>
                         </>
                     ) : null}
@@ -221,4 +237,3 @@ function Item({
         </DrawerDialog>
     );
 }
-

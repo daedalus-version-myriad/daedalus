@@ -7,14 +7,21 @@ import { removeIndex } from "@/lib/processors";
 import { useState } from "react";
 import { FaPlus, FaTrash, FaXmark } from "react-icons/fa6";
 
+export function snowflakeFilter(term: string) {
+    if (!term.match(/^[1-9][0-9]{16,19}$/)) return "Discord IDs must be 17-20 digit numbers.";
+    return null;
+}
+
 export default function ListInput({
     list,
     setList,
     filter = () => null,
+    limit,
 }: {
     list: string[];
     setList: (list: string[]) => unknown;
     filter?: (term: string) => string | null;
+    limit?: number;
 }) {
     const [useTextarea, setUseTextarea] = useState<boolean>(false);
     const [item, setItem] = useState<string>("");
@@ -46,6 +53,7 @@ export default function ListInput({
                     {useTextarea ? "Use interactive mode" : "Use textarea"}
                 </Button>
             </div>
+            {limit && list.length > limit ? <b>Limit ({limit}) exceeded.</b> : null}
             {useTextarea ? (
                 <Textarea
                     value={content}

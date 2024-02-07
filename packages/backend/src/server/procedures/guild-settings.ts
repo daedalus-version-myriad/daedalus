@@ -880,7 +880,7 @@ export default {
                             "link-blocklist",
                             "mention-spam",
                         ]),
-                        blockedTermsData: z.object({ terms: z.array(z.string().regex(/^(\*\S|[^*]).+(\S\*|[^*])$/)).max(1000) }),
+                        blockedTermsData: z.object({ terms: z.array(z.string().regex(/^(\*\S|[^*]).{3,}(\S\*|[^*])$/)).max(1000) }),
                         blockedStickersData: z.object({ ids: snowflake.array().max(1000) }),
                         capsSpamData: z.object({ ratioLimit: z.number().min(40).max(100), limit: z.number().min(1) }),
                         newlineSpamData: z.object({ consecutiveLimit: z.number().min(1), totalLimit: z.number().min(1) }),
