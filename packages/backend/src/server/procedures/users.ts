@@ -110,7 +110,7 @@ export default {
         .input(z.object({ id: snowflake, guild: snowflake }))
         .query(async ({ input: { id, guild: guildId } }): Promise<{ error: string } | DashboardGuild> => {
             const client = await clients.getBot(guildId);
-            const guild = await client?.guilds.fetch(guildId).catch(() => null);
+            const guild = await client?.guilds.fetch({ guild: guildId, force: true })?.catch(() => null);
             if (!guild) return { error: `Could not fetch the server with ID ${guildId}.` };
 
             if (!(await isAdmin(id))) {

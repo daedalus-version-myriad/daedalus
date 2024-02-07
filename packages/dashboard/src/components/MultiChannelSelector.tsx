@@ -100,7 +100,15 @@ export default function MultiChannelSelector({
                 <Button variant="outline" className="h-9 center-row gap-4" key={id} onClick={() => setChannels(ids.filter((x) => x !== id))}>
                     <FaXmark></FaXmark>
                     <div className="center-row gap-1">
-                        {channelIcons[channelMap[id].type]?.({})} {channelMap[id].name}
+                        {id in channelMap ? (
+                            <>
+                                {channelIcons[channelMap[id].type]?.({})} {channelMap[id].name}
+                            </>
+                        ) : (
+                            <div className="center-row gap-2">
+                                Invalid Channel: <b>{id}</b>
+                            </div>
+                        )}
                     </div>
                 </Button>
             ))}

@@ -35,8 +35,16 @@ export default function SingleChannelSelector({
             <Popover open={open} onOpenChange={setOpen} modal>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={open} className="center-row gap-1">
-                        {id ? channelIcons[channelMap[id]?.type]?.({}) : null}
-                        {id ? channelMap[id]?.name : "Select a channel"}
+                        {!id || id in channelMap ? (
+                            <>
+                                {id ? channelIcons[channelMap[id].type]?.({}) : null}
+                                {id ? channelMap[id].name : "Select a channel"}
+                            </>
+                        ) : (
+                            <div className="center-row gap-2">
+                                <FaXmark></FaXmark> Invalid Channel: <b>{id}</b>
+                            </div>
+                        )}
                         <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"></CaretSortIcon>
                     </Button>
                 </PopoverTrigger>

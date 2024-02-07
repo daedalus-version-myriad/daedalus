@@ -202,6 +202,61 @@ export type GuildStarboardSettings = {
     }[];
 };
 
+export type GuildAutomodSettings = {
+    guild: string;
+    ignoredChannels: string[];
+    ignoredRoles: string[];
+    defaultChannel: string | null;
+    interactWithWebhooks: boolean;
+    rules: {
+        enable: boolean;
+        name: string;
+        type:
+            | "blocked-terms"
+            | "blocked-stickers"
+            | "caps-spam"
+            | "newline-spam"
+            | "repeated-characters"
+            | "length-limit"
+            | "emoji-spam"
+            | "ratelimit"
+            | "attachment-spam"
+            | "sticker-spam"
+            | "link-spam"
+            | "invite-links"
+            | "link-blocklist"
+            | "mention-spam";
+        blockedTermsData: { terms: string[] };
+        blockedStickersData: { ids: string[] };
+        capsSpamData: { ratioLimit: number; limit: number };
+        newlineSpamData: { consecutiveLimit: number; totalLimit: number };
+        repeatedCharactersData: { consecutiveLimit: number };
+        lengthLimitData: { limit: number };
+        emojiSpamData: { limit: number; blockAnimatedEmoji: boolean };
+        ratelimitData: { threshold: number; timeInSeconds: number };
+        attachmentSpamData: { threshold: number; timeInSeconds: number };
+        stickerSpamData: { threshold: number; timeInSeconds: number };
+        linkSpamData: { threshold: number; timeInSeconds: number };
+        inviteLinksData: { blockUnknown: boolean; allowed: string[]; blocked: string[] };
+        linkBlocklistData: { websites: string[] };
+        mentionSpamData: { perMessageLimit: number; totalLimit: number; timeInSeconds: number; blockFailedEveryoneOrHere: boolean };
+        reportToChannel: boolean;
+        deleteMessage: boolean;
+        notifyAuthor: boolean;
+        reportChannel: string | null;
+        additionalAction: "nothing" | "warn" | "mute" | "timeout" | "kick" | "ban";
+        actionDuration: number;
+        disregardDefaultIgnoredChannels: boolean;
+        disregardDefaultIgnoredRoles: boolean;
+        onlyWatchEnabledChannels: boolean;
+        onlyWatchEnabledRoles: boolean;
+        ignoredChannels: string[];
+        ignoredRoles: string[];
+        watchedChannels: string[];
+        watchedRoles: string[];
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

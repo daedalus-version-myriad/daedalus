@@ -31,7 +31,17 @@ export default function SingleRoleSelector({
             <Popover open={open} onOpenChange={setOpen} modal>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={open} className="w-[max-content] justify-between">
-                        {id ? roles[id]?.name : "Select a role"}
+                        {id ? (
+                            id in roles ? (
+                                roles[id]?.name
+                            ) : (
+                                <div className="center-row gap-2">
+                                    <FaXmark></FaXmark> Invalid Role: <b>{id}</b>
+                                </div>
+                            )
+                        ) : (
+                            "Select a role"
+                        )}
                         <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"></CaretSortIcon>
                     </Button>
                 </PopoverTrigger>

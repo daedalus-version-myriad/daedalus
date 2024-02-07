@@ -3,6 +3,7 @@ import { parseMessage } from "@daedalus/custom-messages";
 import { modules } from "@daedalus/data";
 import { logCategories, logEvents } from "@daedalus/logging";
 import type {
+    GuildAutomodSettings,
     GuildLoggingSettings,
     GuildModulesPermissionsSettings,
     GuildPremiumSettings,
@@ -146,6 +147,22 @@ export async function getStarboardSettings(guild: string): Promise<GuildStarboar
         .where(eq(tables.guildStarboardOverrides.guild, guild));
 
     return { ...entry, overrides };
+}
+
+export async function getAutomodSettings(guild: string): Promise<GuildAutomodSettings> {
+    const entry = (await db.select().from(tables.guildAutomodSettings).where(eq(tables.guildAutomodSettings.guild, guild))).at(0) ?? {
+        guild,
+        ignoredChannels: [],
+        ignoredRoles: [],
+        defaultChannel: null,
+        interactWithWebhooks: false,
+    };
+
+    const rules = (await db.select().from(tables.guildAutomodItems).where(eq(tables.guildAutomodItems.guild, guild))).map(
+        ({ guild, ...data }) => data as GuildAutomodSettings["rules"][number],
+    );
+
+    return { ...entry, rules } as GuildAutomodSettings;
 }
 
 const buttonStyles = {
@@ -794,7 +811,6 @@ export default {
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
         .query(async ({ input: { id, guild } }): Promise<GuildStarboardSettings> => {
             if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
-
             return await getStarboardSettings(guild);
         }),
     setStarboardSettings: proc
@@ -827,6 +843,117 @@ export default {
 
                 await tx.delete(tables.guildStarboardOverrides).where(eq(tables.guildStarboardOverrides.guild, guild));
                 if (overrides.length > 0) await tx.insert(tables.guildStarboardOverrides).values(overrides.map((x) => ({ guild, ...x, channel: x.channel! })));
+            });
+        }),
+    getAutomodSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildAutomodSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+            return await getAutomodSettings(guild);
+        }),
+    setAutomodSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                ignoredChannels: snowflake.array(),
+                ignoredRoles: snowflake.array(),
+                defaultChannel: snowflake.nullable(),
+                interactWithWebhooks: z.boolean(),
+                rules: z
+                    .object({
+                        enable: z.boolean(),
+                        name: z.string().trim().max(128),
+                        type: z.enum([
+                            "blocked-terms",
+                            "blocked-stickers",
+                            "caps-spam",
+                            "newline-spam",
+                            "repeated-characters",
+                            "length-limit",
+                            "emoji-spam",
+                            "ratelimit",
+                            "attachment-spam",
+                            "sticker-spam",
+                            "link-spam",
+                            "invite-links",
+                            "link-blocklist",
+                            "mention-spam",
+                        ]),
+                        blockedTermsData: z.object({ terms: z.array(z.string().regex(/^(\*\S|[^*]).+(\S\*|[^*])$/)).max(1000) }),
+                        blockedStickersData: z.object({ ids: snowflake.array().max(1000) }),
+                        capsSpamData: z.object({ ratioLimit: z.number().min(40).max(100), limit: z.number().min(1) }),
+                        newlineSpamData: z.object({ consecutiveLimit: z.number().min(1), totalLimit: z.number().min(1) }),
+                        repeatedCharactersData: z.object({ consecutiveLimit: z.number().min(2) }),
+                        lengthLimitData: z.object({ limit: z.number().min(2) }),
+                        emojiSpamData: z.object({ limit: z.number().min(2), blockAnimatedEmoji: z.boolean() }),
+                        ratelimitData: z.object({ threshold: z.number().min(2), timeInSeconds: z.number().min(1) }),
+                        attachmentSpamData: z.object({ threshold: z.number().min(2), timeInSeconds: z.number().min(1) }),
+                        stickerSpamData: z.object({ threshold: z.number().min(2), timeInSeconds: z.number().min(1) }),
+                        linkSpamData: z.object({ threshold: z.number().min(2), timeInSeconds: z.number().min(1) }),
+                        inviteLinksData: z.object({ blockUnknown: z.boolean(), allowed: snowflake.array().max(1000), blocked: snowflake.array().max(1000) }),
+                        linkBlocklistData: z.object({ websites: z.array(z.string().regex(/^(?<!\w+:\/\/).+\../)).max(1000) }),
+                        mentionSpamData: z.object({
+                            perMessageLimit: z.number().min(2),
+                            totalLimit: z.number().min(1),
+                            timeInSeconds: z.number().min(1),
+                            blockFailedEveryoneOrHere: z.boolean(),
+                        }),
+                        reportToChannel: z.boolean(),
+                        deleteMessage: z.boolean(),
+                        notifyAuthor: z.boolean(),
+                        reportChannel: snowflake.nullable(),
+                        additionalAction: z.enum(["nothing", "warn", "mute", "timeout", "kick", "ban"]),
+                        actionDuration: z.number().int().min(0),
+                        disregardDefaultIgnoredChannels: z.boolean(),
+                        disregardDefaultIgnoredRoles: z.boolean(),
+                        onlyWatchEnabledChannels: z.boolean(),
+                        onlyWatchEnabledRoles: z.boolean(),
+                        ignoredChannels: snowflake.array(),
+                        ignoredRoles: snowflake.array(),
+                        watchedChannels: snowflake.array(),
+                        watchedRoles: snowflake.array(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, rules, ...data } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            for (const rule of rules) {
+                try {
+                    if (rule.type === "blocked-terms") {
+                        if (rule.blockedTermsData.terms.some((x) => x.match(/^\*\s|\s\*$/) || x.replace(/^\*?\s*|\s*\*?$/g, "").length < 3))
+                            throw `Terms must be at least 3 characters long (not counting wildcard) and wildcards must not be adjacent to whitespace.`;
+                        if (rule.blockedTermsData.terms.length > 1000) throw `Maximum 1000 terms allowed`;
+                    } else if (rule.type === "blocked-stickers") {
+                        if (rule.blockedStickersData.ids.some((x) => !x.match(/^[1-9][0-9]{16,19}$/))) throw `IDs must be Discord IDs (17-20 digit numbers))`;
+                        if (rule.blockedStickersData.ids.length > 1000) throw `Maximum 1000 stickers allowed`;
+                    } else if (rule.type === "invite-links") {
+                        if ([...rule.inviteLinksData.allowed, ...rule.inviteLinksData.blocked].some((x) => !x.match(/^[1-9][0-9]{16,19}$/)))
+                            throw `IDs must be Discord IDs (17-20 digit numbers))`;
+                        if (rule.inviteLinksData.allowed.length > 1000 || rule.inviteLinksData.blocked.length > 1000) throw `Maximum 1000 servers allowed`;
+                    } else if (rule.type === "link-blocklist") {
+                        if (rule.linkBlocklistData.websites.some((x) => x.match(/^\w+:\/\//) || !x.match(/.\../)))
+                            throw `Links should not contain the schema and should be valid URL components`;
+                        if (rule.linkBlocklistData.websites.length > 1000) throw `Maximum 1000 links allowed.`;
+                    }
+
+                    if (rule.additionalAction === "timeout" && rule.actionDuration > 28 * 24 * 60 * 60 * 1000)
+                        throw `Members can only be timed out for up to 28 days`;
+                } catch (error) {
+                    return `Error in ${rule.name}: ${error}`;
+                }
+            }
+
+            await db.transaction(async (tx): Promise<void> => {
+                await tx
+                    .insert(tables.guildAutomodSettings)
+                    .values({ guild, ...data })
+                    .onDuplicateKeyUpdate({ set: data });
+
+                await tx.delete(tables.guildAutomodItems).where(eq(tables.guildAutomodItems.guild, guild));
+                if (rules.length > 0) await tx.insert(tables.guildAutomodItems).values(rules.map((rule) => ({ guild, ...rule })));
             });
         }),
 } as const;

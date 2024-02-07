@@ -37,10 +37,16 @@ export default function SingleEmojiSelector({ emoji: id, setEmoji }: { emoji: st
                         {id ? (
                             <div className="center-row gap-2">
                                 {id.match(/^[1-9][0-9]{16,19}$/) ? (
-                                    <>
-                                        <Image src={emojis[id]?.url} alt="" width={20} height={20}></Image>
-                                        {emojis[id]?.name}
-                                    </>
+                                    id in emojis ? (
+                                        <>
+                                            <Image src={emojis[id]?.url} alt="" width={20} height={20}></Image>
+                                            {emojis[id]?.name}
+                                        </>
+                                    ) : (
+                                        <div className="center-row gap-2">
+                                            <FaXmark></FaXmark> Invalid Emoji: <b>{id}</b>
+                                        </div>
+                                    )
                                 ) : (
                                     <>
                                         <span>{id}</span>

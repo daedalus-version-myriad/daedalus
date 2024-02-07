@@ -72,7 +72,13 @@ export default function MultiRoleSelector({
             {ids.map((id) => (
                 <Button variant="outline" className="h-9 center-row gap-4" key={id} onClick={() => setRoles(ids.filter((x) => x !== id))}>
                     <FaXmark></FaXmark>
-                    {roles[id].name}
+                    {id in roles ? (
+                        <>{roles[id].name}</>
+                    ) : (
+                        <div className="center-row gap-2">
+                            Invalid Role: <b>{id}</b>
+                        </div>
+                    )}
                 </Button>
             ))}
             {ids.length > 0 ? (

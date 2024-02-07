@@ -167,6 +167,70 @@ export const guildStarboardOverrides = mysqlTable(
     }),
 );
 
+export const guildAutomodSettings = mysqlTable("guild_automod_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    ignoredChannels: json("ignored_channels").notNull(),
+    ignoredRoles: json("ignored_roles").notNull(),
+    defaultChannel: varchar("default_channel", { length: 20 }),
+    interactWithWebhooks: boolean("interact_with_webhooks").notNull(),
+});
+
+export const guildAutomodItems = mysqlTable(
+    "guild_automod_items",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        enable: boolean("enable").notNull(),
+        name: varchar("name", { length: 128 }).notNull(),
+        type: mysqlEnum("type", [
+            "blocked-terms",
+            "blocked-stickers",
+            "caps-spam",
+            "newline-spam",
+            "repeated-characters",
+            "length-limit",
+            "emoji-spam",
+            "ratelimit",
+            "attachment-spam",
+            "sticker-spam",
+            "link-spam",
+            "invite-links",
+            "link-blocklist",
+            "mention-spam",
+        ]).notNull(),
+        blockedTermsData: json("blocked_terms_data").notNull(),
+        blockedStickersData: json("blocked_stickers_data").notNull(),
+        capsSpamData: json("caps_spam_data").notNull(),
+        newlineSpamData: json("newline_spam_data").notNull(),
+        repeatedCharactersData: json("repeated_characters_data").notNull(),
+        lengthLimitData: json("length_limit_data").notNull(),
+        emojiSpamData: json("emoji_spam_data").notNull(),
+        ratelimitData: json("ratelimit_data").notNull(),
+        attachmentSpamData: json("attachment_spam_data").notNull(),
+        stickerSpamData: json("sticker_spam_data").notNull(),
+        linkSpamData: json("link_spam_data").notNull(),
+        inviteLinksData: json("invite_links_data").notNull(),
+        linkBlocklistData: json("link_blocklist_data").notNull(),
+        mentionSpamData: json("mention_spam_data").notNull(),
+        reportToChannel: boolean("report_to_channel").notNull(),
+        deleteMessage: boolean("delete_message").notNull(),
+        notifyAuthor: boolean("notify_author").notNull(),
+        reportChannel: varchar("report_channel", { length: 20 }),
+        additionalAction: mysqlEnum("additional_action", ["nothing", "warn", "mute", "timeout", "kick", "ban"]).notNull(),
+        actionDuration: int("action_duration").notNull(),
+        disregardDefaultIgnoredChannels: boolean("disregard_default_ignored_channels").notNull(),
+        disregardDefaultIgnoredRoles: boolean("disregard_default_ignored_roles").notNull(),
+        onlyWatchEnabledChannels: boolean("only_watch_enabled_channels").notNull(),
+        onlyWatchEnabledRoles: boolean("only_watch_enabled_roles").notNull(),
+        ignoredChannels: json("ignored_channels").notNull(),
+        ignoredRoles: json("ignored_roles").notNull(),
+        watchedChannels: json("watched_channels").notNull(),
+        watchedRoles: json("watched_roles").notNull(),
+    },
+    (t) => ({
+        idx_guild: index("idx_guild").on(t.guild),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {

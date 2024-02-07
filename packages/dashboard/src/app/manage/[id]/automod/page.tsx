@@ -6,7 +6,7 @@ import { trpc } from "@daedalus/api";
 import { Suspense } from "react";
 import { Body } from "./page-body";
 
-export default async function ManageWelcome({ params: { id } }: { params: { id: string } }) {
+export default async function ManageAutomod({ params: { id } }: { params: { id: string } }) {
     return (
         <Suspense fallback={<LoadingManagePage></LoadingManagePage>}>
             <Main id={id}></Main>
@@ -17,13 +17,13 @@ export default async function ManageWelcome({ params: { id } }: { params: { id: 
 async function Main({ id }: { id: string }) {
     const user = await getId();
 
-    const data = await trpc.getReactionRolesSettings.query({ id: user, guild: id });
+    const data = await trpc.getAutomodSettings.query({ id: await getId(), guild: id });
 
     return (
         <Body
             data={data}
-            limit={(await trpc.getLimit.query({ id: user, guild: id, key: "reactionRolesCountLimit" })) as number}
-            disabled={!(await trpc.isModuleEnabled.query({ guild: id, module: "reaction-roles" }))}
+            limit={(await trpc.getLimit.query({ id: user, guild: id, key: "automodCountLimit" })) as number}
+            disabled={!(await trpc.isModuleEnabled.query({ guild: id, module: "automod" }))}
         ></Body>
     );
 }
