@@ -2,6 +2,7 @@
 
 import { DrawerDialog } from "@/components/DrawerDialog";
 import EnableModule from "@/components/EnableModule";
+import ListInput from "@/components/ListInput";
 import MultiChannelSelector from "@/components/MultiChannelSelector";
 import MultiRoleSelector from "@/components/MultiRoleSelector";
 import NormalSelect from "@/components/NormalSelect";
@@ -201,16 +202,18 @@ function Item({
                                     be at least three characters long (excluding <code>*</code>). All matches are case-insensitive.
                                 </span>
                             </p>
-                            <ListEditor
+                            <ListInput
                                 list={rule.blockedTermsData.terms}
                                 setList={(terms) => setRule((rule) => ({ ...rule, blockedTermsData: { terms } }))}
                                 filter={(term) => {
                                     const item = term.trim();
-                                    return item.length - (item.startsWith("*") ? 1 : 0) - (item.endsWith("*") ? 1 : 0) >= 3
-                                        ? null
-                                        : "Terms must be at least three characters long.";
+                                    return item.match(/^\*\s|\s\*$/)
+                                        ? "Wildcard must not be next to whitespace."
+                                        : item.length - (item.startsWith("*") ? 1 : 0) - (item.endsWith("*") ? 1 : 0) >= 3
+                                          ? null
+                                          : "Terms must be at least three characters long.";
                                 }}
-                            ></ListEditor>
+                            ></ListInput>
                         </>
                     ) : null}
                 </Panel>
@@ -219,33 +222,3 @@ function Item({
     );
 }
 
-function ListEditor({
-    list,
-    setList,
-    filter = () => null,
-}: {
-    list: string[];
-    setList: (list: string[]) => unknown;
-    filter?: (term: string) => string | null;
-}) {
-    const [useTextarea, setUseTextarea] = useState<boolean>(false);
-    const [item, setItem] = useState<string>("");
-    const [content, setContent] = useState<string>("");
-
-    return (
-        <>
-            <div>
-                <Button variant="outline" onClick={() => setUseTextarea((t) => !t)}>
-                    {useTextarea ? "Use interactive mode" : "Use textarea"}
-                </Button>
-            </div>
-            {useTextarea ? (
-                <></>
-            ) : (
-                <>
-                    <div className="center-row gap-4 flex-wrap"></div>
-                </>
-            )}
-        </>
-    );
-}

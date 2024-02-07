@@ -74,10 +74,10 @@ export default function Navbar() {
                             Log In
                         </a>
                     )}
-                    <button className="hidden dark:flex h-16 w-16 center-col justify-center hover:bg-foreground/5" onClick={() => setTheme("light")}>
+                    <button className="hidden dark:flex h-16 w-16 flex-col items-center justify-center hover:bg-foreground/5" onClick={() => setTheme("light")}>
                         <FaSun></FaSun>
                     </button>
-                    <button className="flex dark:hidden h-16 w-16 center-col justify-center hover:bg-foreground/5" onClick={() => setTheme("dark")}>
+                    <button className="flex dark:hidden h-16 w-16 flex-col items-center justify-center hover:bg-foreground/5" onClick={() => setTheme("dark")}>
                         <FaMoon></FaMoon>
                     </button>
                     <Sheet>
