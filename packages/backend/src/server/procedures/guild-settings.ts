@@ -149,7 +149,7 @@ export async function getStarboardSettings(guild: string): Promise<GuildStarboar
     return { ...entry, overrides };
 }
 
-export async function getAutomodSettings(guild: string): Promise<GuildAutomodSettings> {
+export async function getAutomodSettings(guild: string, limit?: number): Promise<GuildAutomodSettings> {
     const entry = (await db.select().from(tables.guildAutomodSettings).where(eq(tables.guildAutomodSettings.guild, guild))).at(0) ?? {
         guild,
         ignoredChannels: [],
@@ -158,9 +158,9 @@ export async function getAutomodSettings(guild: string): Promise<GuildAutomodSet
         interactWithWebhooks: false,
     };
 
-    const rules = (await db.select().from(tables.guildAutomodItems).where(eq(tables.guildAutomodItems.guild, guild))).map(
-        ({ guild, ...data }) => data as GuildAutomodSettings["rules"][number],
-    );
+    const query = db.select().from(tables.guildAutomodItems).where(eq(tables.guildAutomodItems.guild, guild));
+
+    const rules = (await (limit ? query.limit(limit) : query)).map(({ guild, ...data }) => data as GuildAutomodSettings["rules"][number]);
 
     return { ...entry, rules } as GuildAutomodSettings;
 }

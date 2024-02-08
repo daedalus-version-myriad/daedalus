@@ -8,7 +8,7 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { getStarboardSettings, getXpSettings, transformXpSettings } from "./guild-settings";
+import { getAutomodSettings, getStarboardSettings, getXpSettings, transformXpSettings } from "./guild-settings";
 import { getLimit } from "./premium";
 
 export default {
@@ -329,5 +329,8 @@ export default {
     }),
     addStarlink: proc.input(z.object({ source: snowflake, target: snowflake })).mutation(async ({ input: { source, target } }) => {
         await db.insert(tables.starboardLinks).values({ source, target }).onDuplicateKeyUpdate({ set: { target } });
+    }),
+    getAutomodConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getAutomodSettings(guild, (await getLimit(guild, "automodCountLimit")) as number);
     }),
 } as const;
