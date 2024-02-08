@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/automod",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}
