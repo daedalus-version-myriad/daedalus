@@ -880,23 +880,63 @@ export default {
                             "link-blocklist",
                             "mention-spam",
                         ]),
-                        blockedTermsData: z.object({ terms: z.array(z.string().regex(/^(\*\S|[^*]).{3,}(\S\*|[^*])$/)).max(1000) }),
+                        blockedTermsData: z.object({
+                            terms: z
+                                .array(
+                                    z
+                                        .string()
+                                        .regex(
+                                            /^(\*\S|[^*]).{3,}(\S\*|[^*])$/,
+                                            "Blocked terms must be at least three characters and wildcards must not be next to spaces.",
+                                        ),
+                                )
+                                .max(1000),
+                        }),
                         blockedStickersData: z.object({ ids: snowflake.array().max(1000) }),
-                        capsSpamData: z.object({ ratioLimit: z.number().min(40).max(100), limit: z.number().min(1) }),
-                        newlineSpamData: z.object({ consecutiveLimit: z.number().min(1), totalLimit: z.number().min(1) }),
-                        repeatedCharactersData: z.object({ consecutiveLimit: z.number().min(2) }),
-                        lengthLimitData: z.object({ limit: z.number().min(2) }),
-                        emojiSpamData: z.object({ limit: z.number().min(2), blockAnimatedEmoji: z.boolean() }),
-                        ratelimitData: z.object({ threshold: z.number().min(2), timeInSeconds: z.number().min(1) }),
-                        attachmentSpamData: z.object({ threshold: z.number().min(2), timeInSeconds: z.number().min(1) }),
-                        stickerSpamData: z.object({ threshold: z.number().min(2), timeInSeconds: z.number().min(1) }),
-                        linkSpamData: z.object({ threshold: z.number().min(2), timeInSeconds: z.number().min(1) }),
+                        capsSpamData: z.object({
+                            ratioLimit: z.number().min(40, "Caps spam ratio limit must be at least 40.").max(100, "Caps spam ratio limit must be at most 100."),
+                            limit: z.number().min(1, "Caps spam flat limit must be at least 1."),
+                        }),
+                        newlineSpamData: z.object({
+                            consecutiveLimit: z.number().min(1, "Newline spam consecutive limit must be at least 1."),
+                            totalLimit: z.number().min(1, "Newline spam total limit must be at least 1."),
+                        }),
+                        repeatedCharactersData: z.object({ consecutiveLimit: z.number().min(2, "Repeated character limit must be at least 2.") }),
+                        lengthLimitData: z.object({ limit: z.number().min(2, "Length limit must be at least 2.") }),
+                        emojiSpamData: z.object({ limit: z.number().min(2, "Emoji spam limit must be at least 2."), blockAnimatedEmoji: z.boolean() }),
+                        ratelimitData: z.object({
+                            threshold: z.number().min(2, "Ratelimit threshold must be at least 2."),
+                            timeInSeconds: z.number().min(1, "Ratelimit timespan must be at least 1 second."),
+                        }),
+                        attachmentSpamData: z.object({
+                            threshold: z.number().min(2, "Attachment spam threshold must be at least 2."),
+                            timeInSeconds: z.number().min(1, "Attachment spam timespan must be at least 1 second."),
+                        }),
+                        stickerSpamData: z.object({
+                            threshold: z.number().min(2, "Sticker spam threshold must be at least 2."),
+                            timeInSeconds: z.number().min(1, "Sticker spam timespan must be at least 1 second."),
+                        }),
+                        linkSpamData: z.object({
+                            threshold: z.number().min(2, "Link spam threshold must be at least 2."),
+                            timeInSeconds: z.number().min(1, "Link spam timespan must be at least 1 second."),
+                        }),
                         inviteLinksData: z.object({ blockUnknown: z.boolean(), allowed: snowflake.array().max(1000), blocked: snowflake.array().max(1000) }),
-                        linkBlocklistData: z.object({ websites: z.array(z.string().regex(/^(?<!\w+:\/\/).+\../)).max(1000) }),
+                        linkBlocklistData: z.object({
+                            websites: z
+                                .array(
+                                    z
+                                        .string()
+                                        .regex(
+                                            /^(?<!\w+:\/\/).+\../,
+                                            "At least one blocklisted website in a link blocklist rule was invalid (schema was included or the input did not resemble a URL component).",
+                                        ),
+                                )
+                                .max(1000),
+                        }),
                         mentionSpamData: z.object({
-                            perMessageLimit: z.number().min(2),
-                            totalLimit: z.number().min(1),
-                            timeInSeconds: z.number().min(1),
+                            perMessageLimit: z.number().min(2, "Mention spam per-message limit must be at least 2."),
+                            totalLimit: z.number().min(1, "Mention spam total limit must be at least 1."),
+                            timeInSeconds: z.number().min(1, "Mention spam timespan must be at least 1 second."),
                             blockFailedEveryoneOrHere: z.boolean(),
                         }),
                         reportToChannel: z.boolean(),
@@ -904,7 +944,7 @@ export default {
                         notifyAuthor: z.boolean(),
                         reportChannel: snowflake.nullable(),
                         additionalAction: z.enum(["nothing", "warn", "mute", "timeout", "kick", "ban"]),
-                        actionDuration: z.number().int().min(0),
+                        actionDuration: z.number().int().min(0, "Additional action duration cannot be negative."),
                         disregardDefaultIgnoredChannels: z.boolean(),
                         disregardDefaultIgnoredRoles: z.boolean(),
                         onlyWatchEnabledChannels: z.boolean(),

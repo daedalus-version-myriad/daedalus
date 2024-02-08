@@ -1,8 +1,9 @@
 import { trpc } from "@daedalus/api";
-import { DurationStyle, code, embed, expand, formatDuration, mdash, timeinfo } from "@daedalus/bot-utils";
+import { code, embed, expand, mdash, timeinfo } from "@daedalus/bot-utils";
 import stickerCache from "@daedalus/bot-utils/sticker-cache";
 import { permissions } from "@daedalus/data";
 import { englishList } from "@daedalus/formatting";
+import { DurationStyle, formatDuration } from "@daedalus/global-utils";
 import { AuditLogEvent, ChannelType, Client, Colors, Events, MessageFlags } from "discord.js";
 import { invokeLog } from "./lib";
 import {

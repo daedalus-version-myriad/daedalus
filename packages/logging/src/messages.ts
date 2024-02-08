@@ -1,7 +1,8 @@
-import { DurationStyle, SpoilerLevel, code, copyFiles, copyMedia, embed, expand, formatDuration, getMuteRoleId, timeinfo, to } from "@daedalus/bot-utils";
+import { SpoilerLevel, code, copyFiles, copyMedia, embed, expand, getMuteRoleId, timeinfo, to } from "@daedalus/bot-utils";
 import stickerCache from "@daedalus/bot-utils/sticker-cache";
 import { permissions } from "@daedalus/data";
 import { englishList } from "@daedalus/formatting";
+import { DurationStyle, formatDuration } from "@daedalus/global-utils";
 import {
     AuditLogEvent,
     ChannelType,
