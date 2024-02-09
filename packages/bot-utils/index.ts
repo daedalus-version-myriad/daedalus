@@ -56,6 +56,18 @@ export async function getMuteRoleId(guild: Guild | string) {
     return await trpc.getMuteRole.query(typeof guild === "string" ? guild : guild.id);
 }
 
+export async function getMuteRole(guild: Guild) {
+    const id = await getMuteRoleId(guild);
+    if (!id) throw "Mute role is not set.";
+
+    const role = await guild.roles.fetch(id).catch(() => null);
+    if (!role) throw "Mute role ID is invalid.";
+
+    if (role.comparePositionTo((await guild.members.fetchMe()).roles.highest) >= 0) throw "Mute role is too high and the bot cannot manage it.";
+
+    return role;
+}
+
 export function getChannelStack(channel: Channel): string[] {
     if (channel.isDMBased() || channel.type === ChannelType.GuildCategory || !channel.parent) return [channel.id];
     return [channel.id, ...getChannelStack(channel.parent)];

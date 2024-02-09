@@ -1,0 +1,1 @@
+ALTER TABLE `guild_automod_items` ADD PRIMARY KEY(`id`);

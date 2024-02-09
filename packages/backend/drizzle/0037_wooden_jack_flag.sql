@@ -1,0 +1,1 @@
+ALTER TABLE `guild_automod_items` MODIFY COLUMN `id` int AUTO_INCREMENT NOT NULL;

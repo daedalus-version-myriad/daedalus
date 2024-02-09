@@ -1,16 +1,16 @@
 import { code } from "@daedalus/bot-utils";
 import { englishList } from "@daedalus/formatting";
 import type { GuildAutomodSettings } from "@daedalus/types";
-import { GuildMember, Invite, Message, type GuildBasedChannel, type PartialMessage } from "discord.js";
+import { GuildMember, Invite, Message, PermissionFlagsBits, escapeMarkdown, type GuildBasedChannel, type PartialMessage } from "discord.js";
 import { escapeRegExp } from "lodash";
 
-export type Rule = GuildAutomodSettings["rules"][number];
+export type Rule = GuildAutomodSettings["rules"][number] & { id: number };
 
 const invitePattern = new RegExp(Invite.InvitesPattern, "g");
 const cache = new Map<string, Message[]>();
 
 export function skip(message: Message | PartialMessage, rule: Rule, config: GuildAutomodSettings) {
-    if (!message.member || skipMember(message.member, rule, config)) return true;
+    if (!message.webhookId && message.member && skipMember(message.member, rule, config)) return true;
 
     if (message.channel.isDMBased()) return true;
     let channel: GuildBasedChannel | null = message.channel;
@@ -78,7 +78,7 @@ export async function match(rule: Rule, message: Message, multiDeleteTargets: Me
 
         if (caps <= rule.capsSpamData.limit || caps * 100 < rule.capsSpamData.ratioLimit * letters.length) return;
 
-        return [`Your message contained more than the allowed uppercase letters.`, `Caps Limit Exceeded (${caps}/ ${letters.length}).`];
+        return [`Your message contained more than the allowed uppercase letters.`, `Caps Limit Exceeded (${caps} / ${letters.length}).`];
     } else if (type === "newline-spam") {
         const lines = message.content.split("\n").map((x) => x.trim().length);
 
@@ -126,5 +126,150 @@ export async function match(rule: Rule, message: Message, multiDeleteTargets: Me
         if (message.content.length <= limit) return;
 
         return [`Your message was too long (${message.content.length} > ${limit}).`, `Length Limit Exceeded (${message.content.length} > ${limit}).`];
+    } else if (type === "emoji-spam") {
+        const emojis = message.content.match(/<a?:[^:]+?:\d+>|\p{Extended_Pictographic}/gu);
+        if (!emojis) return;
+
+        const { blockAnimatedEmoji, limit } = rule.emojiSpamData;
+        const blockedAnimated = blockAnimatedEmoji && emojis.some((x) => x.startsWith("<a"));
+
+        if (!blockedAnimated && emojis.length <= limit) return;
+
+        return [
+            `Your message contained ${[emojis.length > limit ? "too many emoji" : [], blockedAnimated ? "animated emoji, which are not allowed" : []]
+                .flat()
+                .join(" and ")}`,
+            `Emoji Limit Exceeded (${[emojis.length > limit ? `${emojis.length} > ${limit}` : [], blockedAnimated ? "blocked animated emoji" : []]
+                .flat()
+                .join(" and ")}).`,
+        ];
+    } else if (type === "ratelimit" || type === "attachment-spam" || type === "sticker-spam" || type === "link-spam" || type === "mention-spam") {
+        const key = `${message.guild!.id}/${message.webhookId ? `wh/${message.webhookId}` : `user/${message.author.id}`}/${rule.id}/${
+            message.webhookId ? message.author.username : ""
+        }`;
+
+        if (!cache.has(key)) cache.set(key, []);
+        const array = cache.get(key)!;
+
+        const mentions =
+            type === "mention-spam" ? message.mentions.users.size + message.mentions.roles.size - (message.mentions.users.has(message.author.id) ? 1 : 0) : 0;
+
+        let links: RegExpMatchArray | null;
+
+        switch (type) {
+            case "ratelimit":
+                array.push(message);
+                break;
+            case "attachment-spam":
+                if (message.attachments.size === 0) return;
+                for (let x = 0; x < message.attachments.size; x++) array.push(message);
+                break;
+            case "sticker-spam":
+                if (message.stickers.size === 0) return;
+                for (let x = 0; x < message.stickers.size; x++) array.push(message);
+                break;
+            case "link-spam":
+                links = message.content.match(/\bhttps?:\/{2,}/g);
+                if (!links?.length) return;
+                for (let x = 0; x < links.length; x++) array.push(message);
+                break;
+            case "mention-spam":
+                if (mentions === 0) return;
+                array.push(message);
+                break;
+        }
+
+        const data = {
+            ratelimit: rule.ratelimitData,
+            "attachment-spam": rule.attachmentSpamData,
+            "sticker-spam": rule.stickerSpamData,
+            "link-spam": rule.linkSpamData,
+            "mention-spam": rule.mentionSpamData,
+        }[type];
+
+        const threshold = "totalLimit" in data ? data.totalLimit : data.threshold;
+        const ratelimited = array.length >= threshold && Date.now() - array[array.length - threshold].createdTimestamp <= data.timeInSeconds * 1000;
+        const limited = type === "mention-spam" && mentions > rule.mentionSpamData.perMessageLimit;
+
+        const blockedEveryone =
+            type === "mention-spam" &&
+            rule.mentionSpamData.blockFailedEveryoneOrHere &&
+            /@(everyone|here)/.test(message.content) &&
+            !message.member?.permissions.has(PermissionFlagsBits.MentionEveryone);
+
+        if (!ratelimited && !limited && !blockedEveryone) return;
+
+        const deleted = new Set<string>();
+
+        if (rule.deleteMessage)
+            for (const item of array.slice(-threshold)) {
+                if (deleted.has(item.id)) break;
+                multiDeleteTargets.push(item);
+                deleted.add(item.id);
+            }
+
+        const messageParts: string[] = [];
+        const reportParts: string[] = [];
+
+        const variant = {
+            ratelimit: "messages",
+            "attachment-spam": "files",
+            "sticker-spam": "stickers",
+            "link-spam": "links",
+            "mention-spam": "mentions",
+        }[type];
+
+        if (ratelimited) {
+            messageParts.push(`You are sending ${variant} too quickly.`);
+            reportParts.push(`Rate Limit Exceeded (${threshold} ${variant} / ${data.timeInSeconds} seconds)`);
+        }
+
+        if (limited) {
+            messageParts.push(`You sent too many mentions in one message.`);
+            reportParts.push(`Mention Limit Exceeded (${mentions} > ${rule.mentionSpamData.perMessageLimit})`);
+        }
+
+        if (blockedEveryone) {
+            messageParts.push(`You attempted to ping @everyone / @here without permission.`);
+            reportParts.push(`Failed @everyone / @here blocked.`);
+        }
+
+        return [messageParts.join(" "), reportParts.join(" ")];
+    } else if (type === "invite-links") {
+        const invites = message.content.match(invitePattern);
+        if (!invites) return;
+
+        const blocked: Invite[] = [];
+
+        for (const link of invites)
+            try {
+                const invite = await message.client.fetchInvite(link);
+                if (!invite.guild) continue;
+
+                const { id } = invite.guild;
+
+                if (id === message.guild!.id) continue;
+                if (rule.inviteLinksData.allowed.includes(id)) continue;
+                if (rule.inviteLinksData.blockUnknown || rule.inviteLinksData.blocked.includes(id)) blocked.push(invite);
+            } catch {}
+
+        if (blocked.length === 0) return;
+
+        return [
+            `You sent invite links to disallowed servers: ${englishList(blocked.map((x) => `discord.gg/${x.code} (${escapeMarkdown(x.guild!.name)})`))}.`,
+            `Blocked Invites: ${blocked.map((x) => `\`${x.code}\` (${escapeMarkdown(x.guild!.name)} \`${x.guild!.id}\`)`).join(", ")}.`,
+        ];
+    } else if (type === "link-blocklist") {
+        const blocked = new Set<string>();
+
+        for (const pattern of rule.linkBlocklistData.websites)
+            if (message.content.match(new RegExp(`\\bhttps?:\/\/[^/\\s]*${escapeRegExp(pattern)}(${pattern.endsWith("/") ? "" : "/"}\\S*)*?`)))
+                blocked.add(pattern);
+
+        if (blocked.size === 0) return;
+
+        const links = [...blocked];
+
+        return [`You sent blocked links: ${englishList(links)}`, `Blocked Links: ${links.join(", ")}`];
     }
 }

@@ -178,6 +178,7 @@ export const guildAutomodSettings = mysqlTable("guild_automod_settings", {
 export const guildAutomodItems = mysqlTable(
     "guild_automod_items",
     {
+        id: int("id").notNull().autoincrement().primaryKey(),
         guild: varchar("guild", { length: 20 }).notNull(),
         enable: boolean("enable").notNull(),
         name: varchar("name", { length: 128 }).notNull(),
@@ -351,3 +352,36 @@ export const starboardLinks = mysqlTable("starboard_links", {
     source: varchar("source", { length: 20 }).notNull().primaryKey(),
     target: varchar("target", { length: 20 }).notNull(),
 });
+
+export const moderationRemovalTasks = mysqlTable(
+    "moderation_removal_tasks",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        action: mysqlEnum("action", ["unmute", "unban"]).notNull(),
+        time: timestamp("time").notNull(),
+    },
+    (t) => ({
+        pk_guild_user_action: primaryKey({ name: "pk_guild_user_action", columns: [t.guild, t.user, t.action] }),
+    }),
+);
+
+export const userHistory = mysqlTable(
+    "user_history",
+    {
+        id: int("id").autoincrement().primaryKey(),
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        type: mysqlEnum("type", ["ban", "kick", "timeout", "mute", "informal_warn", "warn", "bulk"]).notNull(),
+        mod: varchar("mod", { length: 20 }).notNull(),
+        time: timestamp("time")
+            .default(sql`CURRENT_TIMESTAMP`)
+            .notNull(),
+        duration: int("duration"),
+        origin: varchar("origin", { length: 128 }),
+        reason: varchar("reason", { length: 512 }),
+    },
+    (t) => ({
+        idx_guild_user: index("idx_guild_user").on(t.guild, t.user),
+    }),
+);

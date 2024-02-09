@@ -16,6 +16,14 @@ export default {
         const [entry] = await db.select({ color: tables.guildSettings.embedColor }).from(tables.guildSettings).where(eq(tables.guildSettings.guild, guild));
         return entry?.color ?? 0x009688;
     }),
+    getBanFooterAndEmbedColor: proc.input(snowflake).query(async ({ input: guild }) => {
+        const [entry] = await db
+            .select({ banFooter: tables.guildSettings.banFooter, embedColor: tables.guildSettings.embedColor })
+            .from(tables.guildSettings)
+            .where(eq(tables.guildSettings.guild, guild));
+
+        return entry ?? { banFooter: "", embedColor: 0x009688 };
+    }),
     getMuteRole: proc.input(snowflake).query(async ({ input: guild }) => {
         const [entry] = await db.select({ id: tables.guildSettings.muteRole }).from(tables.guildSettings).where(eq(tables.guildSettings.guild, guild));
         return entry?.id ?? null;
@@ -333,4 +341,37 @@ export default {
     getAutomodConfig: proc.input(snowflake).query(async ({ input: guild }) => {
         return await getAutomodSettings(guild, (await getLimit(guild, "automodCountLimit")) as number);
     }),
+    removeModerationRemovalTask: proc
+        .input(z.object({ guild: snowflake, user: snowflake, action: z.enum(["unmute", "unban"]) }))
+        .mutation(async ({ input: { guild, user, action } }) => {
+            await db
+                .delete(tables.moderationRemovalTasks)
+                .where(
+                    and(
+                        eq(tables.moderationRemovalTasks.guild, guild),
+                        eq(tables.moderationRemovalTasks.user, user),
+                        eq(tables.moderationRemovalTasks.action, action),
+                    ),
+                );
+        }),
+    setModerationRemovalTask: proc
+        .input(z.object({ guild: snowflake, user: snowflake, action: z.enum(["unmute", "unban"]), time: z.date() }))
+        .mutation(async ({ input: { guild, user, time, action } }) => {
+            await db.insert(tables.moderationRemovalTasks).values({ guild, user, time, action }).onDuplicateKeyUpdate({ set: { time } });
+        }),
+    addUserHistory: proc
+        .input(
+            z.object({
+                guild: snowflake,
+                user: snowflake,
+                type: z.enum(["ban", "kick", "timeout", "mute", "informal_warn", "warn", "bulk"]),
+                mod: snowflake,
+                duration: z.number().optional(),
+                origin: z.string().max(128).optional(),
+                reason: z.string().max(512).optional(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            await db.insert(tables.userHistory).values(input);
+        }),
 } as const;

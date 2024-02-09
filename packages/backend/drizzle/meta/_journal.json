@@ -246,6 +246,34 @@
       "when": 1707261627703,
       "tag": "0034_thankful_robin_chapel",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "5",
+      "when": 1707502745057,
+      "tag": "0035_misty_bug",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1707502769210,
+      "tag": "0036_smooth_molecule_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1707502775913,
+      "tag": "0037_wooden_jack_flag",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "5",
+      "when": 1707512092212,
+      "tag": "0038_soft_thundra",
+      "breakpoints": true
     }
   ]
 }

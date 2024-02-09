@@ -149,7 +149,10 @@ export async function getStarboardSettings(guild: string): Promise<GuildStarboar
     return { ...entry, overrides };
 }
 
-export async function getAutomodSettings(guild: string, limit?: number): Promise<GuildAutomodSettings> {
+export async function getAutomodSettings(
+    guild: string,
+    limit?: number,
+): Promise<Omit<GuildAutomodSettings, "rules"> & { rules: (GuildAutomodSettings["rules"][number] & { id: number })[] }> {
     const entry = (await db.select().from(tables.guildAutomodSettings).where(eq(tables.guildAutomodSettings.guild, guild))).at(0) ?? {
         guild,
         ignoredChannels: [],
@@ -162,7 +165,7 @@ export async function getAutomodSettings(guild: string, limit?: number): Promise
 
     const rules = (await (limit ? query.limit(limit) : query)).map(({ guild, ...data }) => data as GuildAutomodSettings["rules"][number]);
 
-    return { ...entry, rules } as GuildAutomodSettings;
+    return { ...entry, rules } as any;
 }
 
 const buttonStyles = {
@@ -849,7 +852,9 @@ export default {
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
         .query(async ({ input: { id, guild } }): Promise<GuildAutomodSettings> => {
             if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
-            return await getAutomodSettings(guild);
+            const settings = await getAutomodSettings(guild);
+
+            return { ...settings, rules: settings.rules.map(({ id, ...x }) => x) };
         }),
     setAutomodSettings: proc
         .input(
