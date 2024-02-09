@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/sticky-roles",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

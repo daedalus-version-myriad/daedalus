@@ -10,6 +10,7 @@ import type {
     GuildReactionRolesSettings,
     GuildSettings,
     GuildStarboardSettings,
+    GuildStickyRolesSettings,
     GuildSupporterAnnouncementsSettings,
     GuildWelcomeSettings,
     GuildXpSettings,
@@ -166,6 +167,19 @@ export async function getAutomodSettings(
     const rules = (await (limit ? query.limit(limit) : query)).map(({ guild, ...data }) => data as GuildAutomodSettings["rules"][number]);
 
     return { ...entry, rules } as any;
+}
+
+export async function getStickyRolesSettings(guild: string): Promise<GuildStickyRolesSettings> {
+    const { roles } = (
+        await db
+            .select({ roles: tables.guildStickyRolesSettings.roles })
+            .from(tables.guildStickyRolesSettings)
+            .where(eq(tables.guildStickyRolesSettings.guild, guild))
+    ).at(0) ?? {
+        roles: "",
+    };
+
+    return { guild, roles: decodeArray(roles) };
 }
 
 const buttonStyles = {
@@ -1000,5 +1014,18 @@ export default {
                 await tx.delete(tables.guildAutomodItems).where(eq(tables.guildAutomodItems.guild, guild));
                 if (rules.length > 0) await tx.insert(tables.guildAutomodItems).values(rules.map((rule) => ({ guild, ...rule })));
             });
+        }),
+    getStickyRolesSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getStickyRolesSettings(guild);
+    }),
+    setStickyRolesSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake, roles: snowflake.array() }))
+        .mutation(async ({ input: { id, guild, roles: array } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            const roles = array.join("/");
+
+            await db.insert(tables.guildStickyRolesSettings).values({ guild, roles }).onDuplicateKeyUpdate({ set: { roles } });
         }),
 } as const;

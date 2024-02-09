@@ -257,6 +257,11 @@ export type GuildAutomodSettings = {
     }[];
 };
 
+export type GuildStickyRolesSettings = {
+    guild: string;
+    roles: string[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

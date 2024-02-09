@@ -232,6 +232,11 @@ export const guildAutomodItems = mysqlTable(
     }),
 );
 
+export const guildStickyRolesSettings = mysqlTable("guild_sticky_roles_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    roles: text("roles").notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {
@@ -383,5 +388,17 @@ export const userHistory = mysqlTable(
     },
     (t) => ({
         idx_guild_user: index("idx_guild_user").on(t.guild, t.user),
+    }),
+);
+
+export const stickyRoles = mysqlTable(
+    "sticky_roles",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        roles: text("roles").notNull(),
+    },
+    (t) => ({
+        pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
     }),
 );

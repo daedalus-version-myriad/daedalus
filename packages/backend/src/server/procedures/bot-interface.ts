@@ -1,6 +1,6 @@
 import { commandMap, modules, type PremiumBenefits } from "@daedalus/data";
 import { logEvents } from "@daedalus/logging";
-import type { GuildReactionRolesSettings, ParsedMessage } from "@daedalus/types";
+import type { GuildReactionRolesSettings, GuildStickyRolesSettings, ParsedMessage } from "@daedalus/types";
 import { and, desc, eq, gt, inArray, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
@@ -8,7 +8,7 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { getAutomodSettings, getStarboardSettings, getXpSettings, transformXpSettings } from "./guild-settings";
+import { getAutomodSettings, getStarboardSettings, getStickyRolesSettings, getXpSettings, transformXpSettings } from "./guild-settings";
 import { getLimit } from "./premium";
 
 export default {
@@ -374,4 +374,21 @@ export default {
         .mutation(async ({ input }) => {
             await db.insert(tables.userHistory).values(input);
         }),
+    getStickyRolesConfig: proc.input(snowflake).query(async ({ input: guild }): Promise<GuildStickyRolesSettings> => {
+        return await getStickyRolesSettings(guild);
+    }),
+    setStickyRoles: proc
+        .input(z.object({ guild: snowflake, user: snowflake, roles: snowflake.array() }))
+        .mutation(async ({ input: { guild, user, roles: array } }) => {
+            const roles = array.join("/");
+            await db.insert(tables.stickyRoles).values({ guild, user, roles }).onDuplicateKeyUpdate({ set: { roles } });
+        }),
+    getStickyRoles: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        const [entry] = await db
+            .select({ roles: tables.stickyRoles.roles })
+            .from(tables.stickyRoles)
+            .where(and(eq(tables.stickyRoles.guild, guild), eq(tables.stickyRoles.user, user)));
+
+        return decodeArray(entry?.roles ?? "");
+    }),
 } as const;
