@@ -237,6 +237,11 @@ export const guildStickyRolesSettings = mysqlTable("guild_sticky_roles_settings"
     roles: text("roles").notNull(),
 });
 
+export const guildAutorolesSettings = mysqlTable("guild_autoroles_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    roles: text("roles").notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {

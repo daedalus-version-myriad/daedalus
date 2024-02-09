@@ -1,6 +1,6 @@
 import { commandMap, modules, type PremiumBenefits } from "@daedalus/data";
 import { logEvents } from "@daedalus/logging";
-import type { GuildReactionRolesSettings, GuildStickyRolesSettings, ParsedMessage } from "@daedalus/types";
+import type { GuildAutorolesSettings, GuildReactionRolesSettings, GuildStickyRolesSettings, ParsedMessage } from "@daedalus/types";
 import { and, desc, eq, gt, inArray, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
@@ -8,7 +8,7 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { getAutomodSettings, getStarboardSettings, getStickyRolesSettings, getXpSettings, transformXpSettings } from "./guild-settings";
+import { getAutomodSettings, getAutorolesSettings, getStarboardSettings, getStickyRolesSettings, getXpSettings, transformXpSettings } from "./guild-settings";
 import { getLimit } from "./premium";
 
 export default {
@@ -390,5 +390,8 @@ export default {
             .where(and(eq(tables.stickyRoles.guild, guild), eq(tables.stickyRoles.user, user)));
 
         return decodeArray(entry?.roles ?? "");
+    }),
+    getAutorolesConfig: proc.input(snowflake).query(async ({ input: guild }): Promise<GuildAutorolesSettings> => {
+        return await getAutorolesSettings(guild);
     }),
 } as const;

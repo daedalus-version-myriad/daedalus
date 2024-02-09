@@ -281,6 +281,13 @@
       "when": 1707514763836,
       "tag": "0039_fair_amphibian",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "5",
+      "when": 1707515374784,
+      "tag": "0040_even_roland_deschain",
+      "breakpoints": true
     }
   ]
 }

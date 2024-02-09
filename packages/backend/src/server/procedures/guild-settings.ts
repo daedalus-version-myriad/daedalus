@@ -4,6 +4,7 @@ import { modules } from "@daedalus/data";
 import { logCategories, logEvents } from "@daedalus/logging";
 import type {
     GuildAutomodSettings,
+    GuildAutorolesSettings,
     GuildLoggingSettings,
     GuildModulesPermissionsSettings,
     GuildPremiumSettings,
@@ -175,6 +176,19 @@ export async function getStickyRolesSettings(guild: string): Promise<GuildSticky
             .select({ roles: tables.guildStickyRolesSettings.roles })
             .from(tables.guildStickyRolesSettings)
             .where(eq(tables.guildStickyRolesSettings.guild, guild))
+    ).at(0) ?? {
+        roles: "",
+    };
+
+    return { guild, roles: decodeArray(roles) };
+}
+
+export async function getAutorolesSettings(guild: string): Promise<GuildAutorolesSettings> {
+    const { roles } = (
+        await db
+            .select({ roles: tables.guildAutorolesSettings.roles })
+            .from(tables.guildAutorolesSettings)
+            .where(eq(tables.guildAutorolesSettings.guild, guild))
     ).at(0) ?? {
         roles: "",
     };
@@ -1027,5 +1041,18 @@ export default {
             const roles = array.join("/");
 
             await db.insert(tables.guildStickyRolesSettings).values({ guild, roles }).onDuplicateKeyUpdate({ set: { roles } });
+        }),
+    getAutorolesSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getAutorolesSettings(guild);
+    }),
+    setAutorolesSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake, roles: snowflake.array() }))
+        .mutation(async ({ input: { id, guild, roles: array } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            const roles = array.join("/");
+
+            await db.insert(tables.guildAutorolesSettings).values({ guild, roles }).onDuplicateKeyUpdate({ set: { roles } });
         }),
 } as const;
