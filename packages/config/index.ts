@@ -5,6 +5,7 @@ export type Secrets = {
         API: number;
         WS: number;
         LOG: number;
+        CUSTOM_ROLE_SWEEPER: number;
     };
     DATABASE: {
         NAME: string;

@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/custom-roles",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

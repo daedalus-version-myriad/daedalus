@@ -288,6 +288,20 @@
       "when": 1707515374784,
       "tag": "0040_even_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1707518604476,
+      "tag": "0041_secret_tempest",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "5",
+      "when": 1707583663156,
+      "tag": "0042_clean_king_cobra",
+      "breakpoints": true
     }
   ]
 }

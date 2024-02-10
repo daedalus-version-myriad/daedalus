@@ -5,6 +5,7 @@ import { logCategories, logEvents } from "@daedalus/logging";
 import type {
     GuildAutomodSettings,
     GuildAutorolesSettings,
+    GuildCustomRolesSettings,
     GuildLoggingSettings,
     GuildModulesPermissionsSettings,
     GuildPremiumSettings,
@@ -21,6 +22,7 @@ import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMess
 import { eq } from "drizzle-orm";
 import _ from "lodash";
 import { z } from "zod";
+import { triggerCustomRoleSweep } from "../../../../custom-roles/index.ts";
 import { clients } from "../../bot";
 import { tables } from "../../db";
 import { db } from "../../db/db";
@@ -194,6 +196,17 @@ export async function getAutorolesSettings(guild: string): Promise<GuildAutorole
     };
 
     return { guild, roles: decodeArray(roles) };
+}
+
+export async function getCustomRolesSettings(guild: string): Promise<GuildCustomRolesSettings> {
+    const { roles, ...data } = (await db.select().from(tables.guildCustomRolesSettings).where(eq(tables.guildCustomRolesSettings.guild, guild))).at(0) ?? {
+        guild,
+        allowBoosters: false,
+        roles: "",
+        anchor: null,
+    };
+
+    return { ...data, roles: decodeArray(roles) };
 }
 
 const buttonStyles = {
@@ -1054,5 +1067,23 @@ export default {
             const roles = array.join("/");
 
             await db.insert(tables.guildAutorolesSettings).values({ guild, roles }).onDuplicateKeyUpdate({ set: { roles } });
+        }),
+    getCustomRolesSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getCustomRolesSettings(guild);
+    }),
+    setCustomRolesSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake, allowBoosters: z.boolean(), roles: snowflake.array(), anchor: snowflake.nullable() }))
+        .mutation(async ({ input: { id, guild, roles, ...rest } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            const data = { ...rest, roles: roles.join("/") };
+
+            await db
+                .insert(tables.guildCustomRolesSettings)
+                .values({ guild, ...data })
+                .onDuplicateKeyUpdate({ set: data });
+
+            await triggerCustomRoleSweep(guild).catch(() => null);
         }),
 } as const;

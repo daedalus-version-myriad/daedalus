@@ -44,6 +44,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/automod", moduleIcons.automod, "Automod"],
     ["/sticky-roles", moduleIcons["sticky-roles"], "Sticky Roles"],
     ["/autoroles", moduleIcons.autoroles, "Autoroles"],
+    ["/custom-roles", moduleIcons["custom-roles"], "Custom Roles"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

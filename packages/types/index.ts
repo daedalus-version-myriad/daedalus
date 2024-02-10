@@ -267,6 +267,13 @@ export type GuildAutorolesSettings = {
     roles: string[];
 };
 
+export type GuildCustomRolesSettings = {
+    guild: string;
+    allowBoosters: boolean;
+    roles: string[];
+    anchor: string | null;
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

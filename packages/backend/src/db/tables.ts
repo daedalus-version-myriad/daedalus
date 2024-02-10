@@ -242,6 +242,13 @@ export const guildAutorolesSettings = mysqlTable("guild_autoroles_settings", {
     roles: text("roles").notNull(),
 });
 
+export const guildCustomRolesSettings = mysqlTable("guild_custom_roles_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    allowBoosters: boolean("allow_boosters").notNull(),
+    roles: text("roles").notNull(),
+    anchor: varchar("anchor", { length: 20 }),
+});
+
 export const news = mysqlTable(
     "news",
     {
@@ -402,6 +409,18 @@ export const stickyRoles = mysqlTable(
         guild: varchar("guild", { length: 20 }).notNull(),
         user: varchar("user", { length: 20 }).notNull(),
         roles: text("roles").notNull(),
+    },
+    (t) => ({
+        pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
+    }),
+);
+
+export const customRoles = mysqlTable(
+    "custom_roles",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        role: varchar("role", { length: 20 }).notNull(),
     },
     (t) => ({
         pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),

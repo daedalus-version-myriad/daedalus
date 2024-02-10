@@ -1,6 +1,6 @@
 import { commandMap, modules, type PremiumBenefits } from "@daedalus/data";
 import { logEvents } from "@daedalus/logging";
-import type { GuildAutorolesSettings, GuildReactionRolesSettings, GuildStickyRolesSettings, ParsedMessage } from "@daedalus/types";
+import type { GuildAutorolesSettings, GuildCustomRolesSettings, GuildReactionRolesSettings, GuildStickyRolesSettings, ParsedMessage } from "@daedalus/types";
 import { and, desc, eq, gt, inArray, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
@@ -8,7 +8,15 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { getAutomodSettings, getAutorolesSettings, getStarboardSettings, getStickyRolesSettings, getXpSettings, transformXpSettings } from "./guild-settings";
+import {
+    getAutomodSettings,
+    getAutorolesSettings,
+    getCustomRolesSettings,
+    getStarboardSettings,
+    getStickyRolesSettings,
+    getXpSettings,
+    transformXpSettings,
+} from "./guild-settings";
 import { getLimit } from "./premium";
 
 export default {
@@ -393,5 +401,33 @@ export default {
     }),
     getAutorolesConfig: proc.input(snowflake).query(async ({ input: guild }): Promise<GuildAutorolesSettings> => {
         return await getAutorolesSettings(guild);
+    }),
+    getCustomRolesConfig: proc.input(snowflake).query(async ({ input: guild }): Promise<GuildCustomRolesSettings> => {
+        return await getCustomRolesSettings(guild);
+    }),
+    getCustomRole: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        return (
+            (
+                await db
+                    .select({ role: tables.customRoles.role })
+                    .from(tables.customRoles)
+                    .where(and(eq(tables.customRoles.guild, guild), eq(tables.customRoles.user, user)))
+            ).at(0)?.role ?? null
+        );
+    }),
+    setCustomRole: proc.input(z.object({ guild: snowflake, user: snowflake, role: snowflake })).mutation(async ({ input: { guild, user, role } }) => {
+        await db.insert(tables.customRoles).values({ guild, user, role });
+    }),
+    deleteCustomRole: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
+        await db.delete(tables.customRoles).where(and(eq(tables.customRoles.guild, guild), eq(tables.customRoles.user, user)));
+    }),
+    deleteCustomRoles: proc.input(z.object({ guild: snowflake, users: snowflake.array() })).mutation(async ({ input: { guild, users } }) => {
+        await db.delete(tables.customRoles).where(and(eq(tables.customRoles.guild, guild), inArray(tables.customRoles.user, users)));
+    }),
+    getAllCustomRoles: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await db
+            .select({ user: tables.customRoles.user, role: tables.customRoles.role })
+            .from(tables.customRoles)
+            .where(eq(tables.customRoles.guild, guild));
     }),
 } as const;

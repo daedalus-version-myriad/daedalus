@@ -1,8 +1,10 @@
-import { checkPermissions, isWrongClient, template } from "@daedalus/bot-utils";
+import { checkPermissions, isWrongClient, reply, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
 import { ApplicationCommandOptionType, Client, IntentsBitField } from "discord.js";
 import rank from "./commands/rank";
+import roleDelete from "./commands/role-delete.ts";
+import roleSet from "./commands/role-set.ts";
 import top from "./commands/top";
 import xpMee6Import from "./commands/xp-mee6-import";
 import xpReset from "./commands/xp-reset";
@@ -40,11 +42,18 @@ const argentium = new Argentium()
                     );
             })
             .use(rank)
+            .use(roleDelete)
+            .use(roleSet)
             .use(top)
             .use(xpReset)
             .use(xpMee6Import),
     )
-    .onCommandError((e, { _ }) => {
+    .onCommandError((e, _) => {
+        if (_.isRepliable() && typeof e === "string") {
+            reply(_, template.error(e));
+            return;
+        }
+
         const id = crypto.randomUUID();
         console.error(`${id}`, e);
 
