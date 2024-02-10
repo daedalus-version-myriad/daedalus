@@ -10,7 +10,6 @@ import type {
 } from "@daedalus/types";
 import type { MessageCreateOptions } from "discord.js";
 import functions, { flatFMap } from "./functions";
-
 const escapeMap: Record<string, string> = { r: "\r", t: "\t", f: "\f", n: "\n", "\\": "\\", "'": "'", '"': '"' };
 
 class CharArray {
@@ -164,7 +163,7 @@ async function formatCustomMessageComponent([fname, ...args]: CustomMessageCompo
     if (!fn) throw `Unrecognized function: ${fname}.`;
 
     for (const key of fn.fetch ?? []) {
-        if (key === "members") await ctx.guild?.members.fetch();
+        if (key === "members") await ctx.guild?.members.fetch().catch(() => null);
     }
 
     if (typeof fn.arity === "number") {

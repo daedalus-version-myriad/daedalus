@@ -1,6 +1,13 @@
 import { commandMap, modules, type PremiumBenefits } from "@daedalus/data";
 import { logEvents } from "@daedalus/logging";
-import type { GuildAutorolesSettings, GuildCustomRolesSettings, GuildReactionRolesSettings, GuildStickyRolesSettings, ParsedMessage } from "@daedalus/types";
+import type {
+    CustomMessageText,
+    GuildAutorolesSettings,
+    GuildCustomRolesSettings,
+    GuildReactionRolesSettings,
+    GuildStickyRolesSettings,
+    ParsedMessage,
+} from "@daedalus/types";
 import { and, desc, eq, gt, inArray, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
@@ -429,5 +436,23 @@ export default {
             .select({ user: tables.customRoles.user, role: tables.customRoles.role })
             .from(tables.customRoles)
             .where(eq(tables.customRoles.guild, guild));
+    }),
+    getAllStatsChannels: proc.query(async () => {
+        const entries = await db
+            .select({
+                guild: tables.guildStatsChannelsItems.guild,
+                channel: tables.guildStatsChannelsItems.channel,
+                parsed: tables.guildStatsChannelsItems.parsed,
+            })
+            .from(tables.guildStatsChannelsItems);
+
+        const guilds = new Map<string, { channel: string; parsed: CustomMessageText }[]>();
+
+        for (const { guild, channel, parsed } of entries) {
+            if (!guilds.has(guild)) guilds.set(guild, []);
+            guilds.get(guild)!.push({ channel, parsed: parsed as CustomMessageText });
+        }
+
+        return [...guilds];
     }),
 } as const;

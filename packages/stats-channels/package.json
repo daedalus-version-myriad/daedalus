@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/stats-channels",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

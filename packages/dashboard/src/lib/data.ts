@@ -45,6 +45,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/sticky-roles", moduleIcons["sticky-roles"], "Sticky Roles"],
     ["/autoroles", moduleIcons.autoroles, "Autoroles"],
     ["/custom-roles", moduleIcons["custom-roles"], "Custom Roles"],
+    ["/stats-channels", moduleIcons["stats-channels"], "Stats Channels"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

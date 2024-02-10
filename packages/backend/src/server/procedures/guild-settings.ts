@@ -1,8 +1,9 @@
 import { secrets } from "@daedalus/config";
-import { parseMessage } from "@daedalus/custom-messages";
+import { parseCustomMessageString, parseMessage } from "@daedalus/custom-messages";
 import { modules } from "@daedalus/data";
 import { logCategories, logEvents } from "@daedalus/logging";
 import type {
+    CustomMessageText,
     GuildAutomodSettings,
     GuildAutorolesSettings,
     GuildCustomRolesSettings,
@@ -12,6 +13,7 @@ import type {
     GuildReactionRolesSettings,
     GuildSettings,
     GuildStarboardSettings,
+    GuildStatsChannelsSettings,
     GuildStickyRolesSettings,
     GuildSupporterAnnouncementsSettings,
     GuildWelcomeSettings,
@@ -1085,5 +1087,44 @@ export default {
                 .onDuplicateKeyUpdate({ set: data });
 
             await triggerCustomRoleSweep(guild).catch(() => null);
+        }),
+    getStatsChannelsSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildStatsChannelsSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+            return {
+                guild,
+                channels: await db
+                    .select({ channel: tables.guildStatsChannelsItems.channel, format: tables.guildStatsChannelsItems.format })
+                    .from(tables.guildStatsChannelsItems)
+                    .where(eq(tables.guildStatsChannelsItems.guild, guild)),
+            };
+        }),
+    setStatsChannelsSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake, channels: z.object({ channel: snowflake.nullable(), format: z.string() }).array() }))
+        .mutation(async ({ input: { id, guild, channels } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+            if (channels.some((x) => !x.channel)) return "All stats channels must have a channel set on the left side.";
+            if (new Set(channels.map((x) => x.channel)).size < channels.length)
+                return "Each channel can only have one stats channel format string bound to it.";
+
+            const data: { guild: string; channel: string; format: string; parsed: CustomMessageText }[] = [];
+
+            for (let i = 0; i < channels.length; i++) {
+                const { channel, format } = channels[i];
+
+                try {
+                    const parsed = parseCustomMessageString(format);
+                    data.push({ guild, channel: channel!, format, parsed });
+                } catch (error) {
+                    return `An error occurred parsing entry #${i + 1}: ${error}`;
+                }
+            }
+
+            await db.transaction(async (tx) => {
+                await tx.delete(tables.guildStatsChannelsItems).where(eq(tables.guildStatsChannelsItems.guild, guild));
+                if (channels.length > 0) await tx.insert(tables.guildStatsChannelsItems).values(data);
+            });
         }),
 } as const;

@@ -302,6 +302,13 @@
       "when": 1707583663156,
       "tag": "0042_clean_king_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "5",
+      "when": 1707585076573,
+      "tag": "0043_striped_corsair",
+      "breakpoints": true
     }
   ]
 }

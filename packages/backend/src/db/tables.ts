@@ -249,6 +249,19 @@ export const guildCustomRolesSettings = mysqlTable("guild_custom_roles_settings"
     anchor: varchar("anchor", { length: 20 }),
 });
 
+export const guildStatsChannelsItems = mysqlTable(
+    "guild_stats_channels_items",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        channel: varchar("channel", { length: 20 }).notNull(),
+        format: text("format").notNull(),
+        parsed: json("parsed").notNull(),
+    },
+    (t) => ({
+        pk_guild_channel: primaryKey({ name: "pk_guild_channel", columns: [t.guild, t.channel] }),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {

@@ -274,6 +274,14 @@ export type GuildCustomRolesSettings = {
     anchor: string | null;
 };
 
+export type GuildStatsChannelsSettings = {
+    guild: string;
+    channels: {
+        channel: string | null;
+        format: string;
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;
