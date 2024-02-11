@@ -9,6 +9,7 @@ import type {
     GuildAutorolesSettings,
     GuildCustomRolesSettings,
     GuildLoggingSettings,
+    GuildModmailSettings,
     GuildModulesPermissionsSettings,
     GuildPremiumSettings,
     GuildReactionRolesSettings,
@@ -23,10 +24,10 @@ import type {
     ParsedMessage,
 } from "@daedalus/types";
 import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMessageOptions } from "discord.js";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray, not } from "drizzle-orm";
 import _ from "lodash";
 import { z } from "zod";
-import { triggerCustomRoleSweep } from "../../../../custom-roles/index.ts";
+import { triggerCustomRoleSweep } from "../../../../custom-roles/index";
 import { clients } from "../../bot";
 import { tables } from "../../db";
 import { db } from "../../db/db";
@@ -254,6 +255,48 @@ export async function getAutoresponderSettings(guild: string, limit?: number): P
         blockedChannels: decodeArray(entry.blockedChannels),
         blockedRoles: decodeArray(entry.blockedRoles),
         triggers,
+    };
+}
+
+export async function getModmailSettings(guild: string): Promise<GuildModmailSettings> {
+    const entry = (await db.select().from(tables.guildModmailSettings).where(eq(tables.guildModmailSettings.guild, guild))).at(0) ?? { guild, useMulti: false };
+
+    const targets = (await db.select().from(tables.guildModmailItems).where(eq(tables.guildModmailItems.guild, guild))).map(
+        ({ guild, pingRoles, accessRoles, openParsed, closeParsed, ...data }) => ({
+            ...data,
+            pingRoles: decodeArray(pingRoles),
+            accessRoles: decodeArray(accessRoles),
+            openParsed: openParsed as any,
+            closeParsed: closeParsed as any,
+        }),
+    );
+
+    return {
+        ...entry,
+        targets:
+            targets.length === 0
+                ? [
+                      {
+                          id: -1,
+                          name: "Default Modmail Target",
+                          description: "Remove/replace this description",
+                          emoji: null,
+                          useThreads: true,
+                          channel: null,
+                          category: null,
+                          pingRoles: [],
+                          pingHere: false,
+                          accessRoles: [],
+                          openMessage: "",
+                          closeMessage: "",
+                          openParsed: [],
+                          closeParsed: [],
+                      },
+                  ]
+                : targets,
+        snippets: (await db.select().from(tables.guildModmailSnippets).where(eq(tables.guildModmailSnippets.guild, guild))).map(
+            ({ guild, parsed, ...data }) => ({ ...data, parsed: parsed as any }),
+        ),
     };
 }
 
@@ -1250,5 +1293,113 @@ export default {
                         })),
                     );
             });
+        }),
+    getModmailSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getModmailSettings(guild);
+    }),
+    setModmailSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                useMulti: z.boolean(),
+                targets: z
+                    .object({
+                        id: z.number(),
+                        name: z.string().max(100),
+                        description: z.string().max(100),
+                        emoji: z.string().max(20).nullable(),
+                        useThreads: z.boolean(),
+                        channel: snowflake.nullable(),
+                        category: snowflake.nullable(),
+                        pingRoles: snowflake.array(),
+                        pingHere: z.boolean(),
+                        accessRoles: snowflake.array(),
+                        openMessage: z.string(),
+                        closeMessage: z.string(),
+                        openParsed: z.any(),
+                        closeParsed: z.any(),
+                    })
+                    .array(),
+                snippets: z
+                    .object({
+                        name: z.string().max(100),
+                        content: z.string(),
+                        parsed: z.any(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, useMulti, targets, snippets } }): Promise<[string | null, GuildModmailSettings]> => {
+            const result = { useMulti, targets, snippets } as GuildModmailSettings;
+
+            if (!(await hasPermission(id, guild))) return [NO_PERMISSION, result];
+
+            for (let i = 0; i < targets.length; i++) {
+                const target = targets[i];
+
+                try {
+                    target.openParsed = parseCustomMessageString(target.openMessage);
+                    target.closeParsed = parseCustomMessageString(target.closeMessage);
+                } catch (error) {
+                    return [
+                        `Error parsing open/close message${useMulti || i > 0 ? ` for modmail target #${i + 1}${useMulti ? "" : ` (although multi-target mode is off, to ensure no future issues, please fix or remove this modmail target)`}` : ""}: ${error}`,
+                        result,
+                    ];
+                }
+            }
+
+            for (const snippet of snippets)
+                try {
+                    snippet.parsed = parseCustomMessageString(snippet.content);
+                } catch (error) {
+                    return [`Error parsing snippet named ${snippet.name}: ${error}`, result];
+                }
+
+            await db.transaction(async (tx) => {
+                await tx.insert(tables.guildModmailSettings).values({ guild, useMulti }).onDuplicateKeyUpdate({ set: { useMulti } });
+
+                if (targets.length > 0)
+                    await tx.delete(tables.guildModmailItems).where(
+                        and(
+                            eq(tables.guildModmailItems.guild, guild),
+                            not(
+                                inArray(
+                                    tables.guildModmailItems.id,
+                                    targets.map((t) => t.id),
+                                ),
+                            ),
+                        ),
+                    );
+                else await tx.delete(tables.guildModmailItems).where(eq(tables.guildModmailItems.guild, guild));
+
+                for (const { id, pingRoles, accessRoles, openParsed, closeParsed, ...target } of targets) {
+                    const data = {
+                        guild,
+                        ...target,
+                        pingRoles: pingRoles.join("/"),
+                        accessRoles: accessRoles.join("/"),
+                        openParsed: openParsed!,
+                        closeParsed: closeParsed!,
+                    };
+
+                    if (id === -1) await tx.insert(tables.guildModmailItems).values(data);
+                    else {
+                        const { rowsAffected } = await tx
+                            .update(tables.guildModmailItems)
+                            .set(data)
+                            .where(and(eq(tables.guildModmailItems.id, id), eq(tables.guildModmailItems.guild, guild)));
+
+                        if (rowsAffected === 0) await tx.insert(tables.guildModmailItems).values(data);
+                    }
+                }
+
+                await tx.delete(tables.guildModmailSnippets).where(eq(tables.guildModmailSnippets.guild, guild));
+                if (snippets.length > 0)
+                    await tx.insert(tables.guildModmailSnippets).values(snippets.map(({ parsed, ...snippet }) => ({ guild, ...snippet, parsed: parsed! })));
+            });
+
+            return [null, await getModmailSettings(guild)];
         }),
 } as const;

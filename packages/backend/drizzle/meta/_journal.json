@@ -330,6 +330,34 @@
       "when": 1707626577800,
       "tag": "0046_colorful_longshot",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "5",
+      "when": 1707641685980,
+      "tag": "0047_sad_captain_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "5",
+      "when": 1707674879736,
+      "tag": "0048_late_morlun",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "5",
+      "when": 1707685852996,
+      "tag": "0049_ambitious_hardball",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "5",
+      "when": 1707692083290,
+      "tag": "0050_aromatic_silver_surfer",
+      "breakpoints": true
     }
   ]
 }

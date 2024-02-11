@@ -1,6 +1,7 @@
 import { observable } from "@trpc/server/observable";
 import { and, eq, inArray } from "drizzle-orm";
 import { EventEmitter } from "events";
+import { z } from "zod";
 import { tables } from "../../db";
 import { db } from "../../db/db";
 import { snowflake } from "../schemas";
@@ -39,4 +40,15 @@ export default {
             return () => clientUpdateEmitter.off("update", hook);
         }),
     ),
+    vanityClientByToken: proc.input(z.string()).query(async ({ input: token }) => {
+        const guild = (await db.select({ guild: tables.tokens.guild }).from(tables.tokens).where(eq(tables.tokens.token, token))).at(0)?.guild;
+        if (!guild) return null;
+
+        const [entry] = await db
+            .select({})
+            .from(tables.guildPremiumSettings)
+            .where(and(eq(tables.guildPremiumSettings.guild, guild), eq(tables.guildPremiumSettings.hasCustom, true)));
+
+        return entry ? guild : null;
+    }),
 } as const;

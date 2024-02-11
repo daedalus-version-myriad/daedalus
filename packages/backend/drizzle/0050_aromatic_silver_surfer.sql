@@ -1,0 +1,1 @@
+ALTER TABLE `modmail_messages` MODIFY COLUMN `edits` json NOT NULL;

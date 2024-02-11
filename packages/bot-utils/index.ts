@@ -187,7 +187,7 @@ export function copyFiles(files: Iterable<Attachment>, spoilerLevel: SpoilerLeve
     return attachments;
 }
 
-export async function copyMedia(message: Message | PartialMessage, spoilerLevel: SpoilerLevel, tracker?: [boolean]): Promise<AttachmentPayload[]> {
+export async function copyMedia(message: Message | PartialMessage, spoilerLevel: SpoilerLevel): Promise<AttachmentPayload[]> {
     const attachments = copyFiles(message.attachments.values(), spoilerLevel);
 
     for (const sticker of message.stickers.values())
@@ -198,7 +198,6 @@ export async function copyMedia(message: Message | PartialMessage, spoilerLevel:
             else throw 0;
         } catch {
             attachments.push({ attachment: Buffer.from([]), name: `${spoilerLevel > 0 ? "SPOILER_" : ""}${sticker.name}.${stickerCache.ext(sticker)}` });
-            if (tracker) tracker[0] = true;
         }
 
     return attachments;

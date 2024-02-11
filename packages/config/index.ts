@@ -19,6 +19,7 @@ export type Secrets = {
             SECRET: string;
         };
         TOKEN: string;
+        IMAGE_HOST: string;
     };
     STRIPE: {
         SECRET_KEY: string;

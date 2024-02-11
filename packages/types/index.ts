@@ -311,6 +311,32 @@ export type GuildAutoresponderSettings = {
     }[];
 };
 
+export type GuildModmailSettings = {
+    guild: string;
+    useMulti: boolean;
+    targets: {
+        id: number;
+        name: string;
+        description: string;
+        emoji: string | null;
+        useThreads: boolean;
+        channel: string | null;
+        category: string | null;
+        pingRoles: string[];
+        pingHere: boolean;
+        accessRoles: string[];
+        openMessage: string;
+        closeMessage: string;
+        openParsed: CustomMessageText;
+        closeParsed: CustomMessageText;
+    }[];
+    snippets: {
+        name: string;
+        content: string;
+        parsed: CustomMessageText;
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

@@ -15,6 +15,7 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
+import { addFile } from "./file-service";
 import {
     getAutomodSettings,
     getAutoresponderSettings,
@@ -458,5 +459,55 @@ export default {
     }),
     getAutoresponderConfig: proc.input(snowflake).query(async ({ input: guild }) => {
         return await getAutoresponderSettings(guild);
+    }),
+    maybeLogInternalMessage: proc
+        .input(
+            z.object({
+                channel: snowflake,
+                id: snowflake,
+                author: snowflake,
+                content: z.string(),
+                attachments: z.object({ name: z.string(), url: z.string().nullable() }).array(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            const [entry] = await db
+                .select({ uuid: tables.modmailThreads.uuid })
+                .from(tables.modmailThreads)
+                .where(eq(tables.modmailThreads.channel, input.channel));
+
+            if (!entry) return;
+
+            for (const attachment of input.attachments) attachment.url &&= await addFile(attachment.url);
+
+            await db.insert(tables.modmailMessages).values({
+                uuid: entry.uuid,
+                type: "internal",
+                id: input.id,
+                source: -1,
+                target: "",
+                author: input.author,
+                anon: false,
+                targetName: "",
+                content: input.content,
+                edits: [],
+                attachments: input.attachments,
+                deleted: false,
+                sent: false,
+            });
+        }),
+    getLastModmailThread: proc.input(z.object({ client: snowflake, user: snowflake })).query(async ({ input: { client, user } }) => {
+        const [entry] = await db
+            .select({ uuid: tables.modmailLastThread.uuid })
+            .from(tables.modmailLastThread)
+            .where(and(eq(tables.modmailLastThread.client, client), eq(tables.modmailLastThread.user, user)));
+
+        if (!entry) return null;
+
+        const [thread] = await db.select().from(tables.modmailThreads).where(eq(tables.modmailThreads.uuid, entry.uuid));
+        return thread;
+    }),
+    getModmailTargets: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await db.select().from(tables.guildModmailItems).where(eq(tables.guildModmailItems.guild, guild));
     }),
 } as const;

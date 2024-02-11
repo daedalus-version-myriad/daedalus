@@ -299,6 +299,48 @@ export const guildAutoresponderItems = mysqlTable(
     }),
 );
 
+export const guildModmailSettings = mysqlTable("guild_modmail_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    useMulti: boolean("use_multi").notNull(),
+});
+
+export const guildModmailItems = mysqlTable(
+    "guild_modmail_items",
+    {
+        id: int("id").notNull().autoincrement().primaryKey(),
+        guild: varchar("guild", { length: 20 }).notNull(),
+        name: varchar("name", { length: 100 }).notNull(),
+        description: varchar("description", { length: 100 }).notNull(),
+        emoji: varchar("emoji", { length: 20 }),
+        useThreads: boolean("use_threads").notNull(),
+        channel: varchar("channel", { length: 20 }),
+        category: varchar("category", { length: 20 }),
+        pingRoles: text("ping_roles").notNull(),
+        pingHere: boolean("ping_here").notNull(),
+        accessRoles: text("access_roles").notNull(),
+        openMessage: text("open_message").notNull(),
+        closeMessage: text("close_message").notNull(),
+        openParsed: json("open_parsed").notNull(),
+        closeParsed: json("close_parsed").notNull(),
+    },
+    (t) => ({
+        idx_guild: index("idx_guild").on(t.guild),
+    }),
+);
+
+export const guildModmailSnippets = mysqlTable(
+    "guild_modmail_snippets",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        name: varchar("name", { length: 100 }).notNull(),
+        content: text("content").notNull(),
+        parsed: json("parsed").notNull(),
+    },
+    (t) => ({
+        idx_guild: index("idx_guild").on(t.guild),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {
@@ -476,3 +518,55 @@ export const customRoles = mysqlTable(
         pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
     }),
 );
+
+export const modmailThreads = mysqlTable(
+    "modmail_threads",
+    {
+        uuid: varchar("uuid", { length: 36 }).notNull(),
+        channel: varchar("channel", { length: 20 }).notNull().primaryKey(),
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        targetId: int("target_id").notNull(),
+        closed: boolean("closed").notNull(),
+    },
+    (t) => ({
+        unq_uuid: unique("unq_uuid").on(t.uuid),
+    }),
+);
+
+export const modmailMessages = mysqlTable("modmail_messages", {
+    uuid: varchar("uuid", { length: 36 }).notNull(),
+    time: timestamp("time")
+        .default(sql`CURRENT_TIMESTAMP`)
+        .notNull(),
+    type: mysqlEnum("type", ["open", "incoming", "internal", "outgoing", "close"]),
+    id: varchar("id", { length: 20 }).notNull(),
+    source: int("source").notNull(),
+    target: varchar("target", { length: 20 }).notNull(),
+    author: varchar("author", { length: 20 }).notNull(),
+    anon: boolean("anon").notNull(),
+    targetName: varchar("target_name", { length: 100 }).notNull(),
+    content: varchar("content", { length: 4000 }).notNull(),
+    edits: json("edits").notNull(),
+    attachments: json("attachments").notNull(),
+    deleted: boolean("deleted").notNull(),
+    sent: boolean("sent").notNull(),
+});
+
+export const modmailLastThread = mysqlTable(
+    "modmail_last_thread",
+    {
+        client: varchar("client", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        uuid: varchar("uuid", { length: 36 }).notNull(),
+    },
+    (t) => ({
+        pk_client_user: primaryKey({ name: "pk_client_user", columns: [t.client, t.user] }),
+    }),
+);
+
+export const files = mysqlTable("files", {
+    uuid: varchar("uuid", { length: 36 }).notNull().primaryKey(),
+    channel: varchar("channel", { length: 20 }).notNull(),
+    message: varchar("message", { length: 20 }).notNull(),
+});

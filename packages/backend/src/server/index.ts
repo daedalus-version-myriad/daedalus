@@ -4,6 +4,7 @@ import { applyWSSHandler } from "@trpc/server/adapters/ws";
 import ws from "ws";
 import account from "./procedures/account";
 import botInterface from "./procedures/bot-interface";
+import fileService from "./procedures/file-service";
 import guildSettings from "./procedures/guild-settings";
 import news from "./procedures/news";
 import premium from "./procedures/premium";
@@ -14,6 +15,7 @@ import { router } from "./trpc";
 const appRouter = router({
     ...account,
     ...botInterface,
+    ...fileService,
     ...guildSettings,
     ...news,
     ...premium,

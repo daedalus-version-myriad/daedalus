@@ -1,0 +1,1 @@
+ALTER TABLE `guild_modmail_items` ADD `access_roles` text NOT NULL;
