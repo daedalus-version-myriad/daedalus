@@ -17,6 +17,7 @@ import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
 import {
     getAutomodSettings,
+    getAutoresponderSettings,
     getAutorolesSettings,
     getCustomRolesSettings,
     getStarboardSettings,
@@ -454,5 +455,8 @@ export default {
         }
 
         return [...guilds];
+    }),
+    getAutoresponderConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getAutoresponderSettings(guild);
     }),
 } as const;

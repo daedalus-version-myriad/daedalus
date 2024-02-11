@@ -262,6 +262,43 @@ export const guildStatsChannelsItems = mysqlTable(
     }),
 );
 
+export const guildAutoresponderSettings = mysqlTable("guild_autoresponder_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    onlyInAllowedChannels: boolean("only_in_allowed_channels").notNull(),
+    onlyToAllowedRoles: boolean("only_to_allowed_roles").notNull(),
+    allowedChannels: text("allowed_channels").notNull(),
+    allowedRoles: text("allowed_roles").notNull(),
+    blockedChannels: text("blocked_channels").notNull(),
+    blockedRoles: text("blocked_roles").notNull(),
+});
+
+export const guildAutoresponderItems = mysqlTable(
+    "guild_autoresponder_items",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        enabled: boolean("enabled").notNull(),
+        match: varchar("match", { length: 4000 }).notNull(),
+        wildcard: boolean("wildcard").notNull(),
+        caseInsensitive: boolean("case_insensitive").notNull(),
+        respondToBotsAndWebhooks: boolean("respond_to_bots_and_webhooks").notNull(),
+        replyMode: mysqlEnum("reply_mode", ["none", "normal", "reply", "ping-reply"]).notNull(),
+        reaction: varchar("reaction", { length: 20 }),
+        message: json("message").notNull(),
+        parsed: json("parsed").notNull(),
+        bypassDefaultChannelSettings: boolean("bypass_default_channel_settings").notNull(),
+        bypassDefaultRoleSettings: boolean("bypass_default_role_settings").notNull(),
+        onlyInAllowedChannels: boolean("only_in_allowed_channels").notNull(),
+        onlyToAllowedRoles: boolean("only_to_allowed_roles").notNull(),
+        allowedChannels: text("allowed_channels").notNull(),
+        allowedRoles: text("allowed_roles").notNull(),
+        blockedChannels: text("blocked_channels").notNull(),
+        blockedRoles: text("blocked_roles").notNull(),
+    },
+    (t) => ({
+        idx_guild: index("idx_guild").on(t.guild),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {

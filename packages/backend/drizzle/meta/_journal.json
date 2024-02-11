@@ -309,6 +309,27 @@
       "when": 1707585076573,
       "tag": "0043_striped_corsair",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "5",
+      "when": 1707617033742,
+      "tag": "0044_steep_doctor_faustus",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "5",
+      "when": 1707618783166,
+      "tag": "0045_young_arachne",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "5",
+      "when": 1707626577800,
+      "tag": "0046_colorful_longshot",
+      "breakpoints": true
     }
   ]
 }

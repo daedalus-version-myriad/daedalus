@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/autoresponder",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

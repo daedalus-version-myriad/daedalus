@@ -5,6 +5,7 @@ import { logCategories, logEvents } from "@daedalus/logging";
 import type {
     CustomMessageText,
     GuildAutomodSettings,
+    GuildAutoresponderSettings,
     GuildAutorolesSettings,
     GuildCustomRolesSettings,
     GuildLoggingSettings,
@@ -18,6 +19,7 @@ import type {
     GuildSupporterAnnouncementsSettings,
     GuildWelcomeSettings,
     GuildXpSettings,
+    MessageData,
     ParsedMessage,
 } from "@daedalus/types";
 import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMessageOptions } from "discord.js";
@@ -209,6 +211,50 @@ export async function getCustomRolesSettings(guild: string): Promise<GuildCustom
     };
 
     return { ...data, roles: decodeArray(roles) };
+}
+
+export async function getAutoresponderSettings(guild: string, limit?: number): Promise<GuildAutoresponderSettings> {
+    const entry = (await db.select().from(tables.guildAutoresponderSettings).where(eq(tables.guildAutoresponderSettings.guild, guild))).at(0) ?? {
+        guild,
+        onlyInAllowedChannels: false,
+        onlyToAllowedRoles: false,
+        allowedChannels: "",
+        allowedRoles: "",
+        blockedChannels: "",
+        blockedRoles: "",
+    };
+
+    const query = db.select().from(tables.guildAutoresponderItems).where(eq(tables.guildAutoresponderItems.guild, guild));
+
+    const triggers = (await (limit ? query.limit(limit) : query)).map(
+        ({
+            guild,
+            message,
+            parsed,
+            allowedChannels,
+            allowedRoles,
+            blockedChannels,
+            blockedRoles,
+            ...data
+        }): GuildAutoresponderSettings["triggers"][number] => ({
+            ...data,
+            message: message as any,
+            parsed: parsed as any,
+            allowedChannels: decodeArray(allowedChannels),
+            allowedRoles: decodeArray(allowedRoles),
+            blockedChannels: decodeArray(blockedChannels),
+            blockedRoles: decodeArray(blockedRoles),
+        }),
+    );
+
+    return {
+        ...entry,
+        allowedChannels: decodeArray(entry.allowedChannels),
+        allowedRoles: decodeArray(entry.allowedRoles),
+        blockedChannels: decodeArray(entry.blockedChannels),
+        blockedRoles: decodeArray(entry.blockedRoles),
+        triggers,
+    };
 }
 
 const buttonStyles = {
@@ -1125,6 +1171,84 @@ export default {
             await db.transaction(async (tx) => {
                 await tx.delete(tables.guildStatsChannelsItems).where(eq(tables.guildStatsChannelsItems.guild, guild));
                 if (channels.length > 0) await tx.insert(tables.guildStatsChannelsItems).values(data);
+            });
+        }),
+    getAutoresponderSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getAutoresponderSettings(guild);
+    }),
+    setAutoresponderSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                onlyInAllowedChannels: z.boolean(),
+                onlyToAllowedRoles: z.boolean(),
+                allowedChannels: snowflake.array(),
+                allowedRoles: snowflake.array(),
+                blockedChannels: snowflake.array(),
+                blockedRoles: snowflake.array(),
+                triggers: z
+                    .object({
+                        enabled: z.boolean(),
+                        match: z.string().max(4000),
+                        wildcard: z.boolean(),
+                        caseInsensitive: z.boolean(),
+                        respondToBotsAndWebhooks: z.boolean(),
+                        replyMode: z.enum(["none", "normal", "reply", "ping-reply"]),
+                        reaction: z.string().nullable(),
+                        message: baseMessageData,
+                        parsed: z.any(),
+                        bypassDefaultChannelSettings: z.boolean(),
+                        bypassDefaultRoleSettings: z.boolean(),
+                        onlyInAllowedChannels: z.boolean(),
+                        onlyToAllowedRoles: z.boolean(),
+                        allowedChannels: snowflake.array(),
+                        allowedRoles: snowflake.array(),
+                        blockedChannels: snowflake.array(),
+                        blockedRoles: snowflake.array(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, triggers, ...data } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            for (const trigger of triggers)
+                try {
+                    trigger.parsed = parseMessage(trigger.message as MessageData, false);
+                } catch (error) {
+                    return `Error parsing custom message for trigger matching ${trigger.match}: ${error}`;
+                }
+
+            await db.transaction(async (tx) => {
+                const values = {
+                    ...data,
+                    allowedChannels: data.allowedChannels.join("/"),
+                    allowedRoles: data.allowedRoles.join("/"),
+                    blockedChannels: data.blockedChannels.join("/"),
+                    blockedRoles: data.blockedRoles.join("/"),
+                };
+
+                await tx
+                    .insert(tables.guildAutoresponderSettings)
+                    .values({ guild, ...values })
+                    .onDuplicateKeyUpdate({ set: values });
+
+                await tx.delete(tables.guildAutoresponderItems).where(eq(tables.guildAutoresponderItems.guild, guild));
+
+                if (triggers.length > 0)
+                    await tx.insert(tables.guildAutoresponderItems).values(
+                        triggers.map(({ allowedChannels, allowedRoles, blockedChannels, blockedRoles, parsed, ...data }) => ({
+                            guild,
+                            ...data,
+                            allowedChannels: allowedChannels.join("/"),
+                            allowedRoles: allowedRoles.join("/"),
+                            blockedChannels: blockedChannels.join("/"),
+                            blockedRoles: blockedRoles.join("/"),
+                            parsed: parsed!,
+                        })),
+                    );
             });
         }),
 } as const;

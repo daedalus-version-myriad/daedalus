@@ -1,0 +1,1 @@
+ALTER TABLE `guild_autoresponder_settings` ADD PRIMARY KEY(`guild`);

@@ -282,6 +282,35 @@ export type GuildStatsChannelsSettings = {
     }[];
 };
 
+export type GuildAutoresponderSettings = {
+    guild: string;
+    onlyInAllowedChannels: boolean;
+    onlyToAllowedRoles: boolean;
+    allowedChannels: string[];
+    allowedRoles: string[];
+    blockedChannels: string[];
+    blockedRoles: string[];
+    triggers: {
+        enabled: boolean;
+        match: string;
+        wildcard: boolean;
+        caseInsensitive: boolean;
+        respondToBotsAndWebhooks: boolean;
+        replyMode: "none" | "normal" | "reply" | "ping-reply";
+        reaction: string | null;
+        message: MessageData;
+        parsed: ParsedMessage;
+        bypassDefaultChannelSettings: boolean;
+        bypassDefaultRoleSettings: boolean;
+        onlyInAllowedChannels: boolean;
+        onlyToAllowedRoles: boolean;
+        allowedChannels: string[];
+        allowedRoles: string[];
+        blockedChannels: string[];
+        blockedRoles: string[];
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

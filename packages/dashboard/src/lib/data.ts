@@ -46,6 +46,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/autoroles", moduleIcons.autoroles, "Autoroles"],
     ["/custom-roles", moduleIcons["custom-roles"], "Custom Roles"],
     ["/stats-channels", moduleIcons["stats-channels"], "Stats Channels"],
+    ["/autoresponder", moduleIcons.autoresponder, "Autoresponder"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [
