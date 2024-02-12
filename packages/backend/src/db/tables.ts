@@ -553,18 +553,6 @@ export const modmailMessages = mysqlTable("modmail_messages", {
     sent: boolean("sent").notNull(),
 });
 
-export const modmailLastThread = mysqlTable(
-    "modmail_last_thread",
-    {
-        client: varchar("client", { length: 20 }).notNull(),
-        user: varchar("user", { length: 20 }).notNull(),
-        uuid: varchar("uuid", { length: 36 }).notNull(),
-    },
-    (t) => ({
-        pk_client_user: primaryKey({ name: "pk_client_user", columns: [t.client, t.user] }),
-    }),
-);
-
 export const files = mysqlTable("files", {
     uuid: varchar("uuid", { length: 36 }).notNull().primaryKey(),
     channel: varchar("channel", { length: 20 }).notNull(),

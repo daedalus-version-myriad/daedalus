@@ -8,7 +8,7 @@ import type {
     GuildStickyRolesSettings,
     ParsedMessage,
 } from "@daedalus/types";
-import { and, desc, eq, gt, inArray, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
@@ -496,18 +496,31 @@ export default {
                 sent: false,
             });
         }),
-    getLastModmailThread: proc.input(z.object({ client: snowflake, user: snowflake })).query(async ({ input: { client, user } }) => {
-        const [entry] = await db
-            .select({ uuid: tables.modmailLastThread.uuid })
-            .from(tables.modmailLastThread)
-            .where(and(eq(tables.modmailLastThread.client, client), eq(tables.modmailLastThread.user, user)));
+    getOpenModmailThreads: proc.input(z.object({ guild: snowflake.nullable(), user: snowflake })).query(async ({ input: { guild, user } }) => {
+        const conditions = [eq(tables.modmailThreads.user, user), eq(tables.modmailThreads.closed, false)];
 
-        if (!entry) return null;
+        if (guild === null)
+            return await db
+                .select({ guild: tables.modmailThreads.guild, targetId: tables.modmailThreads.targetId })
+                .from(tables.modmailThreads)
+                .leftJoin(tables.tokens, eq(tables.modmailThreads.guild, tables.tokens.guild))
+                .where(and(isNull(tables.tokens.guild), ...conditions));
 
-        const [thread] = await db.select().from(tables.modmailThreads).where(eq(tables.modmailThreads.uuid, entry.uuid));
-        return thread;
+        return await db
+            .select({ guild: tables.modmailThreads.guild, targetId: tables.modmailThreads.targetId })
+            .from(tables.modmailThreads)
+            .where(and(eq(tables.modmailThreads.guild, guild), ...conditions));
     }),
     getModmailTargets: proc.input(snowflake).query(async ({ input: guild }) => {
         return await db.select().from(tables.guildModmailItems).where(eq(tables.guildModmailItems.guild, guild));
+    }),
+    getModmailEnabledNonVanityGuilds: proc.query(async () => {
+        return (
+            await db
+                .select({ guild: tables.guildModulesSettings.guild })
+                .from(tables.guildModulesSettings)
+                .leftJoin(tables.tokens, eq(tables.guildModulesSettings.guild, tables.tokens.guild))
+                .where(and(eq(tables.guildModulesSettings.module, "modmail"), eq(tables.guildModulesSettings.enabled, true), isNull(tables.tokens.guild)))
+        ).map(({ guild }) => guild);
     }),
 } as const;

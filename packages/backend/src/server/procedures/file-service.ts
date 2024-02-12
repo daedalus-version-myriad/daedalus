@@ -3,13 +3,14 @@ import type { TextChannel } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { bot } from "../../bot";
-import { db } from "../../db";
-import { tables } from "../../db";
+import { db, tables } from "../../db";
 import { proc } from "../trpc";
 
-const channel = (await (await bot).channels.fetch(secrets.DISCORD.IMAGE_HOST)) as TextChannel;
+let channel: TextChannel;
 
 export async function addFile(url: string) {
+    channel ??= (await (await bot).channels.fetch(secrets.DISCORD.IMAGE_HOST)) as TextChannel;
+
     try {
         const { id } = await channel.send({ files: [{ attachment: url }] });
 

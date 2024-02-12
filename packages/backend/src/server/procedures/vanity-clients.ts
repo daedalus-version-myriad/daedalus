@@ -45,7 +45,7 @@ export default {
         if (!guild) return null;
 
         const [entry] = await db
-            .select({})
+            .select()
             .from(tables.guildPremiumSettings)
             .where(and(eq(tables.guildPremiumSettings.guild, guild), eq(tables.guildPremiumSettings.hasCustom, true)));
 

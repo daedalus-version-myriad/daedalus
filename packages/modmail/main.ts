@@ -1,8 +1,8 @@
 import { trpc } from "@daedalus/api";
-import { getColor, isModuleDisabled, template } from "@daedalus/bot-utils";
+import { isModuleDisabled, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
-import { ButtonStyle, Client, ComponentType, Events, IntentsBitField, MessageType, Partials, type Guild, type Message } from "discord.js";
-import { handleTargetSelection } from "./lib.ts";
+import { Client, Events, IntentsBitField, MessageType, Partials, type Guild, type Message } from "discord.js";
+import { modmailGuildSelector, modmailMultiResendConfirmation, modmailReply, modmailResendConfirmation, modmailTargetSelector } from "./lib";
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({
@@ -40,32 +40,29 @@ async function maybeLogInternalMessage(message: Message) {
     });
 }
 
-async function resolveDefault(message: Message) {}
+async function resolveDefault(message: Message) {
+    const openThreads = (await trpc.getOpenModmailThreads.query({ guild: null, user: message.author.id })).filter(({ guild }) =>
+        message.client.guilds.cache.has(guild),
+    );
+
+    console.log(
+        `Received message from ${message.author.id}; resolving with the global client (${openThreads.length} open thread${openThreads.length === 1 ? "" : "s"})`,
+    );
+
+    if (openThreads.length === 0) await modmailReply(message, modmailGuildSelector(message.author));
+    else if (openThreads.length === 1)
+        await modmailReply(message, modmailResendConfirmation(message.client.guilds.cache.get(openThreads[0].guild)!, openThreads[0].targetId, true));
+    else await modmailReply(message, modmailMultiResendConfirmation(message.client, openThreads, true));
+}
 
 async function resolveVanity(message: Message, guild: Guild) {
-    const thread = await trpc.getLastModmailThread.query({ client: message.client.user.id, user: message.author.id });
-    if (thread === null) return await handleTargetSelection(message, guild);
+    const openThreads = await trpc.getOpenModmailThreads.query({ guild: guild.id, user: message.author.id });
 
-    const targets = await trpc.getModmailTargets.query(guild.id);
+    console.log(
+        `Received message from ${message.author.id}; resolving with vanity client ${message.client.user.id} for guild ${guild.id} (${openThreads.length} open thread${openThreads.length === 1 ? "" : "s"})`,
+    );
 
-    if (targets.length === 1 && targets[0].id === thread.targetId) {
-        await message.reply({
-            embeds: [
-                {
-                    title: "Server Selection",
-                    description: `Are you sure that you want to send this message to **${guild.name}**?`,
-                    color: await getColor(guild),
-                },
-            ],
-            components: [
-                {
-                    type: ComponentType.ActionRow,
-                    components: [
-                        { type: ComponentType.Button, style: ButtonStyle.Success, customId: `::modmail/confirm-single-target/${guild.id}`, label: "Yes" },
-                        { type: ComponentType.Button, style: ButtonStyle.Danger, customId: `::cancel`, label: "Cancel" },
-                    ],
-                },
-            ],
-        });
-    }
+    if (openThreads.length === 0) await modmailReply(message, modmailTargetSelector(guild, false));
+    else if (openThreads.length === 1) await modmailReply(message, modmailResendConfirmation(guild, openThreads[0].targetId, false));
+    else await modmailReply(message, modmailMultiResendConfirmation(message.client, openThreads, false));
 }

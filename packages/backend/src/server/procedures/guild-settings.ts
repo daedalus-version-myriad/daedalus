@@ -1333,7 +1333,6 @@ export default {
         )
         .mutation(async ({ input: { id, guild, useMulti, targets, snippets } }): Promise<[string | null, GuildModmailSettings]> => {
             const result = { useMulti, targets, snippets } as GuildModmailSettings;
-
             if (!(await hasPermission(id, guild))) return [NO_PERMISSION, result];
 
             for (let i = 0; i < targets.length; i++) {

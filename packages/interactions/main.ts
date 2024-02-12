@@ -4,6 +4,13 @@ import { Client, Events, IntentsBitField } from "discord.js";
 
 const Intents = IntentsBitField.Flags;
 
+// pending:
+// ::modmail/select-guild (dropdown, show target selector)
+// ::modmail/confirm/[guild]/[target] (button, process modmail)
+// ::modmail/switch-guild (button, show guild selector)
+// ::modmail/select-target/[guild] (dropdown, process modmail)
+// ::modmail/select-thread (dropdown, process modmail)
+
 new ClientManager({
     factory: () => new Client({ intents: Intents.Guilds }),
     postprocess: (client) =>
