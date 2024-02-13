@@ -1,5 +1,5 @@
 import { trpc } from "@daedalus/api";
-import { SpoilerLevel, copyMedia, getColor, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
+import { SpoilerLevel, copyMedia, getColor, isModuleDisabled, isWrongClient, mdash } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import type { GuildStarboardSettings } from "@daedalus/types";
 import { Client, Events, IntentsBitField, Message, Partials, type APIEmbed, type Channel, type GuildBasedChannel, type PartialMessage } from "discord.js";
@@ -33,60 +33,80 @@ async function checkStars(input: Message | PartialMessage) {
     if (await isWrongClient(input.client, input.guild)) return;
     if (await isModuleDisabled(input.guild, "starboard")) return;
 
-    const message = (await input.fetch()) as Message<true>;
-    const config = await trpc.getStarboardConfig.query(message.guild.id);
-    if (!config.reaction) return;
+    try {
+        const message = (await input.fetch()) as Message<true>;
+        const config = await trpc.getStarboardConfig.query(message.guild.id);
+        if (!config.reaction) return;
 
-    const starboard = await getStarboard(config, message.channel);
-    if (!starboard) return;
+        const starboard = await getStarboard(config, message.channel);
+        if (!starboard) return;
 
-    const rxn = message.reactions.cache.get(config.reaction);
-    const count = rxn?.count ?? 0;
-    const target = await getStarlink(starboard.target, message.id);
+        const rxn = message.reactions.cache.get(config.reaction);
+        const count = rxn?.count ?? 0;
+        const target = await getStarlink(starboard.target, message.id);
 
-    if (count < starboard.threshold) {
-        stars.delete(message.id);
-        await target?.delete().catch(() => null);
-        await trpc.purgeStarlink.mutate(message.id);
-    } else {
-        const content = `${rxn!.emoji} **${count}** ${message.channel}`;
+        if (count < starboard.threshold) {
+            stars.delete(message.id);
+            await target?.delete().catch(() => null);
+            await trpc.purgeStarlink.mutate(message.id);
+        } else {
+            const content = `${rxn!.emoji} **${count}** ${message.channel}`;
 
-        if (target) await target.edit({ content });
-        else {
-            if (isNSFW(message.channel) && !isNSFW(starboard.target)) return;
-            if (stars.has(message.id)) return void setTimeout(() => checkStars(message), 1000);
-            stars.add(message.id);
-
-            const attachments = await copyMedia(message, SpoilerLevel.KEEP);
-
-            const single =
-                attachments.length === 1 &&
-                !attachments[0].name?.startsWith("SPOILER_") &&
-                ["png", "jpg"].includes((attachments[0].name ?? "").split(".").at(-1)!);
-
-            let embeds: APIEmbed[] = [
-                {
-                    description: message.content,
-                    color: await getColor(message.guild),
-                    fields: [{ name: "Source", value: `[Jump!](${message.url})` }],
-                    author: { name: message.author.tag, icon_url: (message.member ?? message.author).displayAvatarURL({ size: 64 }) },
-                    footer: { text: message.id },
-                    image: single ? { url: attachments[0].attachment as string } : undefined,
-                },
-            ];
-
-            let files = [];
-
-            if (!message.embeds.some((embed) => embed.data.type === "rich")) files = single ? [] : attachments;
+            if (target) await target.edit({ content });
             else {
-                embeds[0].image = undefined;
-                files = attachments;
-                embeds = [...message.embeds.map((e) => e.toJSON()).slice(0, 9), embeds[0]];
-            }
+                if (isNSFW(message.channel) && !isNSFW(starboard.target)) return;
+                if (stars.has(message.id)) return void setTimeout(() => checkStars(message), 1000);
+                stars.add(message.id);
 
-            const link = await starboard.target.send({ content, embeds, files });
-            await trpc.addStarlink.mutate({ source: message.id, target: link.id });
+                const attachments = await copyMedia(message, SpoilerLevel.KEEP);
+
+                const single =
+                    attachments.length === 1 &&
+                    !attachments[0].name?.startsWith("SPOILER_") &&
+                    ["png", "jpg"].includes((attachments[0].name ?? "").split(".").at(-1)!);
+
+                let embeds: APIEmbed[] = [
+                    {
+                        description: message.content || undefined,
+                        color: await getColor(message.guild),
+                        fields: [{ name: "Source", value: `[Jump!](${message.url})` }],
+                        author: { name: message.author.tag, icon_url: (message.member ?? message.author).displayAvatarURL({ size: 64 }) },
+                        footer: { text: message.id },
+                        image: single ? { url: attachments[0].attachment as string } : undefined,
+                    },
+                ];
+
+                let files = [];
+
+                if (!message.embeds.some((embed) => embed.data.type === "rich")) files = single ? [] : attachments;
+                else {
+                    embeds[0].image = undefined;
+                    files = attachments;
+                    embeds = [...message.embeds.map((e) => e.toJSON()).slice(0, 9), embeds[0]];
+                }
+
+                let link: Message;
+
+                try {
+                    link = await starboard.target.send({ content, embeds, files });
+                } catch {
+                    link = await starboard.target.send({
+                        content,
+                        embeds: [
+                            ...embeds.slice(0, -1),
+                            {
+                                ...embeds.at(-1)!,
+                                footer: { text: `${embeds.at(-1)!.footer!.text} ${mdash} files could not be uploaded; please jump to the original message` },
+                            },
+                        ],
+                    });
+                }
+
+                await trpc.addStarlink.mutate({ source: message.id, target: link.id });
+            }
         }
+    } finally {
+        stars.delete(input.id);
     }
 }
 
