@@ -1,0 +1,1 @@
+ALTER TABLE `modmail_autoclose` ADD `time` int NOT NULL;

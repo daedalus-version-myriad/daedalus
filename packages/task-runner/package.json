@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/task-runner",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

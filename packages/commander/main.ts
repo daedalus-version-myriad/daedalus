@@ -2,8 +2,16 @@ import { checkPermissions, isWrongClient, reply, template } from "@daedalus/bot-
 import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
 import { ApplicationCommandOptionType, Client, IntentsBitField } from "discord.js";
+import modmailClose from "./commands/modmail-close";
+import modmailContact from "./commands/modmail-contact";
+import modmailLogLink from "./commands/modmail-log-link";
+import modmailNotify from "./commands/modmail-notify";
+import modmailNsfw from "./commands/modmail-nsfw";
 import modmailReply from "./commands/modmail-reply";
 import modmailReplyModal from "./commands/modmail-reply-modal";
+import modmailSnippetSend from "./commands/modmail-snippet-send";
+import modmailSnippetUseAsTemplate from "./commands/modmail-snippet-use-as-template";
+import modmailSnippetView from "./commands/modmail-snippet-view";
 import rank from "./commands/rank";
 import roleDelete from "./commands/role-delete";
 import roleSet from "./commands/role-set";
@@ -43,8 +51,16 @@ const argentium = new Argentium()
                         `${_.isChatInputCommand() ? `/${[_.commandName, _.options.getSubcommandGroup(false), _.options.getSubcommand(false)].filter((x) => x).join(" ")}` : _.commandName} (${_.user.tag} (${_.user.id}) in ${_.guild ? `${_.guild.name} (${_.guild.id})` : "DMs"}) ${denied ? "(permission denied)" : ""}`,
                     );
             })
+            .use(modmailClose)
+            .use(modmailContact)
+            .use(modmailLogLink)
+            .use(modmailNotify)
+            .use(modmailNsfw)
             .use(modmailReplyModal)
             .use(modmailReply)
+            .use(modmailSnippetSend)
+            .use(modmailSnippetUseAsTemplate)
+            .use(modmailSnippetView)
             .use(rank)
             .use(roleDelete)
             .use(roleSet)

@@ -1,0 +1,1 @@
+ALTER TABLE `modmail_autoclose` MODIFY COLUMN `time` bigint NOT NULL;

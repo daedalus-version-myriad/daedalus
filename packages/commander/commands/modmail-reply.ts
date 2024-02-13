@@ -7,7 +7,7 @@ export default (x: Commands) =>
         x
             .key("modmail reply")
             .description("reply to a modmail thread")
-            .stringOption("content", "the content of the reply")
+            .stringOption("content", "the content of the reply", { maxLength: 4000 })
             .use(addModmailReplyOptions)
             .fn(async ({ _, ...data }) => {
                 const reply = await _.deferReply();

@@ -1,6 +1,8 @@
 import { trpc } from "@daedalus/api";
 import { fuzzy } from "@daedalus/global-utils";
+import type { GuildModmailSettings } from "@daedalus/types";
 import type { SlashUtil } from "argentium/src/slash-util";
+import type { ChatInputCommandInteraction } from "discord.js";
 
 export const addModmailReplyOptions = <T>(x: SlashUtil<T>) =>
     x
@@ -31,3 +33,14 @@ export const addModmailSnippetOption = <T>(x: SlashUtil<T>) =>
     });
 
 export const addModmailSnippetSendOption = <T>(x: SlashUtil<T>) => x.booleanOption("anon", "if true, hide your name and top role in the reply");
+
+export async function loadSnippet<T extends { _: ChatInputCommandInteraction; snippet: string }>(
+    data: T,
+): Promise<Omit<T, "snippet"> & { snippet: GuildModmailSettings["snippets"][number] }> {
+    const snippets = await trpc.getModmailSnippets.query(data._.guild!.id);
+
+    const snippet = snippets.find((x) => x.name === data.snippet);
+    if (!snippet) throw "No snippet exists with that name.";
+
+    return { ...data, snippet: snippet as GuildModmailSettings["snippets"][number] };
+}

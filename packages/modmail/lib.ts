@@ -1,11 +1,13 @@
 import { trpc } from "@daedalus/api";
-import { SpoilerLevel, copyMedia, embed, getColor, isModuleDisabled, isWrongClient, mdash, obtainLimit, template } from "@daedalus/bot-utils";
+import { SpoilerLevel, copyMedia, embed, expand, getColor, isModuleDisabled, isWrongClient, mdash, obtainLimit, template } from "@daedalus/bot-utils";
+import { secrets } from "@daedalus/config";
 import { formatCustomMessageString } from "@daedalus/custom-messages";
 import { logError } from "@daedalus/log-interface";
 import {
     Attachment,
     ButtonStyle,
     ChannelType,
+    ChatInputCommandInteraction,
     Client,
     Colors,
     ComponentType,
@@ -17,7 +19,6 @@ import {
     type ActionRowData,
     type ButtonComponentData,
     type ButtonInteraction,
-    type ChatInputCommandInteraction,
     type Guild,
     type GuildMember,
     type GuildTextBasedChannel,
@@ -572,7 +573,7 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
 
         for (const content of contents.slice(0, -1)) await channel.send({ content, allowedMentions: { parse: ["users"] } }).catch(() => null);
 
-        const sent = await channel
+        await channel
             .send({
                 content: contents.at(-1),
                 embeds: [
@@ -772,4 +773,85 @@ export async function startModal(
     } catch (error) {
         await modal.editReply(template.error(`${error}`));
     }
+}
+
+export async function closeModmailThread(ctx: ChatInputCommandInteraction | GuildTextBasedChannel, user: string, notify: boolean, content: string) {
+    const send = ctx instanceof ChatInputCommandInteraction ? ctx.editReply.bind(ctx) : ctx.send.bind(ctx);
+    const channel = ctx instanceof ChatInputCommandInteraction ? ctx.channel! : ctx;
+
+    const { member, thread } = await getModmailContactInfo(!notify)({ _: ctx });
+
+    const targets = await trpc.getModmailTargets.query(ctx.guild!.id);
+    const target = targets.find((target) => target.id === thread.targetId);
+
+    if (member && notify) {
+        content ||= target
+            ? await formatCustomMessageString(target.closeParsed, { guild: ctx.guild, member }).catch((error) => {
+                  logError(
+                      ctx.guild!.id,
+                      "Formatting modmail on-close message",
+                      `An unexpected error occurred formatting your custom on-close message for modmail:\n\`\`\`\n${error}\n\`\`\``,
+                  );
+
+                  return "";
+              })
+            : "";
+
+        try {
+            await member.send({
+                embeds: [
+                    {
+                        title: `Modmail Thread Closed: **${escapeMarkdown(ctx.guild!.name)}**`,
+                        description: content,
+                        color: await getColor(ctx.guild!),
+                        footer: { text: `Server ID: ${ctx.guild!.id}` },
+                    },
+                ],
+            });
+        } catch (error) {
+            console.error(error);
+            await send(template.error("The user could not be notified. They may have disabled DMs or blocked the bot."));
+            return;
+        }
+    }
+
+    await trpc.closeModmailThread.mutate({ channel: channel.id, author: user, content, sent: notify });
+
+    setTimeout(() => (channel.isThread() ? channel.setArchived(true) : channel.delete()), 2500);
+
+    const log = !target || target.channel === null ? null : await ctx.guild!.channels.fetch(target.channel).catch(() => null);
+
+    if (log?.isTextBased())
+        await log.send({
+            embeds: [
+                {
+                    title: "Modmail Thread Closed",
+                    description: `The thread with ${expand(member, `Missing Member: <@${thread.user}>`)} was closed.`,
+                    color: Colors.Red,
+                },
+            ],
+            components: [
+                {
+                    type: ComponentType.ActionRow,
+                    components: [
+                        {
+                            type: ComponentType.Button,
+                            style: ButtonStyle.Link,
+                            label: "View on Dashboard",
+                            url: `${secrets.DOMAIN}/modmail/${thread.uuid}`,
+                        },
+                    ],
+                },
+            ],
+        });
+
+    await send({
+        embeds: [
+            {
+                title: "Modmail Thread Closed",
+                description: notify ? "The recipient was notified." : "No notification was sent.",
+                color: await getColor(ctx.guild!),
+            },
+        ],
+    });
 }

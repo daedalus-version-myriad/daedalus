@@ -9,7 +9,7 @@ import type {
     GuildStickyRolesSettings,
     ParsedMessage,
 } from "@daedalus/types";
-import { and, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
@@ -373,10 +373,18 @@ export default {
                 );
         }),
     setModerationRemovalTask: proc
-        .input(z.object({ guild: snowflake, user: snowflake, action: z.enum(["unmute", "unban"]), time: z.date() }))
+        .input(z.object({ guild: snowflake, user: snowflake, action: z.enum(["unmute", "unban"]), time: z.number().int() }))
         .mutation(async ({ input: { guild, user, time, action } }) => {
             await db.insert(tables.moderationRemovalTasks).values({ guild, user, time, action }).onDuplicateKeyUpdate({ set: { time } });
         }),
+    getAndClearModerationRemovalTasks: proc.query(async () => {
+        return await db.transaction(async (tx) => {
+            const tasks = await tx.select().from(tables.moderationRemovalTasks).where(lt(tables.moderationRemovalTasks.time, Date.now()));
+            await tx.delete(tables.moderationRemovalTasks).where(lt(tables.moderationRemovalTasks.time, Date.now()));
+
+            return tasks;
+        });
+    }),
     addUserHistory: proc
         .input(
             z.object({
@@ -397,17 +405,24 @@ export default {
     }),
     setStickyRoles: proc
         .input(z.object({ guild: snowflake, user: snowflake, roles: snowflake.array() }))
-        .mutation(async ({ input: { guild, user, roles: array } }) => {
-            const roles = array.join("/");
-            await db.insert(tables.stickyRoles).values({ guild, user, roles }).onDuplicateKeyUpdate({ set: { roles } });
+        .mutation(async ({ input: { guild, user, roles } }) => {
+            await db.transaction(async (tx) => {
+                await tx.delete(tables.stickyRoles).where(and(eq(tables.stickyRoles.guild, guild), eq(tables.stickyRoles.user, user)));
+                if (roles.length > 0) await tx.insert(tables.stickyRoles).values(roles.map((role) => ({ guild, user, role })));
+            });
         }),
     getStickyRoles: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
-        const [entry] = await db
-            .select({ roles: tables.stickyRoles.roles })
-            .from(tables.stickyRoles)
-            .where(and(eq(tables.stickyRoles.guild, guild), eq(tables.stickyRoles.user, user)));
-
-        return decodeArray(entry?.roles ?? "");
+        return (
+            await db
+                .select({ role: tables.stickyRoles.role })
+                .from(tables.stickyRoles)
+                .where(and(eq(tables.stickyRoles.guild, guild), eq(tables.stickyRoles.user, user)))
+        ).map(({ role }) => role);
+    }),
+    deleteStickyRole: proc.input(z.object({ guild: snowflake, user: snowflake, role: snowflake })).mutation(async ({ input: { guild, user, role } }) => {
+        await db
+            .delete(tables.stickyRoles)
+            .where(and(eq(tables.stickyRoles.guild, guild), eq(tables.stickyRoles.user, user), eq(tables.stickyRoles.role, role)));
     }),
     getAutorolesConfig: proc.input(snowflake).query(async ({ input: guild }): Promise<GuildAutorolesSettings> => {
         return await getAutorolesSettings(guild);
@@ -554,7 +569,11 @@ export default {
                 uuid = crypto.randomUUID();
             } while ((await db.select().from(tables.modmailThreads).where(eq(tables.modmailThreads.uuid, uuid))).length > 0);
 
-            await db.insert(tables.modmailThreads).values({ ...data, uuid, closed: false });
+            await db
+                .insert(tables.modmailThreads)
+                .values({ ...data, uuid, closed: false })
+                .onDuplicateKeyUpdate({ set: { channel: data.channel, closed: false } });
+
             await db.insert(tables.modmailMessages).values({ ...defaultModmailMessage, uuid, type: "open", author: data.user, targetName });
         }),
     reviveModmailThread: proc
@@ -580,6 +599,16 @@ export default {
     cancelModmailAutoclose: proc.input(snowflake).mutation(async ({ input: channel }) => {
         await db.delete(tables.modmailAutoclose).where(eq(tables.modmailAutoclose.channel, channel));
     }),
+    setModmailAutoclose: proc
+        .input(
+            z.object({ guild: snowflake, channel: snowflake, author: snowflake, notify: z.boolean(), message: z.string().max(4000), time: z.number().int() }),
+        )
+        .mutation(async ({ input: { channel, ...data } }) => {
+            await db
+                .insert(tables.modmailAutoclose)
+                .values({ channel, ...data })
+                .onDuplicateKeyUpdate({ set: data });
+        }),
     postIncomingModmailMessage: proc
         .input(z.object({ channel: snowflake, content: z.string().max(4000), attachments: z.object({ name: z.string(), url: z.string() }).array() }))
         .mutation(async ({ input: { channel, content, attachments } }) => {
@@ -627,6 +656,33 @@ export default {
             await db
                 .insert(tables.modmailMessages)
                 .values({ ...defaultModmailMessage, ...data, uuid: entry.uuid, type: "outgoing", attachments: await mapFiles(attachments) });
+        }),
+    closeModmailThread: proc
+        .input(z.object({ channel: snowflake, author: snowflake, content: z.string().max(4000), sent: z.boolean() }))
+        .mutation(async ({ input: { channel, ...data } }) => {
+            const [entry] = await db.select({ uuid: tables.modmailThreads.uuid }).from(tables.modmailThreads).where(eq(tables.modmailThreads.channel, channel));
+            if (!entry) return;
+
+            await db.update(tables.modmailThreads).set({ closed: true }).where(eq(tables.modmailThreads.uuid, entry.uuid));
+            await db.insert(tables.modmailMessages).values({ ...defaultModmailMessage, uuid: entry.uuid, type: "close", ...data });
+            await db.delete(tables.modmailAutoclose).where(eq(tables.modmailAutoclose.channel, channel));
+        }),
+    getAndClearModmailCloseTasks: proc.query(async () => {
+        return await db.transaction(async (tx) => {
+            const tasks = await tx.select().from(tables.modmailAutoclose).where(lt(tables.modmailAutoclose.time, Date.now()));
+            await tx.delete(tables.modmailAutoclose).where(lt(tables.modmailAutoclose.time, Date.now()));
+
+            return tasks;
+        });
+    }),
+    setModmailNotify: proc
+        .input(z.object({ channel: snowflake, user: snowflake, delete: z.boolean(), once: z.boolean() }))
+        .mutation(async ({ input: { channel, user, delete: del, once } }) => {
+            if (del)
+                await db
+                    .delete(tables.modmailNotifications)
+                    .where(and(eq(tables.modmailNotifications.channel, channel), eq(tables.modmailNotifications.user, user)));
+            else await db.insert(tables.modmailNotifications).values({ channel, user, once }).onDuplicateKeyUpdate({ set: { once } });
         }),
 } as const;
 

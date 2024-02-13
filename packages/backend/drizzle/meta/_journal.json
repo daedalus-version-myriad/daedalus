@@ -379,6 +379,62 @@
       "when": 1707792528544,
       "tag": "0053_square_adam_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "5",
+      "when": 1707803296454,
+      "tag": "0054_young_baron_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "5",
+      "when": 1707803333300,
+      "tag": "0055_nifty_spirit",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "5",
+      "when": 1707804095751,
+      "tag": "0056_next_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "5",
+      "when": 1707806644583,
+      "tag": "0057_dazzling_ben_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "5",
+      "when": 1707806652098,
+      "tag": "0058_busy_night_nurse",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "5",
+      "when": 1707810384714,
+      "tag": "0059_modern_moira_mactaggert",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "5",
+      "when": 1707810815788,
+      "tag": "0060_dear_frank_castle",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "5",
+      "when": 1707810822763,
+      "tag": "0061_chief_carnage",
+      "breakpoints": true
     }
   ]
 }

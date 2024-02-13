@@ -3,6 +3,9 @@ import { isModuleDisabled, isWrongClient, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, IntentsBitField, MessageType, Partials, type Guild, type Message } from "discord.js";
 import { modmailGuildSelector, modmailMultiResendConfirmation, modmailReply, modmailResendConfirmation, modmailTargetSelector } from "./lib";
+
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({

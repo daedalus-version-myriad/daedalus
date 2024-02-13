@@ -468,7 +468,7 @@ export const moderationRemovalTasks = mysqlTable(
         guild: varchar("guild", { length: 20 }).notNull(),
         user: varchar("user", { length: 20 }).notNull(),
         action: mysqlEnum("action", ["unmute", "unban"]).notNull(),
-        time: timestamp("time").notNull(),
+        time: bigint("time", { mode: "number" }).notNull(),
     },
     (t) => ({
         pk_guild_user_action: primaryKey({ name: "pk_guild_user_action", columns: [t.guild, t.user, t.action] }),
@@ -500,10 +500,10 @@ export const stickyRoles = mysqlTable(
     {
         guild: varchar("guild", { length: 20 }).notNull(),
         user: varchar("user", { length: 20 }).notNull(),
-        roles: text("roles").notNull(),
+        role: varchar("role", { length: 20 }).notNull(),
     },
     (t) => ({
-        pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
+        pk_guild_user_role: primaryKey({ name: "pk_guild_user_role", columns: [t.guild, t.user, t.role] }),
     }),
 );
 
@@ -531,7 +531,7 @@ export const modmailThreads = mysqlTable(
     },
     (t) => ({
         unq_uuid: unique("unq_uuid").on(t.uuid),
-        idx_guild_user_target: index("idx_guild_user_target").on(t.guild, t.user, t.targetId),
+        unq_guild_user_target: unique("unq_guild_user_target").on(t.guild, t.user, t.targetId),
     }),
 );
 
@@ -562,7 +562,7 @@ export const modmailNotifications = mysqlTable(
         once: boolean("once").notNull(),
     },
     (t) => ({
-        idx_channel_user: index("idx_channel_user").on(t.channel, t.user),
+        pk_channel_user: primaryKey({ name: "pk_channel_user", columns: [t.channel, t.user] }),
         idx_once: index("idx_once").on(t.once),
     }),
 );
@@ -573,6 +573,7 @@ export const modmailAutoclose = mysqlTable("modmail_autoclose", {
     author: varchar("author", { length: 20 }).notNull(),
     notify: boolean("notify").notNull(),
     message: varchar("message", { length: 4000 }).notNull(),
+    time: bigint("time", { mode: "number" }).notNull(),
 });
 
 export const files = mysqlTable("files", {

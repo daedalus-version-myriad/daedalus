@@ -1023,7 +1023,7 @@ export default {
                                     z
                                         .string()
                                         .regex(
-                                            /^(\*\S|[^*]).{3,}(\S\*|[^*])$/,
+                                            /^(\*\S|[^*]).+(\S\*|[^*])$/,
                                             "Blocked terms must be at least three characters and wildcards must not be next to spaces.",
                                         ),
                                 )

@@ -1,0 +1,1 @@
+DROP TABLE `modmail_threads`;

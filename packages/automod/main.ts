@@ -219,7 +219,7 @@ async function check(message: Message | PartialMessage) {
                         guild: message.guild.id,
                         user: message.author!.id,
                         action: "unmute",
-                        time: new Date(Date.now() + actionDurations.mute!),
+                        time: Date.now() + actionDurations.mute!,
                     });
             }
 
@@ -238,7 +238,7 @@ async function check(message: Message | PartialMessage) {
                         guild: message.guild.id,
                         user: message.author!.id,
                         action: "unban",
-                        time: new Date(Date.now() + actionDurations.ban!),
+                        time: Date.now() + actionDurations.ban!,
                     });
             }
 
