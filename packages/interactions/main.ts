@@ -1,18 +1,17 @@
 import { reply, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
-import { Client, Events, IntentsBitField } from "discord.js";
+import { Client, Events, IntentsBitField, Partials } from "discord.js";
 
 const Intents = IntentsBitField.Flags;
 
-// pending:
-// ::modmail/select-guild (dropdown, show target selector)
-// ::modmail/confirm/[guild]/[target] (button, process modmail)
-// ::modmail/switch-guild (button, show guild selector)
-// ::modmail/select-target/[guild] (dropdown, process modmail)
-// ::modmail/select-thread (dropdown, process modmail)
-
 new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds }),
+    factory: () =>
+        new Client({
+            intents: Intents.Guilds | Intents.DirectMessages | Intents.MessageContent,
+            partials: [Partials.Channel],
+            sweepers: { messages: { lifetime: 60, interval: 60 } },
+            allowedMentions: { parse: [] },
+        }),
     postprocess: (client) =>
         client.on(Events.InteractionCreate, async (interaction) => {
             if (!interaction.isMessageComponent() && !interaction.isModalSubmit()) return;

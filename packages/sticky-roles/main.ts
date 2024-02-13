@@ -6,11 +6,7 @@ import { Client, Events, GuildMember, IntentsBitField, Partials, type PartialGui
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({
-    factory: () =>
-        new Client({
-            intents: Intents.Guilds | Intents.GuildMembers,
-            partials: [Partials.GuildMember],
-        }),
+    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, partials: [Partials.GuildMember], allowedMentions: { parse: [] } }),
     postprocess: (client) =>
         client
             .on(Events.GuildMemberRemove, syncRoles)

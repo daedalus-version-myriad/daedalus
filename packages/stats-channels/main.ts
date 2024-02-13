@@ -7,7 +7,7 @@ import { Client, IntentsBitField } from "discord.js";
 
 const Intents = IntentsBitField.Flags;
 
-const manager = new ClientManager({ factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers }) });
+const manager = new ClientManager({ factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, allowedMentions: { parse: [] } }) });
 
 async function run() {
     for (const [guildId, channels] of await trpc.getAllStatsChannels.query()) {

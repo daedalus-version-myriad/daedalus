@@ -8,7 +8,7 @@ process.on("uncaughtException", console.error);
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers }),
+    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, allowedMentions: { parse: [] } }),
     postprocess: (client) => {
         (async () => {
             const guilds = await client.guilds.fetch();

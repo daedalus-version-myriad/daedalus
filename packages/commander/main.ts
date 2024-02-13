@@ -66,7 +66,7 @@ const Intents = IntentsBitField.Flags;
 
 new ClientManager({
     factory: () => {
-        const client = new Client({ intents: Intents.Guilds });
+        const client = new Client({ intents: Intents.Guilds, allowedMentions: { parse: [] } });
         argentium.preApply(client);
         return client;
     },

@@ -28,6 +28,10 @@ export async function addFile(url: string) {
     }
 }
 
+export async function mapFiles(files: { name: string; url: string }[]) {
+    return await Promise.all(files.map(async ({ name, url }) => ({ name, url: await addFile(url) })));
+}
+
 export default {
     addFile: proc.input(z.string()).mutation(async ({ input: url }) => {
         return await addFile(url);

@@ -531,6 +531,7 @@ export const modmailThreads = mysqlTable(
     },
     (t) => ({
         unq_uuid: unique("unq_uuid").on(t.uuid),
+        idx_guild_user_target: index("idx_guild_user_target").on(t.guild, t.user, t.targetId),
     }),
 );
 
@@ -551,6 +552,27 @@ export const modmailMessages = mysqlTable("modmail_messages", {
     attachments: json("attachments").notNull(),
     deleted: boolean("deleted").notNull(),
     sent: boolean("sent").notNull(),
+});
+
+export const modmailNotifications = mysqlTable(
+    "modmail_notifications",
+    {
+        channel: varchar("channel", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        once: boolean("once").notNull(),
+    },
+    (t) => ({
+        idx_channel_user: index("idx_channel_user").on(t.channel, t.user),
+        idx_once: index("idx_once").on(t.once),
+    }),
+);
+
+export const modmailAutoclose = mysqlTable("modmail_autoclose", {
+    channel: varchar("channel", { length: 20 }).notNull().primaryKey(),
+    guild: varchar("guild", { length: 20 }).notNull(),
+    author: varchar("author", { length: 20 }).notNull(),
+    notify: boolean("notify").notNull(),
+    message: varchar("message", { length: 4000 }).notNull(),
 });
 
 export const files = mysqlTable("files", {

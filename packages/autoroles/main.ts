@@ -6,7 +6,7 @@ import { Client, Events, IntentsBitField } from "discord.js";
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers }),
+    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, allowedMentions: { parse: [] } }),
     postprocess: (client) =>
         client.on(Events.GuildMemberAdd, async (member) => {
             if (await isWrongClient(member.client, member.guild)) return;

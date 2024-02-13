@@ -42,6 +42,7 @@ export const clients = new ClientManager({
         new Client({
             intents: IntentsBitField.Flags.Guilds | IntentsBitField.Flags.GuildMembers,
             sweepers: { users: { interval: 3600, filter: () => () => true } },
+            allowedMentions: { parse: [] },
         }),
     postprocess: setPresence,
     sweep: 3600000,

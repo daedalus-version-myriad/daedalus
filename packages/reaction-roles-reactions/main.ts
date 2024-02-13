@@ -6,7 +6,12 @@ import { Client, Events, IntentsBitField, MessageReaction, Partials, User, type 
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMessageReactions, partials: [Partials.Channel, Partials.Message, Partials.Reaction] }),
+    factory: () =>
+        new Client({
+            intents: Intents.Guilds | Intents.GuildMessageReactions,
+            partials: [Partials.Channel, Partials.Message, Partials.Reaction],
+            allowedMentions: { parse: [] },
+        }),
     postprocess: (client) =>
         client
             .on(Events.MessageReactionAdd, async (reaction, user) => await handle(reaction, user, true))

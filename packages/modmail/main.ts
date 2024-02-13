@@ -11,6 +11,7 @@ new ClientManager({
             intents: Intents.Guilds | Intents.DirectMessages | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers,
             partials: [Partials.Channel, Partials.Message, Partials.GuildMember],
             sweepers: { messages: { lifetime: 60, interval: 60 } },
+            allowedMentions: { parse: [] },
         }),
     postprocess: (client) =>
         client.on(Events.MessageCreate, async (message) => {

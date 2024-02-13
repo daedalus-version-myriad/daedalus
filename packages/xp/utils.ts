@@ -78,6 +78,7 @@ export async function addXp(channel: Channel, member: GuildMember, text = 0, voi
                                         image: { url: settings.announcementBackground || secrets.ASSETS.XP_LEVELUP_IMAGE },
                                     },
                                 ],
+                                allowedMentions: { users: [member.id] },
                             },
                             `The XP level-up announcement for ${member} (${key} level ${levelBefore[key]} ${to} ${levelAfter[key]}) could not be sent.`,
                         );

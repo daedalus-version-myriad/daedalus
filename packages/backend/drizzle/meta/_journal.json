@@ -365,6 +365,13 @@
       "when": 1707768156294,
       "tag": "0051_yielding_wraith",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "5",
+      "when": 1707786375323,
+      "tag": "0052_tense_sabretooth",
+      "breakpoints": true
     }
   ]
 }

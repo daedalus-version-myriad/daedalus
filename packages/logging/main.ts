@@ -28,6 +28,7 @@ const manager = new ClientManager({
                 Intents.GuildVoiceStates,
             partials: [Partials.Channel, Partials.Message, Partials.Reaction],
             sweepers: { messages: { lifetime: 604800, interval: 3600 } },
+            allowedMentions: { parse: [] },
         }),
     postprocess: addEventHandlers,
 });

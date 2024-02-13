@@ -4,6 +4,7 @@ import type {
     CustomMessageText,
     GuildAutorolesSettings,
     GuildCustomRolesSettings,
+    GuildModmailSettings,
     GuildReactionRolesSettings,
     GuildStickyRolesSettings,
     ParsedMessage,
@@ -15,7 +16,7 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { addFile } from "./file-service";
+import { addFile, mapFiles } from "./file-service";
 import {
     getAutomodSettings,
     getAutoresponderSettings,
@@ -511,8 +512,25 @@ export default {
             .from(tables.modmailThreads)
             .where(and(eq(tables.modmailThreads.guild, guild), ...conditions));
     }),
-    getModmailTargets: proc.input(snowflake).query(async ({ input: guild }) => {
-        return await db.select().from(tables.guildModmailItems).where(eq(tables.guildModmailItems.guild, guild));
+    getModmailTargets: proc.input(snowflake).query(async ({ input: guild }): Promise<GuildModmailSettings["targets"]> => {
+        const [entry] = await db
+            .select({ multi: tables.guildModmailSettings.useMulti })
+            .from(tables.guildModmailSettings)
+            .where(eq(tables.guildModmailSettings.guild, guild));
+
+        return (
+            await db
+                .select()
+                .from(tables.guildModmailItems)
+                .where(eq(tables.guildModmailItems.guild, guild))
+                .limit(entry?.multi && (await getLimit(guild, "multiModmail")) ? ((await getLimit(guild, "modmailTargetCountLimit")) as number) : 1)
+        ).map(({ pingRoles, accessRoles, openParsed, closeParsed, ...target }) => ({
+            ...target,
+            pingRoles: decodeArray(pingRoles),
+            accessRoles: decodeArray(accessRoles),
+            openParsed: openParsed as CustomMessageText,
+            closeParsed: closeParsed as CustomMessageText,
+        }));
     }),
     getModmailEnabledNonVanityGuilds: proc.query(async () => {
         return (
@@ -523,4 +541,75 @@ export default {
                 .where(and(eq(tables.guildModulesSettings.module, "modmail"), eq(tables.guildModulesSettings.enabled, true), isNull(tables.tokens.guild)))
         ).map(({ guild }) => guild);
     }),
+    getExistingThread: proc
+        .input(z.object({ guild: snowflake, user: snowflake, target: z.number().int() }))
+        .query(async ({ input: { guild, user, target } }) => {
+            return (
+                (
+                    await db
+                        .select()
+                        .from(tables.modmailThreads)
+                        .where(and(eq(tables.modmailThreads.guild, guild), eq(tables.modmailThreads.user, user), eq(tables.modmailThreads.targetId, target)))
+                ).at(0) ?? null
+            );
+        }),
+    createModmailThread: proc
+        .input(z.object({ guild: snowflake, user: snowflake, targetId: z.number().int(), targetName: z.string().max(100), channel: snowflake }))
+        .mutation(async ({ input: { targetName, ...data } }) => {
+            let uuid: string;
+
+            do {
+                uuid = crypto.randomUUID();
+            } while ((await db.select().from(tables.modmailThreads).where(eq(tables.modmailThreads.uuid, uuid))).length > 0);
+
+            await db.insert(tables.modmailThreads).values({ ...data, uuid, closed: false });
+            await db.insert(tables.modmailMessages).values({ ...defaultModmailMessage, uuid, type: "open", author: data.user, targetName });
+        }),
+    reviveModmailThread: proc
+        .input(z.object({ uuid: z.string().length(36), channel: snowflake, user: snowflake, targetName: z.string().max(100) }))
+        .mutation(async ({ input: { uuid, channel, user, targetName } }) => {
+            await db.update(tables.modmailThreads).set({ channel, closed: false }).where(eq(tables.modmailThreads.uuid, uuid));
+            await db.insert(tables.modmailMessages).values({ ...defaultModmailMessage, uuid, type: "open", author: user, targetName });
+        }),
+    getAndUpdateModmailNotifications: proc.input(snowflake).mutation(async ({ input: channel }) => {
+        return await db.transaction(async (tx) => {
+            const entries = await tx
+                .select({ user: tables.modmailNotifications.user })
+                .from(tables.modmailNotifications)
+                .where(eq(tables.modmailNotifications.channel, channel));
+
+            await tx
+                .delete(tables.modmailNotifications)
+                .where(and(eq(tables.modmailNotifications.channel, channel), eq(tables.modmailNotifications.once, true)));
+
+            return entries.map(({ user }) => user);
+        });
+    }),
+    cancelModmailAutoclose: proc.input(snowflake).mutation(async ({ input: channel }) => {
+        await db.delete(tables.modmailAutoclose).where(eq(tables.modmailAutoclose.channel, channel));
+    }),
+    postIncomingModmailMessage: proc
+        .input(z.object({ channel: snowflake, content: z.string().max(4000), attachments: z.object({ name: z.string(), url: z.string() }).array() }))
+        .mutation(async ({ input: { channel, content, attachments } }) => {
+            const [entry] = await db.select({ uuid: tables.modmailThreads.uuid }).from(tables.modmailThreads).where(eq(tables.modmailThreads.channel, channel));
+            if (!entry) return;
+
+            await db
+                .insert(tables.modmailMessages)
+                .values({ ...defaultModmailMessage, uuid: entry.uuid, type: "incoming", content, attachments: await mapFiles(attachments) });
+        }),
+} as const;
+
+const defaultModmailMessage = {
+    id: "",
+    source: -1,
+    target: "",
+    author: "",
+    anon: false,
+    targetName: "",
+    content: "",
+    edits: [],
+    attachments: [],
+    deleted: false,
+    sent: false,
 } as const;

@@ -11,7 +11,7 @@ import { isSupporter } from "./lib";
 const Intents = IntentsBitField.Flags;
 
 const manager = new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers }),
+    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, allowedMentions: { parse: [] } }),
     postprocess: (client) =>
         client
             .on(Events.GuildMemberRemove, async (member) => {

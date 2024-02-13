@@ -12,6 +12,7 @@ new ClientManager({
         new Client({
             intents: Intents.Guilds | Intents.GuildMembers,
             sweepers: { guildMembers: { filter: () => () => true, interval: 3600 } },
+            allowedMentions: { parse: [] },
         }),
     postprocess: (client) =>
         client.on(Events.GuildMemberAdd, async (member) => {

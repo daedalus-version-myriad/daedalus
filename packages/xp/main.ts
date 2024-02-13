@@ -12,7 +12,11 @@ const lastMessage = new Map<string, number>();
 
 const manager = new ClientManager({
     factory: () =>
-        new Client({ intents: Intents.Guilds | Intents.GuildMessages | Intents.GuildVoiceStates, sweepers: { messages: { lifetime: 0, interval: 60 } } }),
+        new Client({
+            intents: Intents.Guilds | Intents.GuildMessages | Intents.GuildVoiceStates,
+            sweepers: { messages: { lifetime: 0, interval: 60 } },
+            allowedMentions: { parse: [] },
+        }),
     postprocess: (client) => {
         client.on(Events.MessageCreate, async (message) => {
             if (!message.guild) return;

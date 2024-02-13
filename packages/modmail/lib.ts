@@ -1,24 +1,32 @@
 import { trpc } from "@daedalus/api";
-import { getColor, template } from "@daedalus/bot-utils";
+import { SpoilerLevel, copyMedia, embed, getColor, isModuleDisabled, isWrongClient, mdash, obtainLimit, template } from "@daedalus/bot-utils";
+import { formatCustomMessageString } from "@daedalus/custom-messages";
+import { logError } from "@daedalus/log-interface";
 import {
     ButtonStyle,
+    ChannelType,
     Client,
     Colors,
     ComponentType,
     Message,
-    ModalSubmitInteraction,
+    ThreadAutoArchiveDuration,
     escapeMarkdown,
     type ActionRowData,
     type ButtonComponentData,
     type Guild,
+    type GuildTextBasedChannel,
     type MessageActionRowComponentData,
     type MessageComponentInteraction,
     type MessageCreateOptions,
+    type ModalMessageModalSubmitInteraction,
     type StringSelectMenuComponentData,
     type User,
 } from "discord.js";
 
-export async function modmailReply(source: Message | MessageComponentInteraction | ModalSubmitInteraction, message: Promise<MessageCreateOptions | null>) {
+export async function modmailReply(
+    source: Message | MessageComponentInteraction | ModalMessageModalSubmitInteraction,
+    message: Promise<MessageCreateOptions | null>,
+) {
     if (source instanceof Message) {
         const data = await message;
         if (data) await source.reply(data);
@@ -54,7 +62,9 @@ export async function modmailGuildSelector(user: User): Promise<MessageCreateOpt
     }
 
     if (guilds.length === 0) return null;
-    // if (guilds.length === 1) return await modmailTargetSelector(guilds[0], false);
+    if (guilds.length === 1) return await modmailTargetSelector(guilds[0], false);
+
+    guilds.sort((x, y) => x.name.localeCompare(y.name));
 
     return {
         embeds: [
@@ -65,7 +75,7 @@ export async function modmailGuildSelector(user: User): Promise<MessageCreateOpt
                 footer:
                     guilds.length > 100
                         ? {
-                              text: "Since you are in more than 100 servers with modmail, which exceeds the number of options the bot can give you in a dropdown, you must enter the ID using the button below.",
+                              text: "Because you are in more than 100 servers with modmail, which exceeds the number of options the bot can give you in a dropdown, you must enter the ID using the button below.",
                           }
                         : undefined,
             },
@@ -322,6 +332,299 @@ export async function modmailMultiResendConfirmation(
                     },
                 ],
             },
+            {
+                type: ComponentType.ActionRow,
+                components: [
+                    {
+                        type: ComponentType.Button,
+                        style: ButtonStyle.Secondary,
+                        customId: multiGuild ? "::modmail/switch-guild" : "::modmail/switch-target",
+                        label: multiGuild ? "Select another guild" : "Select another target",
+                    },
+                    {
+                        type: ComponentType.Button,
+                        style: ButtonStyle.Danger,
+                        customId: "::cancel",
+                        label: "Cancel",
+                    },
+                ],
+            },
         ],
     };
+}
+
+export async function sendModmail(interaction: MessageComponentInteraction | ModalMessageModalSubmitInteraction, guildId: string, targetId: number) {
+    const color = await getColor(guildId);
+
+    await interaction.update({
+        embeds: [
+            {
+                title: "Your message is being processed...",
+                description: "Please be patient; this may take a few seconds.",
+                color,
+            },
+        ],
+        components: [],
+    });
+
+    try {
+        const message = await interaction.message.fetchReference().catch((error) => {
+            console.error(error);
+            throw "Your message could not be fetched. If you did not delete it before confirming your modmail target, please contact support.";
+        });
+
+        const guild = await interaction.client.guilds.fetch(guildId).catch(() => {
+            throw `Could not fetch the guild with ID \`${guildId}\`. The bot may have been removed from this guild. If not and this issue persists, please contact support.`;
+        });
+
+        if (await isWrongClient(guild.client, guild))
+            throw `This is not the correct modmail bot for **${escapeMarkdown(guild.name)}** (it was changed after your message). Please find the client that that guild is using.`;
+
+        if (await isModuleDisabled(guild, "modmail"))
+            throw `**${escapeMarkdown(guild.name)}** does not have modmail enabled (it was disabled after your message).`;
+
+        const targets = await trpc.getModmailTargets.query(guild.id);
+        const limit = (await obtainLimit(guild.id, "multiModmail")) ? ((await obtainLimit(guild.id, "modmailTargetCountLimit")) as number) : 1;
+        const target = targets.slice(0, limit).find((target) => target.id === targetId);
+
+        if (!target)
+            throw `That modmail target no longer exists (**${escapeMarkdown(guild.name)}**'s configuration changed after your message). Please send your message again to try again.`;
+
+        const existingThread = await trpc.getExistingThread.query({ guild: guildId, target: targetId, user: message.author.id });
+
+        let channel: GuildTextBasedChannel | null =
+            existingThread === null ? null : ((await guild.channels.fetch(existingThread.channel).catch(() => null)) as GuildTextBasedChannel | null);
+
+        let created = false;
+
+        if (!channel) {
+            created = true;
+
+            if (target.useThreads) {
+                if (!target.channel) {
+                    logError(
+                        guild.id,
+                        "Creating modmail thread",
+                        `Invalid configuration: the root channel for target \"${escapeMarkdown(target.name)}\" is not set.`,
+                    );
+
+                    throw `Invalid configuration: **${escapeMarkdown(guild.name)}** did not configure the root channel for this target. Please report this to the server's staff.`;
+                }
+
+                const root = await guild.channels.fetch(target.channel).catch(() => {
+                    logError(
+                        guild.id,
+                        "Creating modmail thread",
+                        `Invalid configuration: the root channel for the target \"${escapeMarkdown(target.name)}\", <#${target.channel}>, could not be fetched ${mdash} check the bot's permissions.`,
+                    );
+
+                    throw `Invalid configuration: the modmail channel could not be fetched. Please report this to the server's staff.`;
+                });
+
+                if (!root || (root.type !== ChannelType.GuildText && root.type !== ChannelType.GuildAnnouncement)) {
+                    logError(
+                        guild.id,
+                        "Creating modmail thread",
+                        `Invalid configuration: the target \"${escapeMarkdown(target.name)}\" is configured to use threads, but the specified parent channel does not allow thread creation.`,
+                    );
+
+                    throw `Invalid configuration: **${escapeMarkdown(guild.name)}** is configured to use threads for modmail, but the parent channel does not allow thread creation. Please report this to the server's staff.`;
+                } else {
+                    const startMessage = await root.send(embed("New Modmail Thread", `This modmail thread is with ${message.author}.`, color)).catch(() => {
+                        logError(
+                            guild.id,
+                            "Creating modmail thread",
+                            `Could not post a message to ${root}, which is required to start a modmail thread ${mdash} check the bot's permissions.`,
+                        );
+
+                        throw "The bot was not able to create a message in the modmail channel to start your thread. Please report this to the server's staff.";
+                    });
+
+                    channel = await startMessage.startThread({ name: message.author.tag, autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek }).catch(() => {
+                        logError(
+                            guild.id,
+                            "Creating modmail thread",
+                            `Could not start a thread under ${startMessage.url} ${mdash} check the bot's permissions.`,
+                        );
+
+                        throw "The bot was not able to start a thread in the modmail channel. Please report this to the server's staff.";
+                    });
+                }
+            } else {
+                if (!target.category) {
+                    logError(
+                        guild.id,
+                        "Creating modmail thread",
+                        `Invalid configuration: the root category for target \"${escapeMarkdown(target.name)}\" is not set.`,
+                    );
+
+                    throw `Invalid configuration: **${escapeMarkdown(guild.name)}** did not configure the root category for this target. Please report this to the server's staff.`;
+                }
+
+                const root = await guild.channels.fetch(target.category).catch(() => {
+                    logError(
+                        guild.id,
+                        "Creating modmail thread",
+                        `Invalid configuration: the root category for the target \"${escapeMarkdown(target.name)}\", <#${target.category}>, could not be fetched ${mdash} check the bot's permissions.`,
+                    );
+
+                    throw `Invalid configuration: the modmail category could not be fetched. Please report this to the server's staff.`;
+                });
+
+                if (!root || root.type !== ChannelType.GuildCategory) {
+                    logError(
+                        guild.id,
+                        "Creating modmail thread",
+                        `Invalid configuration: the target \"${escapeMarkdown(target.name)}\" is configured to use regular text channels, but the specified parent channel is not a category.`,
+                    );
+
+                    throw `Invalid configuration: **${escapeMarkdown(guild.name)}** is configured to use regular text channels for modmail, but the parent channel is not a category. Please report this to the server's staff.`;
+                }
+
+                channel =
+                    root.children.cache.size >= 50
+                        ? await root.guild.channels.create({ name: message.author.tag, permissionOverwrites: root.permissionOverwrites.cache }).catch(() => {
+                              logError(
+                                  guild.id,
+                                  "Creating modmail thread",
+                                  `Could not create a channel in the guild (your modmail category, ${root.name}, is overflowing) ${mdash} check the bot's permissions.`,
+                              );
+
+                              throw "The bot was not able to start a channel for your modmail thread. Please report this to the server's staff.";
+                          })
+                        : await root.children.create({ name: message.author.tag }).catch(() => {
+                              logError(guild.id, "Creating modmail thread", `Could not create a channel in ${root.name} ${mdash} check the bot's permissions.`);
+                              throw "The bot was not able to start a channel for your modmail thread. Please report this to the server's staff.";
+                          });
+
+                if (target.channel) {
+                    const log = await guild.channels
+                        .fetch(target.channel)
+                        .catch(() =>
+                            logError(
+                                guild.id,
+                                "Posting modmail log entry",
+                                `Could not fetch <#${target.channel}> to post a modmail log entry ${mdash} check the bot's permissions.`,
+                            ),
+                        );
+
+                    if (!log?.isTextBased())
+                        logError(
+                            guild.id,
+                            "Posting modmail log entry",
+                            `Somehow, ${log} is not text-based and a modmail log entry cannot be posted ${mdash} contact support if you believe this is a bug.`,
+                        );
+                    else
+                        await log
+                            .send(embed("New Modmail Thread", `A modmail thread was just opened with ${message.author}: ${channel}.`, Colors.Green))
+                            .catch(() =>
+                                logError(
+                                    guild.id,
+                                    "Posting modmail log entry",
+                                    `Could not post a modmail log entry to ${log} ${mdash} check the bot's permissions.`,
+                                ),
+                            );
+                }
+            }
+        }
+
+        if (created)
+            await trpc.createModmailThread.mutate({
+                guild: guild.id,
+                user: message.author.id,
+                targetId: target.id,
+                targetName: target.name,
+                channel: channel.id,
+            });
+        else if (existingThread?.closed)
+            await trpc.reviveModmailThread.mutate({ uuid: existingThread.uuid, channel: channel.id, user: message.author.id, targetName: target.name });
+
+        if (existingThread?.closed ?? true)
+            await channel
+                .send({
+                    content: `${target.pingHere ? "@here" : ""} ${target.pingRoles.map((x) => `<@&${x}>`).join(" ")}`,
+                    embeds: [{ title: "Modmail Thread Opened", description: `This modmail thread was just opened by ${message.author}.`, color }],
+                    allowedMentions: { parse: target.pingHere ? ["everyone"] : [], roles: target.pingRoles },
+                })
+                .catch(() =>
+                    logError(
+                        guild.id,
+                        "Posting modmail alert",
+                        `An error occurred trying to post a modmail alert in ${channel} ${mdash} check the bot's permissions.`,
+                    ),
+                );
+
+        const pings = await trpc.getAndUpdateModmailNotifications.mutate(channel.id);
+
+        const contents = pings.length > 0 ? [`<@${pings.shift()}>`] : [];
+
+        for (const ping of pings)
+            if (contents.at(-1)!.length + ping.length + 4 <= 2000) contents[contents.length - 1] += `<@${ping}>`;
+            else contents.push(`<@${ping}>`);
+
+        for (const content of contents.slice(0, -1)) await channel.send({ content, allowedMentions: { parse: ["users"] } }).catch(() => null);
+
+        const sent = await channel
+            .send({
+                content: contents.at(-1),
+                embeds: [
+                    {
+                        title: "Incoming Message",
+                        description: message.content,
+                        author: { name: message.author.tag, icon_url: message.author.displayAvatarURL({ size: 256 }) },
+                        timestamp: new Date().toISOString(),
+                        color,
+                        footer: { text: message.url },
+                    },
+                ],
+                files: await copyMedia(message, SpoilerLevel.HIDE),
+                allowedMentions: { parse: ["users"] },
+            })
+            .catch(() => {
+                logError(
+                    guild.id,
+                    "Posting modmail message",
+                    `An error occurred trying to post an incoming modmail message in ${channel}. Please check the bot's permissions and contact support if this issue persists and you believe it is not a configuration error.`,
+                );
+
+                throw "Your modmail message could not be sent. Everything else (loading/creating your thread) worked fine. Please report this to the server's staff.";
+            });
+
+        await trpc.cancelModmailAutoclose.mutate(channel.id);
+        await trpc.postIncomingModmailMessage.mutate({ channel: channel.id, content: message.content, attachments: message.attachments.toJSON() });
+
+        await interaction.editReply({
+            embeds: [
+                {
+                    title: `Message sent to **${escapeMarkdown(guild.name)}**`,
+                    description:
+                        existingThread?.closed ?? true
+                            ? (await formatCustomMessageString(target.openParsed, { guild, user: message.author }).catch((error) =>
+                                  logError(
+                                      guild.id,
+                                      "Formatting modmail on-open message",
+                                      `An unexpected error occurred formatting your custom on-open message for modmail:\n\`\`\`\n${error}\n\`\`\``,
+                                  ),
+                              )) || `Thank you for contacting ${escapeMarkdown(guild.name)}'s staff! We will get back to you shortly.`
+                            : undefined,
+                    color,
+                },
+            ],
+            components: [],
+        });
+
+        await message.react("✅");
+    } catch (error) {
+        if (typeof error === "string") await interaction.editReply(template.error(error));
+        else {
+            const id = crypto.randomUUID();
+            console.error(`${id}`, error);
+
+            await interaction.editReply(
+                template.error(
+                    `An unexpected error occurred. We sincerely apologize for this issue. Please contact support if this issue persists. This error has ID \`${id}\`.`,
+                ),
+            );
+        }
+    }
 }
