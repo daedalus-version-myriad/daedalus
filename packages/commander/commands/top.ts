@@ -26,7 +26,10 @@ export default (x: Commands) =>
 
                 for (const key of type === "both" ? (["text", "voice"] as const) : [type]) {
                     const entries = await trpc.getXpTop.query({ guild: _.guild!.id, key: `${key}${range}`, page, limit });
-                    const list = entries.map((x, i) => `\`#${offset + i}.\` <@${x.user}> ${mdash} lvl. ${xpToLevel(x.amount)} (${Math.floor(x.amount)})`);
+                    const list = entries.map(
+                        (x, i) =>
+                            `\`#${offset + i}.\` <@${x.user}> ${mdash}${range === "Total" ? ` lvl. ${xpToLevel(x.amount)}` : ""} (${Math.floor(x.amount)})`,
+                    );
 
                     fields.push({
                         name: `${{ text: "Text", voice: "Voice" }[key]} [${page} / ${Math.ceil(size / limit)}]`,

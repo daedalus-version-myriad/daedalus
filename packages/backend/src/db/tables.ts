@@ -1,6 +1,11 @@
 import { sql } from "drizzle-orm";
 import { bigint, boolean, float, index, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, unique, varchar } from "drizzle-orm/mysql-core";
 
+export const globals = mysqlTable("globals", {
+    id: int("id").notNull().primaryKey(),
+    lastXpPurge: bigint("last_xp_purge", { mode: "number" }).notNull(),
+});
+
 export const admins = mysqlTable("admins", {
     id: varchar("id", { length: 20 }).notNull().primaryKey(),
 });
