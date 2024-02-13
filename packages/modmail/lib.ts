@@ -3,22 +3,30 @@ import { SpoilerLevel, copyMedia, embed, getColor, isModuleDisabled, isWrongClie
 import { formatCustomMessageString } from "@daedalus/custom-messages";
 import { logError } from "@daedalus/log-interface";
 import {
+    Attachment,
     ButtonStyle,
     ChannelType,
     Client,
     Colors,
     ComponentType,
     Message,
+    TextInputStyle,
     ThreadAutoArchiveDuration,
     escapeMarkdown,
+    type APIEmbed,
     type ActionRowData,
     type ButtonComponentData,
+    type ButtonInteraction,
+    type ChatInputCommandInteraction,
     type Guild,
+    type GuildMember,
     type GuildTextBasedChannel,
+    type InteractionReplyOptions,
     type MessageActionRowComponentData,
     type MessageComponentInteraction,
     type MessageCreateOptions,
     type ModalMessageModalSubmitInteraction,
+    type ModalSubmitInteraction,
     type StringSelectMenuComponentData,
     type User,
 } from "discord.js";
@@ -626,5 +634,142 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
                 ),
             );
         }
+    }
+}
+
+export function getModmailContactInfo<P extends boolean>(permitAbsent: P) {
+    return async function <T extends { _: ChatInputCommandInteraction | ButtonInteraction | ModalSubmitInteraction | GuildTextBasedChannel }>(
+        data: T,
+    ): Promise<
+        T & {
+            member: P extends true ? GuildMember | undefined : GuildMember;
+            thread: Exclude<Awaited<ReturnType<typeof trpc.getModmailThreadByChannel.query>>, null>;
+        }
+    > {
+        const { _ } = data;
+        const channel = "channel" in _ ? _.channel! : _;
+
+        const thread = await trpc.getModmailThreadByChannel.query(channel.id);
+        if (!thread) throw "This is not a modmail thread.";
+        if (thread.closed) throw "This thread is closed.";
+
+        const member = await _.guild!.members.fetch(thread.user).catch(() => {});
+        if (!member && !permitAbsent) throw "The recipient does not appear to be in this server anymore.";
+
+        return { ...data, member: member as any, thread };
+    };
+}
+
+export async function handleReply(
+    _: ChatInputCommandInteraction | ModalSubmitInteraction,
+    caller: GuildMember,
+    member: GuildMember,
+    anon: boolean,
+    content: string | undefined,
+    filemap: Record<string, Attachment | null>,
+): Promise<InteractionReplyOptions> {
+    const files = Object.values(filemap)
+        .filter((x) => x)
+        .map((x) => ({ name: x!.name, attachment: x!.url }));
+
+    if (!content && files.length === 0) throw "You must either include content or at least one file.";
+
+    const data: APIEmbed = {
+        description: content ?? undefined,
+        author: { name: anon ? "Anonymous Message" : _.user.tag, icon_url: anon ? undefined : caller.displayAvatarURL({ size: 256 }) },
+        timestamp: new Date().toISOString(),
+        color: await getColor(_.guild!),
+        footer: anon ? undefined : { text: caller.roles.highest?.name },
+    };
+
+    let output: Message;
+
+    try {
+        output = await member.send({ embeds: [{ title: `Incoming Staff Message from ${_.guild!.name}`, ...data }], files });
+    } catch {
+        throw "The message could not be sent. They may have DMs off or have blocked the bot, or a different issue occurred.";
+    }
+
+    await trpc.cancelModmailAutoclose.mutate(_.channel!.id);
+
+    const source = `${Date.now()}~${Math.random()}`.slice(0, 36);
+
+    await trpc.postOutgoingModmailMessage.mutate({
+        channel: _.channel!.id,
+        id: output.id,
+        source,
+        author: _.user.id,
+        anon,
+        content: content || "",
+        attachments: output.attachments.toJSON(),
+    });
+
+    return {
+        embeds: [{ title: "Outgoing Message", ...data }],
+        files,
+        components: [
+            {
+                type: ComponentType.ActionRow,
+                components: [
+                    {
+                        type: ComponentType.Button,
+                        style: ButtonStyle.Secondary,
+                        customId: `:${_.user.id}:modmail/edit-message:${source}`,
+                        emoji: "✏️",
+                        label: "Edit",
+                    },
+                    {
+                        type: ComponentType.Button,
+                        style: ButtonStyle.Danger,
+                        customId: `:${_.user.id}:modmail/delete-message:${source}`,
+                        emoji: "🗑️",
+                        label: "Delete",
+                    },
+                ],
+            },
+        ],
+    };
+}
+
+export async function startModal(
+    _: ChatInputCommandInteraction,
+    caller: GuildMember,
+    member: GuildMember,
+    anon: boolean,
+    content: string | undefined,
+    filemap: Record<string, Attachment | null>,
+) {
+    await _.showModal({
+        title: "Modmail Response",
+        customId: "-",
+        components: [
+            {
+                type: ComponentType.ActionRow,
+                components: [
+                    {
+                        type: ComponentType.TextInput,
+                        style: TextInputStyle.Paragraph,
+                        customId: "content",
+                        label: "Content",
+                        value: content,
+                        maxLength: 2000,
+                        required: true,
+                        placeholder: "You have 30 minutes to submit your response.",
+                    },
+                ],
+            },
+        ],
+    });
+
+    const modal = await _.awaitModalSubmit({ time: 1800000 }).catch(() => {});
+    if (!modal) return;
+
+    content = modal.fields.getTextInputValue("content");
+    await modal.deferReply();
+
+    try {
+        await modal.editReply(await handleReply(_, caller, member, anon, content, filemap));
+    } catch (error) {
+        await modal.editReply(template.error(`${error}`));
     }
 }

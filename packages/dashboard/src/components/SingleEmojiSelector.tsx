@@ -2,8 +2,8 @@
 
 import { useEmojisMap } from "@/hooks/emojis";
 import { emojiList, nameMap } from "@/lib/data";
-import { fuzzy } from "@/lib/fuzzy";
 import { cn } from "@/lib/utils";
+import { fuzzy } from "@daedalus/global-utils";
 import data from "@emoji-mart/data";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import Image from "next/image";

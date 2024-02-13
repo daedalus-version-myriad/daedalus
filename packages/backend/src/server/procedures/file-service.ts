@@ -16,11 +16,11 @@ export async function addFile(url: string) {
 
         while (true) {
             const uuid = crypto.randomUUID();
-            const [entry] = await db.select({}).from(tables.files).where(eq(tables.files.uuid, uuid));
+            const [entry] = await db.select().from(tables.files).where(eq(tables.files.uuid, uuid));
             if (entry) continue;
 
             await db.insert(tables.files).values({ uuid: crypto.randomUUID(), channel: channel.id, message: id });
-            return `${secrets.DOMAIN}/file/${uuid}`;
+            return uuid;
         }
     } catch (error) {
         console.error(error);

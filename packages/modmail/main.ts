@@ -1,5 +1,5 @@
 import { trpc } from "@daedalus/api";
-import { isModuleDisabled, template } from "@daedalus/bot-utils";
+import { isModuleDisabled, isWrongClient, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, IntentsBitField, MessageType, Partials, type Guild, type Message } from "discord.js";
 import { modmailGuildSelector, modmailMultiResendConfirmation, modmailReply, modmailResendConfirmation, modmailTargetSelector } from "./lib";
@@ -14,24 +14,52 @@ new ClientManager({
             allowedMentions: { parse: [] },
         }),
     postprocess: (client) =>
-        client.on(Events.MessageCreate, async (message) => {
-            if (message.author.id === message.client.user.id) return;
-            if (message.type !== MessageType.Default && message.type !== MessageType.Reply) return;
-            if (message.guild) return await maybeLogInternalMessage(message);
-            if (message.stickers.size > 0) return void (await message.reply(template.error("Unfortunately, stickers cannot be sent through modmail.")));
+        client
+            .on(Events.MessageCreate, async (message) => {
+                if (message.author.id === message.client.user.id) return;
+                if (message.type !== MessageType.Default && message.type !== MessageType.Reply) return;
+                if (message.guild) return await maybeLogInternalMessage(message);
+                if (message.stickers.size > 0) return void (await message.reply(template.error("Unfortunately, stickers cannot be sent through modmail.")));
 
-            const vanity = await trpc.vanityClientByToken.query(message.client.token);
+                const vanity = await trpc.vanityClientByToken.query(message.client.token);
 
-            if (vanity) {
-                const guild = await message.client.guilds.fetch(vanity).catch(() => null);
-                if (!guild || (await isModuleDisabled(guild, "modmail"))) return;
+                if (vanity) {
+                    const guild = await message.client.guilds.fetch(vanity).catch(() => null);
+                    if (!guild || (await isModuleDisabled(guild, "modmail"))) return;
 
-                await resolveVanity(message, guild);
-            } else await resolveDefault(message);
-        }),
+                    await resolveVanity(message, guild);
+                } else await resolveDefault(message);
+            })
+            .on(Events.MessageUpdate, async (before, after) => {
+                if (before.content === after.content) return;
+                if (!after.guild) return;
+                if (await isWrongClient(after.client, after.guild)) return;
+                if (await isModuleDisabled(after.guild, "modmail")) return;
+
+                await trpc.recordInternalMessageEdit.mutate({ message: after.id, content: after.content ?? "" });
+            })
+            .on(Events.MessageDelete, async (message) => {
+                if (!message.guild) return;
+                if (await isWrongClient(message.client, message.guild)) return;
+                if (await isModuleDisabled(message.guild, "modmail")) return;
+
+                await trpc.recordInternalMessageDeletes.mutate([message.id]);
+            })
+            .on(Events.MessageBulkDelete, async (messages) => {
+                const guild = messages.first()!.guild;
+
+                if (!guild) return;
+                if (await isWrongClient(guild.client, guild)) return;
+                if (await isModuleDisabled(guild, "modmail")) return;
+
+                await trpc.recordInternalMessageDeletes.mutate([...messages.keys()]);
+            }),
 });
 
 async function maybeLogInternalMessage(message: Message) {
+    if (await isWrongClient(message.client, message.guild!)) return;
+    if (await isModuleDisabled(message.guild!, "modmail")) return;
+
     await trpc.maybeLogInternalMessage.mutate({
         channel: message.channel.id,
         id: message.id,

@@ -542,7 +542,7 @@ export const modmailMessages = mysqlTable("modmail_messages", {
         .notNull(),
     type: mysqlEnum("type", ["open", "incoming", "internal", "outgoing", "close"]),
     id: varchar("id", { length: 20 }).notNull(),
-    source: int("source").notNull(),
+    source: varchar("source", { length: 36 }).notNull(),
     target: varchar("target", { length: 20 }).notNull(),
     author: varchar("author", { length: 20 }).notNull(),
     anon: boolean("anon").notNull(),

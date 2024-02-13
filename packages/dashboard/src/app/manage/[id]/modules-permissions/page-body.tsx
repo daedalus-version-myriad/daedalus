@@ -10,9 +10,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { fuzzy } from "@/lib/fuzzy";
 import { modules, permissions } from "@daedalus/data";
 import { englishList } from "@daedalus/formatting";
+import { fuzzy } from "@daedalus/global-utils";
 import { GuildModulesPermissionsSettings } from "@daedalus/types";
 import _ from "lodash";
 import { useState } from "react";

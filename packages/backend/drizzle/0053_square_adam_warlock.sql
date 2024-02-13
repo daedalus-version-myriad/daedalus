@@ -1,0 +1,1 @@
+ALTER TABLE `modmail_messages` MODIFY COLUMN `source` varchar(36) NOT NULL;

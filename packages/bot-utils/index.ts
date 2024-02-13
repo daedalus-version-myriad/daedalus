@@ -308,6 +308,11 @@ export function defer(ephemeral: boolean) {
     return async <T extends { _: RepliableInteraction }>(data: T) => (await data._.deferReply({ ephemeral }), data);
 }
 
+export async function fetchCaller<T extends { _: RepliableInteraction }>(data: T) {
+    const { _ } = data;
+    return { ...data, caller: await _.guild!.members.fetch(_.user) };
+}
+
 export async function enforcePermissions(user: User, name: string, channel: Channel, bypass?: boolean) {
     const reason = await checkPermissions(user, name, channel, bypass);
     if (reason) throw reason;

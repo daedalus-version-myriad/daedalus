@@ -16,7 +16,7 @@ import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { addFile, mapFiles } from "./file-service";
+import { mapFiles } from "./file-service";
 import {
     getAutomodSettings,
     getAutoresponderSettings,
@@ -468,7 +468,7 @@ export default {
                 id: snowflake,
                 author: snowflake,
                 content: z.string(),
-                attachments: z.object({ name: z.string(), url: z.string().nullable() }).array(),
+                attachments: z.object({ name: z.string(), url: z.string() }).array(),
             }),
         )
         .mutation(async ({ input }) => {
@@ -479,22 +479,14 @@ export default {
 
             if (!entry) return;
 
-            for (const attachment of input.attachments) attachment.url &&= await addFile(attachment.url);
-
             await db.insert(tables.modmailMessages).values({
+                ...defaultModmailMessage,
                 uuid: entry.uuid,
                 type: "internal",
                 id: input.id,
-                source: -1,
-                target: "",
                 author: input.author,
-                anon: false,
-                targetName: "",
                 content: input.content,
-                edits: [],
-                attachments: input.attachments,
-                deleted: false,
-                sent: false,
+                attachments: await mapFiles(input.attachments),
             });
         }),
     getOpenModmailThreads: proc.input(z.object({ guild: snowflake.nullable(), user: snowflake })).query(async ({ input: { guild, user } }) => {
@@ -598,11 +590,49 @@ export default {
                 .insert(tables.modmailMessages)
                 .values({ ...defaultModmailMessage, uuid: entry.uuid, type: "incoming", content, attachments: await mapFiles(attachments) });
         }),
+    recordInternalMessageEdit: proc.input(z.object({ message: snowflake, content: z.string().max(4000) })).mutation(async ({ input: { message, content } }) => {
+        const [entry] = await db.select({ edits: tables.modmailMessages.edits }).from(tables.modmailMessages).where(eq(tables.modmailMessages.id, message));
+        if (!entry) return;
+
+        await db
+            .update(tables.modmailMessages)
+            .set({ edits: [...(entry.edits as string[]), content] })
+            .where(eq(tables.modmailMessages.id, message));
+    }),
+    recordInternalMessageDeletes: proc.input(snowflake.array()).mutation(async ({ input: messages }) => {
+        await db.update(tables.modmailMessages).set({ deleted: true }).where(inArray(tables.modmailMessages.id, messages));
+    }),
+    getModmailSnippets: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await db.select().from(tables.guildModmailSnippets).where(eq(tables.guildModmailSnippets.guild, guild));
+    }),
+    getModmailThreadByChannel: proc.input(snowflake).query(async ({ input: channel }) => {
+        return (await db.select().from(tables.modmailThreads).where(eq(tables.modmailThreads.channel, channel))).at(0) ?? null;
+    }),
+    postOutgoingModmailMessage: proc
+        .input(
+            z.object({
+                channel: snowflake,
+                id: snowflake,
+                source: z.string().max(36),
+                author: snowflake,
+                anon: z.boolean(),
+                content: z.string().max(4000),
+                attachments: z.object({ name: z.string(), url: z.string() }).array(),
+            }),
+        )
+        .mutation(async ({ input: { channel, attachments, ...data } }) => {
+            const [entry] = await db.select({ uuid: tables.modmailThreads.uuid }).from(tables.modmailThreads).where(eq(tables.modmailThreads.channel, channel));
+            if (!entry) return;
+
+            await db
+                .insert(tables.modmailMessages)
+                .values({ ...defaultModmailMessage, ...data, uuid: entry.uuid, type: "outgoing", attachments: await mapFiles(attachments) });
+        }),
 } as const;
 
 const defaultModmailMessage = {
     id: "",
-    source: -1,
+    source: "",
     target: "",
     author: "",
     anon: false,
