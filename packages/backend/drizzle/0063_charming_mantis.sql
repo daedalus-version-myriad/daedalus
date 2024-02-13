@@ -1,0 +1,1 @@
+ALTER TABLE `guild_logging_settings` ADD `enable_web_logging` boolean NOT NULL;

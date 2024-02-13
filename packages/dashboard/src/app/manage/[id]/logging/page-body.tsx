@@ -18,9 +18,10 @@ import _ from "lodash";
 import { Dispatch, SetStateAction, useState } from "react";
 import save from "./save";
 
-export function Body({ data: initial, disabled }: { data: GuildLoggingSettings; disabled: boolean }) {
+export function Body({ data: initial, disabled, owner }: { data: GuildLoggingSettings; disabled: boolean; owner: boolean }) {
     const [data, setData] = useState<GuildLoggingSettings>(initial);
 
+    const [enableWebLogging, setEnableWebLogging] = useState<boolean>(data.enableWebLogging);
     const [useWebhook, setUseWebhook] = useState<boolean>(data.useWebhook);
     const [channel, setChannel] = useState<string | null>(data.channel);
     const [webhook, setWebhook] = useState<string>(data.webhook);
@@ -28,7 +29,7 @@ export function Body({ data: initial, disabled }: { data: GuildLoggingSettings; 
     const [fileOnlyMode, setFileOnlyMode] = useState<boolean>(data.fileOnlyMode);
     const [items, setItems] = useState<GuildLoggingSettings["items"]>(data.items);
 
-    const updated = { guild: data.guild, useWebhook, channel, webhook, ignoredChannels, fileOnlyMode, items };
+    const updated = { guild: data.guild, enableWebLogging, useWebhook, channel, webhook, ignoredChannels, fileOnlyMode, items };
 
     return (
         <>
@@ -50,6 +51,16 @@ export function Body({ data: initial, disabled }: { data: GuildLoggingSettings; 
                 ) : (
                     <SingleChannelSelector channel={channel} setChannel={setChannel} types={textTypes}></SingleChannelSelector>
                 )}
+                <Separator></Separator>
+                <h1 className="text-xl">Web Logging</h1>
+                <p>
+                    When web logging is enabled, you will be able to check your server&apos;s logs on the dashboard, and if you staff multiple servers, you can
+                    aggregate their logs together and filter for what you are trying to find. Only the server owner can change this value.
+                </p>
+                <Label className="center-row gap-4">
+                    <Switch checked={enableWebLogging} onCheckedChange={setEnableWebLogging} disabled={!owner}></Switch>
+                    <b>Enable Web Logging</b>
+                </Label>
                 <Separator></Separator>
                 <h1 className="text-xl">Ignored Channels</h1>
                 <MultiChannelSelector channels={ignoredChannels} setChannels={setIgnoredChannels} showReadonly></MultiChannelSelector>
@@ -114,6 +125,7 @@ export function Body({ data: initial, disabled }: { data: GuildLoggingSettings; 
             <SaveChangesBar
                 unsaved={!_.isEqual(updated, data)}
                 reset={() => {
+                    setEnableWebLogging(data.enableWebLogging);
                     setUseWebhook(data.useWebhook);
                     setChannel(data.channel);
                     setWebhook(data.webhook);

@@ -496,6 +496,7 @@ export default {
 
             const rawBase = (await db.select().from(tables.guildLoggingSettings).where(eq(tables.guildLoggingSettings.guild, guild))).at(0) ?? {
                 guild,
+                enableWebLogging: false,
                 useWebhook: false,
                 channel: null,
                 webhook: "",
@@ -522,6 +523,7 @@ export default {
             z.object({
                 id: snowflake.nullable(),
                 guild: snowflake,
+                enableWebLogging: z.boolean(),
                 useWebhook: z.boolean(),
                 channel: snowflake.nullable(),
                 webhook: z.string().trim().max(128, "Webhooks should not be longer than 128 characters."),
@@ -533,15 +535,17 @@ export default {
                 ),
             }),
         )
-        .mutation(async ({ input: { id, guild, items, ignoredChannels, ...raw } }) => {
+        .mutation(async ({ input: { id, guild, items, ignoredChannels, enableWebLogging, ...raw } }) => {
             if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            const ewl = (await isOwner(id, guild)) ? enableWebLogging : null;
 
             const data = { ...raw, ignoredChannels: ignoredChannels.join("/") };
 
             await db
                 .insert(tables.guildLoggingSettings)
-                .values({ guild, ...data })
-                .onDuplicateKeyUpdate({ set: data });
+                .values({ guild, ...data, enableWebLogging: ewl ?? false })
+                .onDuplicateKeyUpdate({ set: { ...data, enableWebLogging: ewl ?? undefined } });
 
             await db.transaction(async (tx) => {
                 await tx.delete(tables.guildLoggingSettingsItems).where(eq(tables.guildLoggingSettingsItems.guild, guild));

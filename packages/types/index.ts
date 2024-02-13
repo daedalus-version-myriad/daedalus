@@ -109,12 +109,6 @@ export type GuildPremiumSettings = {
     activity: string;
 };
 
-type BaseLogSettings = {
-    useWebhook: boolean;
-    channel: string | null;
-    webhook: string;
-};
-
 export type GuildModulesPermissionsSettings = {
     guild: string;
     modules: Record<string, { enabled: boolean }>;
@@ -132,8 +126,15 @@ export type GuildModulesPermissionsSettings = {
     >;
 };
 
+type BaseLogSettings = {
+    useWebhook: boolean;
+    channel: string | null;
+    webhook: string;
+};
+
 export type GuildLoggingSettings = {
     guild: string;
+    enableWebLogging: boolean;
 } & BaseLogSettings & {
         ignoredChannels: string[];
         fileOnlyMode: boolean;

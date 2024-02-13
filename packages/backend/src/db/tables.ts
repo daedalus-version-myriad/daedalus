@@ -70,6 +70,7 @@ export const guildCommandsSettings = mysqlTable(
 
 export const guildLoggingSettings = mysqlTable("guild_logging_settings", {
     guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    enableWebLogging: boolean("enable_web_logging").notNull(),
     useWebhook: boolean("use_webhook").notNull(),
     channel: varchar("channel", { length: 20 }),
     webhook: varchar("webhook", { length: 128 }).notNull(),
