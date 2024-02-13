@@ -15,7 +15,7 @@ async function updateXpAmounts() {
 
     if (Math.floor(now.getTime() / 604800000) !== Math.floor(last.getTime() / 604800000)) set.textWeekly = set.voiceWeekly = set.textDaily = set.voiceDaily = 0;
 
-    await db.update(tables.xp).set(set);
+    if (Object.keys(set).length > 0) await db.update(tables.xp).set(set);
 
     await db
         .insert(tables.globals)
