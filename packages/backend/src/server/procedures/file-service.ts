@@ -19,12 +19,12 @@ export async function addFile(url: string) {
             const [entry] = await db.select().from(tables.files).where(eq(tables.files.uuid, uuid));
             if (entry) continue;
 
-            await db.insert(tables.files).values({ uuid: crypto.randomUUID(), channel: channel.id, message: id });
-            return uuid;
+            await db.insert(tables.files).values({ uuid, channel: channel.id, message: id });
+            return `/file/${uuid}`;
         }
     } catch (error) {
         console.error(error);
-        return null;
+        return url;
     }
 }
 
@@ -41,10 +41,12 @@ export default {
         if (!entry) return null;
 
         try {
-            const ch = entry.channel === channel.id ? channel : ((await (await bot).channels.fetch(entry.channel)) as TextChannel);
+            const ch = entry.channel === channel?.id ? channel : (channel = (await (await bot).channels.fetch(entry.channel)) as TextChannel);
             const message = await ch.messages.fetch({ message: entry.message, force: true });
             return message.attachments.first()!.url;
-        } catch {}
+        } catch (error) {
+            console.error(error);
+        }
 
         return null;
     }),

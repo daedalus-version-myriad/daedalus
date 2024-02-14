@@ -537,7 +537,9 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
             }
         }
 
-        if (created)
+        if (existingThread?.closed)
+            await trpc.reviveModmailThread.mutate({ uuid: existingThread.uuid, channel: channel.id, user: message.author.id, targetName: target.name });
+        else if (created)
             await trpc.createModmailThread.mutate({
                 guild: guild.id,
                 user: message.author.id,
@@ -545,8 +547,6 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
                 targetName: target.name,
                 channel: channel.id,
             });
-        else if (existingThread?.closed)
-            await trpc.reviveModmailThread.mutate({ uuid: existingThread.uuid, channel: channel.id, user: message.author.id, targetName: target.name });
 
         if (existingThread?.closed ?? true)
             await channel

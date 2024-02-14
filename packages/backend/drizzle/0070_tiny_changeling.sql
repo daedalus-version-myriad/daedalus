@@ -1,0 +1,1 @@
+ALTER TABLE `ticket_messages` ADD `time` timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL;

@@ -6,6 +6,7 @@ import account from "./procedures/account";
 import botInterface from "./procedures/bot-interface";
 import fileService from "./procedures/file-service";
 import guildSettings from "./procedures/guild-settings";
+import logviewer from "./procedures/logviewer";
 import news from "./procedures/news";
 import premium from "./procedures/premium";
 import users from "./procedures/users";
@@ -17,6 +18,7 @@ const appRouter = router({
     ...botInterface,
     ...fileService,
     ...guildSettings,
+    ...logviewer,
     ...news,
     ...premium,
     ...users,

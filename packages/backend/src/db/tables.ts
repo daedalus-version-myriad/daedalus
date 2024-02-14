@@ -652,6 +652,9 @@ export const ticketMessages = mysqlTable(
     "ticket_messages",
     {
         uuid: varchar("uuid", { length: 36 }).notNull(),
+        time: timestamp("time")
+            .default(sql`CURRENT_TIMESTAMP`)
+            .notNull(),
         type: mysqlEnum("type", ["open", "message", "close"]),
         id: varchar("id", { length: 20 }),
         author: varchar("author", { length: 20 }).notNull(),

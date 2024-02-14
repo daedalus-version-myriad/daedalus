@@ -7,7 +7,10 @@ const Intents = IntentsBitField.Flags;
 
 new ClientManager({
     factory: () =>
-        new Client({ intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent, sweepers: { messages: { lifetime: 86400, interval: 3600 } } }),
+        new Client({
+            intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildEmojisAndStickers,
+            sweepers: { messages: { lifetime: 86400, interval: 3600 } },
+        }),
     postprocess: (client) =>
         client
             .on(Events.MessageCreate, async (message) => {
@@ -19,7 +22,7 @@ new ClientManager({
                     id: message.id,
                     author: message.author.id,
                     content: message.content,
-                    attachments: message.attachments.toJSON(),
+                    attachments: [...message.attachments.toJSON(), ...message.stickers.toJSON()].map((x) => ({ name: x.name, url: x.url })),
                 });
             })
             .on(Events.MessageUpdate, async (before, after) => {
