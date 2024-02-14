@@ -52,16 +52,20 @@ export function Body({ data: initial, disabled, owner }: { data: GuildLoggingSet
                     <SingleChannelSelector channel={channel} setChannel={setChannel} types={textTypes}></SingleChannelSelector>
                 )}
                 <Separator></Separator>
-                <h1 className="text-xl">Web Logging</h1>
-                <p>
-                    When web logging is enabled, you will be able to check your server&apos;s logs on the dashboard, and if you staff multiple servers, you can
-                    aggregate their logs together and filter for what you are trying to find. Only the server owner can change this value.
-                </p>
-                <Label className="center-row gap-4">
-                    <Switch checked={enableWebLogging} onCheckedChange={setEnableWebLogging} disabled={!owner}></Switch>
-                    <b>Enable Web Logging</b>
-                </Label>
-                <Separator></Separator>
+                {true ? null : (
+                    <>
+                        <h1 className="text-xl">Web Logging</h1>
+                        <p>
+                            When web logging is enabled, you will be able to check your server&apos;s logs on the dashboard, and if you staff multiple servers,
+                            you can aggregate their logs together and filter for what you are trying to find. Only the server owner can change this value.
+                        </p>
+                        <Label className="center-row gap-4">
+                            <Switch checked={enableWebLogging} onCheckedChange={setEnableWebLogging} disabled={!owner}></Switch>
+                            <b>Enable Web Logging</b>
+                        </Label>
+                        <Separator></Separator>
+                    </>
+                )}
                 <h1 className="text-xl">Ignored Channels</h1>
                 <MultiChannelSelector channels={ignoredChannels} setChannels={setIgnoredChannels} showReadonly></MultiChannelSelector>
                 <Separator></Separator>
