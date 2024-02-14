@@ -697,8 +697,8 @@ export async function handleReply(
 
     await trpc.postOutgoingModmailMessage.mutate({
         channel: _.channel!.id,
-        id: output.id,
         source,
+        target: output.id,
         author: _.user.id,
         anon,
         content: content || "",

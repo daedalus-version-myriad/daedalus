@@ -642,7 +642,7 @@ export default {
         .input(
             z.object({
                 channel: snowflake,
-                id: snowflake,
+                target: snowflake,
                 source: z.string().max(36),
                 author: snowflake,
                 anon: z.boolean(),
@@ -684,6 +684,37 @@ export default {
                     .delete(tables.modmailNotifications)
                     .where(and(eq(tables.modmailNotifications.channel, channel), eq(tables.modmailNotifications.user, user)));
             else await db.insert(tables.modmailNotifications).values({ channel, user, once }).onDuplicateKeyUpdate({ set: { once } });
+        }),
+    getOutgoingModmailMessage: proc.input(z.object({ uuid: z.string().length(36), source: z.string().max(36) })).query(async ({ input: { uuid, source } }) => {
+        return (
+            await db
+                .select()
+                .from(tables.modmailMessages)
+                .where(and(eq(tables.modmailMessages.uuid, uuid), eq(tables.modmailMessages.source, source)))
+        ).at(0);
+    }),
+    recordOutgoingModmailMessageEdit: proc
+        .input(z.object({ uuid: z.string().length(36), source: z.string().max(36), content: z.string().max(4000) }))
+        .mutation(async ({ input: { uuid, source, content } }) => {
+            const [entry] = await db
+                .select({ edits: tables.modmailMessages.edits })
+                .from(tables.modmailMessages)
+                .where(and(eq(tables.modmailMessages.uuid, uuid), eq(tables.modmailMessages.source, source)));
+
+            if (!entry) return;
+
+            await db
+                .update(tables.modmailMessages)
+                .set({ edits: [...(entry.edits as string[]), content] })
+                .where(and(eq(tables.modmailMessages.uuid, uuid), eq(tables.modmailMessages.source, source)));
+        }),
+    recordOutgoingModmailMessageDelete: proc
+        .input(z.object({ uuid: z.string().length(36), source: z.string().max(36) }))
+        .mutation(async ({ input: { uuid, source } }) => {
+            await db
+                .update(tables.modmailMessages)
+                .set({ deleted: false })
+                .where(and(eq(tables.modmailMessages.uuid, uuid), eq(tables.modmailMessages.source, source)));
         }),
     getTicketsConfig: proc.input(snowflake).query(async ({ input: guild }) => {
         return await getTicketsSettings(guild);
