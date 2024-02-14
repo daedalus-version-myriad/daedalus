@@ -5,6 +5,8 @@ import { logError } from "@daedalus/log-interface";
 import { closeModmailThread } from "@daedalus/modmail";
 import { Client, IntentsBitField } from "discord.js";
 
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 const manager = new ClientManager({

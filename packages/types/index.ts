@@ -338,6 +338,36 @@ export type GuildModmailSettings = {
     }[];
 };
 
+export type GuildTicketsSettings = {
+    guild: string;
+    prompts: {
+        id: number;
+        name: string;
+        channel: string | null;
+        message: string | null;
+        prompt: MessageData;
+        useMulti: boolean;
+        error: string | null;
+        targets: {
+            id: number;
+            name: string;
+            channel: string | null;
+            category: string | null;
+            buttonLabel: string;
+            buttonColor: "gray" | "blue" | "green" | "red";
+            dropdownLabel: string;
+            dropdownDescription: string;
+            emoji: string | null;
+            pingRoles: string[];
+            pingHere: boolean;
+            accessRoles: string[];
+            postCustomOpenMessage: boolean;
+            customOpenMessage: MessageData;
+            customOpenParsed: ParsedMessage;
+        }[];
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

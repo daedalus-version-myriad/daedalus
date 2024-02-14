@@ -3,6 +3,8 @@ import { isModuleDisabled, isWrongClient, obtainLimit } from "@daedalus/bot-util
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, IntentsBitField, MessageReaction, Partials, User, type PartialMessageReaction, type PartialUser } from "discord.js";
 
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({
@@ -24,7 +26,7 @@ async function handle(reaction: MessageReaction | PartialMessageReaction, user: 
     if (await isWrongClient(reaction.client, reaction.message.guild!)) return;
     if (await isModuleDisabled(reaction.message.guild!, "reaction-roles")) return;
 
-    const entries = await trpc.getReactionRoleEntries.query({ guild: reaction.message.guild!.id });
+    const entries = await trpc.getReactionRoleEntries.query(reaction.message.guild!.id);
 
     const entry = entries
         .slice(0, (await obtainLimit(reaction.message.guild!.id, "reactionRolesCountLimit")) as number)

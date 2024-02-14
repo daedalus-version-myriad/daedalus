@@ -7,6 +7,8 @@ import { logError } from "@daedalus/log-interface";
 import { Client, Events, IntentsBitField, Partials, type Message, type PartialMessage, type TextBasedChannel } from "discord.js";
 import { match, skip, type Rule } from "./lib";
 
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({

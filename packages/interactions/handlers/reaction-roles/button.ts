@@ -3,6 +3,8 @@ import { isModuleDisabled, isWrongClient, obtainLimit, template } from "@daedalu
 import type { ButtonInteraction } from "discord.js";
 
 export default async function (button: ButtonInteraction, _row: string, _col: string) {
+    await button.deferReply({ ephemeral: true });
+
     const row = +_row;
     const col = +_col;
 
@@ -11,7 +13,7 @@ export default async function (button: ButtonInteraction, _row: string, _col: st
 
     if (await isModuleDisabled(button.guild!, "reaction-roles")) throw "The Reaction Roles module is disabled.";
 
-    const entries = await trpc.getReactionRoleEntries.query({ guild: button.guild!.id });
+    const entries = await trpc.getReactionRoleEntries.query(button.guild!.id);
 
     const entry = entries
         .slice(0, (await obtainLimit(button.guild!.id, "reactionRolesCountLimit")) as number)

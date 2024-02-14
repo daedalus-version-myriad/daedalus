@@ -18,6 +18,7 @@ import type {
     GuildStatsChannelsSettings,
     GuildStickyRolesSettings,
     GuildSupporterAnnouncementsSettings,
+    GuildTicketsSettings,
     GuildWelcomeSettings,
     GuildXpSettings,
     MessageData,
@@ -34,6 +35,7 @@ import { db } from "../../db/db";
 import { baseMessageData, snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
+import { getLimit } from "./premium.ts";
 import { isAdmin } from "./users";
 
 export const NO_PERMISSION = "You do not have permission to manage settings within this guild.";
@@ -297,6 +299,46 @@ export async function getModmailSettings(guild: string): Promise<GuildModmailSet
         snippets: (await db.select().from(tables.guildModmailSnippets).where(eq(tables.guildModmailSnippets.guild, guild))).map(
             ({ guild, parsed, ...data }) => ({ ...data, parsed: parsed as any }),
         ),
+    };
+}
+
+export async function getTicketsSettings(guild: string): Promise<GuildTicketsSettings> {
+    const prompts = await db.select().from(tables.guildTicketsItems).where(eq(tables.guildTicketsItems.guild, guild));
+
+    const targets =
+        prompts.length === 0
+            ? []
+            : await db
+                  .select()
+                  .from(tables.guildTicketsTargets)
+                  .where(
+                      and(
+                          eq(tables.guildTicketsTargets.guild, guild),
+                          inArray(
+                              tables.guildTicketsTargets.promptId,
+                              prompts.map(({ id }) => id),
+                          ),
+                      ),
+                  );
+
+    const map: Record<number, typeof targets> = {};
+
+    for (const target of targets) (map[target.promptId] ??= []).push(target);
+
+    return {
+        guild,
+        prompts: prompts.map(({ id, prompt, ...data }) => ({
+            id,
+            ...data,
+            prompt: prompt as MessageData,
+            targets: (map[id] ?? []).map(({ pingRoles, accessRoles, customOpenMessage, customOpenParsed, ...data }) => ({
+                ...data,
+                pingRoles: decodeArray(pingRoles),
+                accessRoles: decodeArray(accessRoles),
+                customOpenMessage: customOpenMessage as MessageData,
+                customOpenParsed: customOpenParsed as ParsedMessage,
+            })),
+        })),
     };
 }
 
@@ -770,7 +812,7 @@ export default {
             const obj = await client?.guilds.fetch(guild);
 
             for (const prompt of prompts) {
-                if (prompt.id === -1) prompt.id = Date.now() * 100 + Math.floor(Math.random() * (100 - inc)) + inc++;
+                if (prompt.id === -1) prompt.id = Date.now() * 100 + inc++;
 
                 try {
                     if (!client)
@@ -879,27 +921,31 @@ export default {
                             );
 
                         if (prompt.id in entryMap) {
-                            if (prompt.channel === entryMap[prompt.id].channel) {
+                            const old = entryMap[prompt.id];
+
+                            if (prompt.channel === old.channel) {
                                 const channel = await obj.channels.fetch(prompt.channel!).catch(() => null);
                                 if (!channel?.isTextBased()) throw "Could not fetch channel.";
 
                                 let edit = false;
 
                                 try {
-                                    message = await channel.messages.fetch({ message: entryMap[prompt.id].message!, force: true });
+                                    if (!old.message) throw 0;
+                                    message = await channel.messages.fetch({ message: old.message, force: true });
                                     edit = true;
                                 } catch {
                                     message = await channel.send(data(true)).catch((error) => {
-                                        throw `Could neither fetch the messaeg in #${channel.name} to edit nor send a new one: ${error}`;
+                                        throw `Could neither fetch the message in #${channel.name} to edit nor send a new one: ${error}`;
                                     });
                                 }
 
                                 if (edit && shouldPost()) await message.edit(data(false));
                             } else {
                                 try {
-                                    const channel = await obj.channels.fetch(entryMap[prompt.id].channel!);
+                                    if (!old.channel || !old.message) throw 0;
+                                    const channel = await obj.channels.fetch(old.channel);
                                     if (!channel?.isTextBased()) throw 0;
-                                    await (await channel.messages.fetch(entryMap[prompt.id].message!)).delete();
+                                    await (await channel.messages.fetch(old.message)).delete();
                                 } catch {}
                             }
                         }
@@ -934,7 +980,7 @@ export default {
                 for (const entry of Object.values(entryMap))
                     if (!entry.addToExisting && !prompts.some((prompt) => prompt.id === entry.id))
                         try {
-                            const channel = await obj?.channels.fetch(entry.channel!);
+                            const channel = await obj.channels.fetch(entry.channel!);
                             if (!channel?.isTextBased()) throw 0;
                             await (await channel.messages.fetch(entry.message!)).delete();
                         } catch {}
@@ -1404,5 +1450,199 @@ export default {
             });
 
             return [null, await getModmailSettings(guild)];
+        }),
+    getTicketsSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildTicketsSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+            return await getTicketsSettings(guild);
+        }),
+    setTicketsSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                prompts: z
+                    .object({
+                        id: z.number(),
+                        name: z.string().max(128),
+                        channel: snowflake.nullable(),
+                        message: snowflake.nullable(),
+                        prompt: baseMessageData,
+                        useMulti: z.boolean(),
+                        error: z.string().nullable(),
+                        targets: z
+                            .object({
+                                id: z.number(),
+                                name: z.string().max(128),
+                                channel: snowflake.nullable(),
+                                category: snowflake.nullable(),
+                                buttonLabel: z.string().max(80),
+                                buttonColor: z.enum(["gray", "blue", "green", "red"]),
+                                dropdownLabel: z.string().max(100),
+                                dropdownDescription: z.string().max(100),
+                                emoji: z.string().nullable(),
+                                pingRoles: snowflake.array(),
+                                pingHere: z.boolean(),
+                                accessRoles: snowflake.array(),
+                                postCustomOpenMessage: z.boolean(),
+                                customOpenMessage: baseMessageData,
+                                customOpenParsed: z.custom<ParsedMessage>(),
+                            })
+                            .array(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, prompts } }): Promise<[string | null, GuildTicketsSettings]> => {
+            if (!(await hasPermission(id, guild))) return [NO_PERMISSION, { guild, prompts }];
+
+            let inc = 0;
+
+            const promptMap = Object.fromEntries((await getTicketsSettings(guild)).prompts.map((prompt) => [prompt.id, prompt]));
+
+            const client = await clients.getBot(guild);
+            const obj = await client?.guilds.fetch(guild);
+
+            const promptLimit = (await getLimit(guild, "ticketPromptCountLimit")) as number;
+
+            const canUseMulti = (await getLimit(guild, "multiTickets")) as boolean;
+            const multiLimit = canUseMulti ? ((await getLimit(guild, "ticketTargetCountLimit")) as number) : 1;
+
+            for (let index = 0; index < prompts.length; index++) {
+                const prompt = prompts[index];
+
+                if (prompt.id === -1) prompt.id = Date.now() * 100 + inc++;
+                if (!canUseMulti) prompt.useMulti = false;
+
+                for (const target of prompt.targets) if (target.id === -1) target.id = Date.now() * 100 + inc++;
+
+                try {
+                    if (index >= promptLimit) throw "This ticket prompt is disabled because it exceeds the server's ticket prompt limit.";
+                    if (!client)
+                        throw "Could not load the client for this guild. If you are using a custom client, please make sure its token is valid. If not, please contact support.";
+                    if (!obj) throw "Could not load this guild. Please make sure the bot is in the server.";
+                    if (!prompt.channel) throw "No channel was set for this prompt. It was still saved but cannot be posted.";
+
+                    const targets = prompt.targets.slice(0, prompt.useMulti ? multiLimit : 1).filter((x) => !!x.channel && !!x.category);
+
+                    if (targets.length === 0)
+                        throw prompt.useMulti
+                            ? "At least one ticket target must be configured (channel and category both must be set)"
+                            : "Ticket target is not configured (missing channel or category)";
+
+                    const data: (post: boolean) => BaseMessageOptions = (post) => ({
+                        ...(!post && prompt.id in promptMap && _.isEqual(prompt.prompt, promptMap[prompt.id].prompt) ? {} : prompt.prompt),
+                        components: prompt.useMulti
+                            ? [
+                                  {
+                                      type: ComponentType.ActionRow,
+                                      components: [
+                                          {
+                                              type: ComponentType.StringSelect,
+                                              customId: `::ticket`,
+                                              options: targets.map((x) => ({
+                                                  label: x.dropdownLabel,
+                                                  value: `${x.id}`,
+                                                  description: x.dropdownDescription || undefined,
+                                                  emoji: x.emoji || undefined,
+                                              })),
+                                          },
+                                      ],
+                                  },
+                              ]
+                            : [
+                                  {
+                                      type: ComponentType.ActionRow,
+                                      components: [
+                                          {
+                                              type: ComponentType.Button,
+                                              style: ButtonStyle[
+                                                  ({ gray: "Secondary", blue: "Primary", green: "Success", red: "Danger" } as const)[targets[0].buttonColor]
+                                              ],
+                                              customId: `::ticket:${targets[0].id}`,
+                                              emoji: targets[0].emoji || undefined,
+                                              label: targets[0].buttonLabel || undefined,
+                                          },
+                                      ],
+                                  },
+                              ],
+                    });
+
+                    let message: Message | null = null;
+
+                    if (prompt.id in promptMap) {
+                        const old = promptMap[prompt.id];
+
+                        if (prompt.channel === old.channel) {
+                            const channel = await obj.channels.fetch(prompt.channel!).catch(() => null);
+                            if (!channel?.isTextBased()) throw "Could not fetch channel.";
+
+                            let edit = false;
+
+                            try {
+                                if (!old.message) throw 0;
+                                message = await channel.messages.fetch({ message: old.message, force: true });
+                                edit = true;
+                            } catch {
+                                message = await channel.send(data(true)).catch((error) => {
+                                    throw `Could neither fetch the message in #${channel.name} to edit nor send a new one: ${error}`;
+                                });
+                            }
+
+                            if (edit) await message.edit(data(false));
+                        } else {
+                            try {
+                                if (!old.message || !old.channel) throw 0;
+                                const channel = await obj.channels.fetch(old.channel);
+                                if (!channel?.isTextBased()) throw 0;
+                                await (await channel.messages.fetch(old.message)).delete();
+                            } catch {}
+                        }
+                    }
+
+                    if (!message) {
+                        const channel = await obj.channels.fetch(prompt.channel!).catch(() => null);
+                        if (!channel?.isTextBased()) throw "Could not fetch channel.";
+
+                        message = await channel.send(data(true)).catch(() => {
+                            throw `Could not send message in #${channel.name}.`;
+                        });
+                    }
+
+                    prompt.message = message.id;
+                    prompt.error = null;
+                } catch (error) {
+                    if (typeof error !== "string") console.error(error);
+                    prompt.error = `${error}`;
+                }
+            }
+
+            if (obj)
+                for (const prompt of Object.values(promptMap))
+                    if (!prompts.some((search) => search.id === prompt.id))
+                        try {
+                            const channel = await obj.channels.fetch(prompt.channel!);
+                            if (!channel?.isTextBased()) throw 0;
+                            await (await channel.messages.fetch(prompt.message!)).delete();
+                        } catch {}
+
+            await db.transaction(async (tx) => {
+                await tx.delete(tables.guildTicketsItems).where(eq(tables.guildTicketsItems.guild, guild));
+                await tx.delete(tables.guildTicketsTargets).where(eq(tables.guildTicketsTargets.guild, guild));
+                if (prompts.length > 0) await tx.insert(tables.guildTicketsItems).values(prompts.map(({ targets, ...prompt }) => ({ guild, ...prompt })));
+                const targets = prompts.flatMap((prompt) => prompt.targets.map((target) => ({ guild, promptId: prompt.id, ...target })));
+
+                if (targets.length > 0)
+                    await tx.insert(tables.guildTicketsTargets).values(
+                        targets.map(({ pingRoles, accessRoles, ...target }) => ({
+                            ...target,
+                            pingRoles: pingRoles.join("/"),
+                            accessRoles: accessRoles.join("/"),
+                        })),
+                    );
+            });
+
+            return [null, { guild, prompts }];
         }),
 } as const;

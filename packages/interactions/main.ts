@@ -2,6 +2,8 @@ import { reply, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, IntentsBitField, Partials } from "discord.js";
 
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({

@@ -449,6 +449,41 @@
       "when": 1707839954851,
       "tag": "0063_charming_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "5",
+      "when": 1707882638834,
+      "tag": "0064_nostalgic_hitman",
+      "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "5",
+      "when": 1707885994208,
+      "tag": "0065_sour_ravenous",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "5",
+      "when": 1707888914647,
+      "tag": "0066_fancy_steve_rogers",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "5",
+      "when": 1707889309867,
+      "tag": "0067_smooth_sunspot",
+      "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "5",
+      "when": 1707894332332,
+      "tag": "0068_classy_pete_wisdom",
+      "breakpoints": true
     }
   ]
 }

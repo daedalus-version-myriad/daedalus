@@ -1,0 +1,1 @@
+ALTER TABLE `guild_tickets_targets` ADD `name` varchar(128) NOT NULL;

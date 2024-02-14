@@ -3,6 +3,8 @@ import { isModuleDisabled, isWrongClient, sendCustomMessage } from "@daedalus/bo
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, IntentsBitField, type GuildBasedChannel } from "discord.js";
 
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({

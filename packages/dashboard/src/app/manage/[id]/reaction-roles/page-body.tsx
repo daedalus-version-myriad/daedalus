@@ -26,15 +26,22 @@ import save from "./save";
 export function Body({ data: initial, limit, disabled }: { data: GuildReactionRolesSettings; limit: number; disabled: boolean }) {
     const [data, setData] = useState<GuildReactionRolesSettings>(initial);
     const [prompts, setPrompts] = useState<GuildReactionRolesSettings["prompts"]>(structuredClone(data.prompts));
+    const [saving, setSaving] = useState<boolean>(false);
 
     const updated = { guild: data.guild, prompts };
 
     async function commitSave() {
-        const [error, output] = (await save(updated)) ?? [null, data];
-        if (error) return alert(error);
-        setData(output);
-        setPrompts(structuredClone(output.prompts));
-        if (output.prompts.some((prompt) => prompt.error)) alert("At least one prompt experienced an error during posting. Please inspect the errors.");
+        setSaving(true);
+
+        try {
+            const [error, output] = (await save(updated)) ?? [null, data];
+            if (error) return alert(error);
+            setData(output);
+            setPrompts(structuredClone(output.prompts));
+            if (output.prompts.some((prompt) => prompt.error)) alert("At least one prompt experienced an error during posting. Please inspect the errors.");
+        } finally {
+            setSaving(false);
+        }
     }
 
     return (
@@ -75,7 +82,11 @@ export function Body({ data: initial, limit, disabled }: { data: GuildReactionRo
                                 )}
                                 <b className="mr-2">{prompt.name}</b>
                                 <Item prompt={prompt} setPrompt={(fn) => setPrompts((prompts) => applyIndex(prompts, i, fn))}></Item>
-                                <Button variant="outline" onClick={() => setPrompts((prompts) => clone(prompts, i, (p) => ({ ...p, id: -1 })))}>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setPrompts((prompts) => clone(prompts, i, (p) => ({ ...p, id: -1 })))}
+                                    disabled={prompts.length >= limit}
+                                >
                                     <FaCopy></FaCopy>
                                 </Button>
                                 <Button variant="outline" onClick={() => setPrompts((prompts) => removeIndex(prompts, i))}>
@@ -123,7 +134,7 @@ export function Body({ data: initial, limit, disabled }: { data: GuildReactionRo
                     </span>
                 </p>
                 <div>
-                    <Button variant="outline" className="center-row gap-2" onClick={commitSave}>
+                    <Button variant="outline" className="center-row gap-2" onClick={commitSave} disabled={saving}>
                         <FaFloppyDisk></FaFloppyDisk> Save
                     </Button>
                 </div>
@@ -134,6 +145,7 @@ export function Body({ data: initial, limit, disabled }: { data: GuildReactionRo
                     setPrompts(structuredClone(data.prompts));
                 }}
                 save={commitSave}
+                disabled={saving}
             ></SaveChangesBar>
         </>
     );

@@ -24,6 +24,7 @@ import {
     getCustomRolesSettings,
     getStarboardSettings,
     getStickyRolesSettings,
+    getTicketsSettings,
     getXpSettings,
     transformXpSettings,
 } from "./guild-settings";
@@ -327,7 +328,7 @@ export default {
     getAllXpConfigs: proc.input(snowflake.array()).query(async ({ input: guilds }) => {
         return (await db.select().from(tables.guildXpSettings).where(inArray(tables.guildXpSettings.guild, guilds))).map(transformXpSettings);
     }),
-    getReactionRoleEntries: proc.input(z.object({ guild: snowflake })).query(async ({ input: { guild } }) => {
+    getReactionRoleEntries: proc.input(snowflake).query(async ({ input: guild }) => {
         return (await db
             .select()
             .from(tables.guildReactionRolesItems)
@@ -684,6 +685,44 @@ export default {
                     .where(and(eq(tables.modmailNotifications.channel, channel), eq(tables.modmailNotifications.user, user)));
             else await db.insert(tables.modmailNotifications).values({ channel, user, once }).onDuplicateKeyUpdate({ set: { once } });
         }),
+    getTicketsConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getTicketsSettings(guild);
+    }),
+    getExistingTicket: proc
+        .input(z.object({ guild: snowflake, user: snowflake, prompt: z.number().int(), target: z.number().int() }))
+        .query(async ({ input: { guild, user, prompt, target } }) => {
+            return (
+                await db
+                    .select()
+                    .from(tables.tickets)
+                    .where(
+                        and(
+                            eq(tables.tickets.guild, guild),
+                            eq(tables.tickets.user, user),
+                            eq(tables.tickets.prompt, prompt),
+                            eq(tables.tickets.target, target),
+                            eq(tables.tickets.closed, false),
+                        ),
+                    )
+            ).at(0);
+        }),
+    markTicketAsClosed: proc.input(z.string().length(36)).mutation(async ({ input: uuid }) => {
+        await db.update(tables.tickets).set({ closed: true }).where(eq(tables.tickets.uuid, uuid));
+    }),
+    openTicket: proc
+        .input(z.object({ guild: snowflake, user: snowflake, prompt: z.number().int(), target: z.number().int(), author: snowflake, channel: snowflake }))
+        .mutation(async ({ input: { author, ...data } }) => {
+            let uuid: string;
+
+            do {
+                uuid = crypto.randomUUID();
+            } while ((await db.select().from(tables.tickets).where(eq(tables.tickets.uuid, uuid))).length > 0);
+
+            await db.insert(tables.tickets).values({ uuid, ...data, closed: false });
+            await db.insert(tables.ticketMessages).values({ uuid, type: "open", author, ...defaultTicketMessage });
+
+            return uuid;
+        }),
 } as const;
 
 const defaultModmailMessage = {
@@ -698,4 +737,11 @@ const defaultModmailMessage = {
     attachments: [],
     deleted: false,
     sent: false,
+} as const;
+
+const defaultTicketMessage = {
+    content: "",
+    attachments: [],
+    edits: [],
+    deleted: false,
 } as const;

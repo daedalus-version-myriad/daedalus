@@ -1,0 +1,1 @@
+ALTER TABLE `guild_tickets_targets` ADD `access_roles` text NOT NULL;

@@ -8,6 +8,8 @@ import { Client, Events, IntentsBitField } from "discord.js";
 import { z } from "zod";
 import { isSupporter } from "./lib";
 
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 const manager = new ClientManager({

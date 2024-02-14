@@ -109,8 +109,9 @@ export function Body({ data: initial, disabled, canUseMulti, limit }: { data: Gu
                                 className="center-row gap-2"
                                 onClick={() =>
                                     setTargets((targets) => {
-                                        if (index >= targets.length - 1) setIndex((idx) => idx - 1);
-                                        return removeIndex(targets, index);
+                                        const result = removeIndex(targets, index);
+                                        if (index >= result.length) setIndex((idx) => idx - 1);
+                                        return result;
                                     })
                                 }
                                 disabled={targets.length <= 1}

@@ -48,6 +48,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/stats-channels", moduleIcons["stats-channels"], "Stats Channels"],
     ["/autoresponder", moduleIcons.autoresponder, "Autoresponder"],
     ["/modmail", moduleIcons.modmail, "Modmail"],
+    ["/tickets", moduleIcons.tickets, "Tickets"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

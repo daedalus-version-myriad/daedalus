@@ -3,6 +3,8 @@ import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, IntentsBitField } from "discord.js";
 
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 new ClientManager({

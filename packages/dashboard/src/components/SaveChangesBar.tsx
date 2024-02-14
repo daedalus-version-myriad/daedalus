@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "./ui/button";
 
-export function SaveChangesBar({ unsaved, reset, save }: { unsaved: boolean; reset: () => unknown; save: () => unknown }) {
+export function SaveChangesBar({ unsaved, reset, save, disabled }: { unsaved: boolean; reset: () => unknown; save: () => unknown; disabled?: boolean }) {
     const [saving, setSaving] = useState(false);
 
     const doSave = useCallback(async () => {
@@ -26,14 +26,14 @@ export function SaveChangesBar({ unsaved, reset, save }: { unsaved: boolean; res
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-                if (unsaved) doSave();
+                if (!disabled && !saving && unsaved) doSave();
                 e.preventDefault();
             }
         };
 
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
-    }, [unsaved, doSave]);
+    }, [disabled, saving, unsaved, doSave]);
 
     return (
         <div
@@ -46,10 +46,10 @@ export function SaveChangesBar({ unsaved, reset, save }: { unsaved: boolean; res
         >
             <span className="text-muted-foreground">YOU HAVE UNSAVED CHANGES</span>
             <div className="center-row gap-2">
-                <Button variant="ghost" className="text-[#ff0000] hover:text-[#ff0000cc]" onClick={reset} disabled={saving}>
+                <Button variant="ghost" className="text-[#ff0000] hover:text-[#ff0000cc]" onClick={reset} disabled={disabled || saving}>
                     RESET
                 </Button>
-                <Button className="text-[#008800] hover:text-[#008800cc]" onClick={doSave} disabled={saving}>
+                <Button className="text-[#008800] hover:text-[#008800cc]" onClick={doSave} disabled={disabled || saving}>
                     SAVE
                 </Button>
             </div>

@@ -5,6 +5,8 @@ import { formatCustomMessageString } from "@daedalus/custom-messages";
 import { logError } from "@daedalus/log-interface";
 import { Client, IntentsBitField } from "discord.js";
 
+process.on("uncaughtException", console.error);
+
 const Intents = IntentsBitField.Flags;
 
 const manager = new ClientManager({ factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, allowedMentions: { parse: [] } }) });

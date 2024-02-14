@@ -347,6 +347,49 @@ export const guildModmailSnippets = mysqlTable(
     }),
 );
 
+export const guildTicketsItems = mysqlTable(
+    "guild_tickets_items",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        id: bigint("id", { mode: "number" }).notNull(),
+        name: varchar("name", { length: 128 }).notNull(),
+        channel: varchar("channel", { length: 20 }),
+        message: varchar("message", { length: 20 }),
+        prompt: json("prompt").notNull(),
+        useMulti: boolean("use_multi").notNull(),
+        error: text("error"),
+    },
+    (t) => ({
+        unq_guild_id: unique("unq_guild_id").on(t.guild, t.id),
+    }),
+);
+
+export const guildTicketsTargets = mysqlTable(
+    "guild_tickets_targets",
+    {
+        id: bigint("id", { mode: "number" }).notNull(),
+        guild: varchar("guild", { length: 20 }).notNull(),
+        promptId: bigint("prompt_id", { mode: "number" }).notNull(),
+        name: varchar("name", { length: 128 }).notNull(),
+        channel: varchar("channel", { length: 20 }),
+        category: varchar("category", { length: 20 }),
+        buttonLabel: varchar("button_label", { length: 80 }).notNull(),
+        buttonColor: mysqlEnum("button_color", ["gray", "blue", "green", "red"]).notNull(),
+        dropdownLabel: varchar("dropdown_label", { length: 100 }).notNull(),
+        dropdownDescription: varchar("dropdown_description", { length: 100 }).notNull(),
+        emoji: varchar("emoji", { length: 20 }),
+        pingRoles: text("ping_roles").notNull(),
+        pingHere: boolean("ping_here").notNull(),
+        accessRoles: text("access_roles").notNull(),
+        postCustomOpenMessage: boolean("post_custom_open_message").notNull(),
+        customOpenMessage: json("custom_open_message").notNull(),
+        customOpenParsed: json("custom_open_parsed").notNull(),
+    },
+    (t) => ({
+        unq_guild_id: unique("unq_guild_id").on(t.guild, t.id),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {
@@ -587,3 +630,36 @@ export const files = mysqlTable("files", {
     channel: varchar("channel", { length: 20 }).notNull(),
     message: varchar("message", { length: 20 }).notNull(),
 });
+
+export const tickets = mysqlTable(
+    "tickets",
+    {
+        uuid: varchar("uuid", { length: 36 }).notNull().primaryKey(),
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        prompt: bigint("prompt", { mode: "number" }).notNull(),
+        target: bigint("target", { mode: "number" }).notNull(),
+        closed: boolean("closed").notNull(),
+        channel: varchar("channel", { length: 20 }).notNull(),
+    },
+    (t) => ({
+        idx_guild_user_prompt_target: index("idx_guild_user_prompt_target").on(t.guild, t.user, t.prompt, t.target),
+    }),
+);
+
+export const ticketMessages = mysqlTable(
+    "ticket_messages",
+    {
+        uuid: varchar("uuid", { length: 36 }).notNull(),
+        type: mysqlEnum("type", ["open", "message", "close"]),
+        id: varchar("id", { length: 20 }),
+        author: varchar("author", { length: 20 }).notNull(),
+        content: varchar("content", { length: 4000 }).notNull(),
+        attachments: json("attachments").notNull(),
+        edits: json("edits").notNull(),
+        deleted: boolean("deleted").notNull(),
+    },
+    (t) => ({
+        idx_uuid: index("idx_uuid").on(t.uuid),
+    }),
+);

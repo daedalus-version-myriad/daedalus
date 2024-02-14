@@ -1,0 +1,1 @@
+ALTER TABLE `guild_tickets_targets` ADD `prompt_id` bigint NOT NULL;

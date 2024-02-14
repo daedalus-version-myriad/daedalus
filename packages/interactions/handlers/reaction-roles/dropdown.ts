@@ -4,12 +4,14 @@ import { englishList } from "@daedalus/formatting";
 import type { StringSelectMenuInteraction } from "discord.js";
 
 export default async function (menu: StringSelectMenuInteraction) {
+    await menu.deferReply({ ephemeral: true });
+
     if (await isWrongClient(menu.client, menu.guild!))
         throw 'This server is no longer using this client. Reaction role prompts need to be set up again, which can be done by simply clicking "save" on the dashboard.';
 
     if (await isModuleDisabled(menu.guild!, "reaction-roles")) throw "The Reaction Roles module is disabled.";
 
-    const entries = await trpc.getReactionRoleEntries.query({ guild: menu.guild!.id });
+    const entries = await trpc.getReactionRoleEntries.query(menu.guild!.id);
 
     const entry = entries.slice(0, (await obtainLimit(menu.guild!.id, "reactionRolesCountLimit")) as number).find((entry) => entry.message === menu.message.id);
 
