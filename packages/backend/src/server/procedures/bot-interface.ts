@@ -719,10 +719,47 @@ export default {
             } while ((await db.select().from(tables.tickets).where(eq(tables.tickets.uuid, uuid))).length > 0);
 
             await db.insert(tables.tickets).values({ uuid, ...data, closed: false });
-            await db.insert(tables.ticketMessages).values({ uuid, type: "open", author, ...defaultTicketMessage });
+            await db.insert(tables.ticketMessages).values({ ...defaultTicketMessage, uuid, type: "open", author });
 
             return uuid;
         }),
+    getTicket: proc.input(snowflake).query(async ({ input: channel }) => {
+        return (
+            await db
+                .select({ uuid: tables.tickets.uuid, user: tables.tickets.user, prompt: tables.tickets.prompt, target: tables.tickets.target })
+                .from(tables.tickets)
+                .where(and(eq(tables.tickets.channel, channel), eq(tables.tickets.closed, false)))
+        ).at(0);
+    }),
+    postTicketMessage: proc
+        .input(
+            z.object({
+                uuid: z.string().length(36),
+                id: snowflake,
+                author: snowflake,
+                content: z.string().max(4000),
+                attachments: z.object({ name: z.string(), url: z.string() }).array(),
+            }),
+        )
+        .mutation(async ({ input: { attachments, ...data } }) => {
+            await db.insert(tables.ticketMessages).values({ ...defaultTicketMessage, type: "message", ...data, attachments: await mapFiles(attachments) });
+        }),
+    editTicketMessage: proc.input(z.object({ id: snowflake, content: z.string().max(4000) })).mutation(async ({ input: { id, content } }) => {
+        const [entry] = await db.select({ edits: tables.ticketMessages.edits }).from(tables.ticketMessages).where(eq(tables.ticketMessages.id, id));
+        if (!entry) return;
+
+        await db
+            .update(tables.ticketMessages)
+            .set({ edits: [...(entry.edits as string[]), content] })
+            .where(eq(tables.ticketMessages.id, id));
+    }),
+    deleteTicketMessages: proc.input(snowflake.array()).mutation(async ({ input: ids }) => {
+        await db.update(tables.ticketMessages).set({ deleted: true }).where(inArray(tables.ticketMessages.id, ids));
+    }),
+    closeTicket: proc.input(z.object({ uuid: z.string().length(36), author: snowflake })).mutation(async ({ input: { uuid, author } }) => {
+        await db.update(tables.tickets).set({ closed: true }).where(eq(tables.tickets.uuid, uuid));
+        await db.insert(tables.ticketMessages).values({ ...defaultTicketMessage, uuid, type: "close", author });
+    }),
 } as const;
 
 const defaultModmailMessage = {

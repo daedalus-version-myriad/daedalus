@@ -9,7 +9,7 @@ const Intents = IntentsBitField.Flags;
 new ClientManager({
     factory: () =>
         new Client({
-            intents: Intents.Guilds | Intents.DirectMessages | Intents.MessageContent,
+            intents: Intents.Guilds | Intents.DirectMessages | Intents.MessageContent | Intents.GuildMembers,
             partials: [Partials.Channel],
             sweepers: { messages: { lifetime: 60, interval: 60 } },
             allowedMentions: { parse: [] },

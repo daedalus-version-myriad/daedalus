@@ -644,6 +644,7 @@ export const tickets = mysqlTable(
     },
     (t) => ({
         idx_guild_user_prompt_target: index("idx_guild_user_prompt_target").on(t.guild, t.user, t.prompt, t.target),
+        idx_channel_closed: index("idx_channel_closed").on(t.channel, t.closed),
     }),
 );
 

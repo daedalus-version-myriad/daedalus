@@ -16,6 +16,7 @@ module.exports = {
             "sticky-roles",
             "supporter-announcements",
             "task-runner",
+            "tickets",
             "welcome",
             "xp",
         ].map((name) => ({

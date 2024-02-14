@@ -1,0 +1,1 @@
+CREATE INDEX `idx_channel_closed` ON `tickets` (`channel`,`closed`);

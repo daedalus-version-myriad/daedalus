@@ -1508,6 +1508,7 @@ export default {
 
             const canUseMulti = (await getLimit(guild, "multiTickets")) as boolean;
             const multiLimit = canUseMulti ? ((await getLimit(guild, "ticketTargetCountLimit")) as number) : 1;
+            const canCustomize = (await getLimit(guild, "customizeTicketOpenMessage")) as boolean;
 
             for (let index = 0; index < prompts.length; index++) {
                 const prompt = prompts[index];
@@ -1530,6 +1531,15 @@ export default {
                         throw prompt.useMulti
                             ? "At least one ticket target must be configured (channel and category both must be set)"
                             : "Ticket target is not configured (missing channel or category)";
+
+                    if (canCustomize)
+                        for (const target of prompt.targets)
+                            if (target.postCustomOpenMessage)
+                                try {
+                                    target.customOpenParsed = parseMessage(target.customOpenMessage, false);
+                                } catch (error) {
+                                    throw `Could not parse the custom message of target ${target.name} of prompt ${prompt.name}: ${error}`;
+                                }
 
                     const data: (post: boolean) => BaseMessageOptions = (post) => ({
                         ...(!post && prompt.id in promptMap && _.isEqual(prompt.prompt, promptMap[prompt.id].prompt) ? {} : prompt.prompt),

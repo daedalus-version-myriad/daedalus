@@ -375,7 +375,29 @@ function Item({
                                 ></NormalSelect>
                             </>
                         )}
+                        {canCustomize ? (
+                            <>
+                                <b>Use Custom On-Open Message</b>
+                                <Switch
+                                    checked={target.postCustomOpenMessage}
+                                    onCheckedChange={(ch) => setTarget((target) => ({ ...target, postCustomOpenMessage: ch }))}
+                                ></Switch>
+                            </>
+                        ) : null}
                     </div>
+                    {canCustomize && target.postCustomOpenMessage ? (
+                        <>
+                            <p>
+                                <b>Custom On-Open Message</b>
+                            </p>
+                            <MessageEditor
+                                data={target.customOpenMessage}
+                                setData={(data) =>
+                                    !_.isEqual(data, target.customOpenMessage) && setTarget((target) => ({ ...target, customOpenMessage: data }))
+                                }
+                            ></MessageEditor>
+                        </>
+                    ) : null}
                 </Panel>
             </div>
         </DrawerDialog>

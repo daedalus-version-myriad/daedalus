@@ -1,5 +1,6 @@
 import { trpc } from "@daedalus/api";
 import { getColor, isModuleDisabled, isWrongClient, obtainLimit, template } from "@daedalus/bot-utils";
+import { secrets } from "@daedalus/config";
 import { formatMessage } from "@daedalus/custom-messages";
 import { logError } from "@daedalus/log-interface";
 import {
@@ -101,11 +102,21 @@ export default async function (interaction: ButtonInteraction | StringSelectMenu
                 member: await interaction.guild!.members.fetch(interaction.user),
             });
 
-            data.content ??= "";
-            data.content = `${content}${data.content}`.slice(0, 2000);
-            data.allowedMentions = { parse: ["everyone", "roles", "users"] };
+            await channel.send({
+                ...data,
+                content: `${content}${data.content ?? ""}`.slice(0, 2000),
+                components: [
+                    {
+                        type: ComponentType.ActionRow,
+                        components: [
+                            { type: ComponentType.Button, style: ButtonStyle.Link, label: "View on Dashboard", url: `${secrets.DOMAIN}/ticket/${uuid}` },
+                        ],
+                    },
+                ],
+                allowedMentions: { parse: ["everyone", "roles", "users"] },
+            });
 
-            await channel.send(data);
+            posted = true;
         } catch (error) {
             logError(interaction.guild!.id, "Posting ticket on-open message", `Error posting custom on-open message in ${channel}:\n\`\`\`\n${error}\n\`\`\``);
         }
@@ -125,7 +136,7 @@ export default async function (interaction: ButtonInteraction | StringSelectMenu
                     {
                         type: ComponentType.ActionRow,
                         components: [
-                            { type: ComponentType.Button, style: ButtonStyle.Link, label: "View on Dashboard", url: `${Bun.env.DOMAIN}/ticket/${uuid}` },
+                            { type: ComponentType.Button, style: ButtonStyle.Link, label: "View on Dashboard", url: `${secrets.DOMAIN}/ticket/${uuid}` },
                         ],
                     },
                 ],

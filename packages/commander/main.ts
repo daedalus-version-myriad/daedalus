@@ -15,6 +15,7 @@ import modmailSnippetView from "./commands/modmail-snippet-view";
 import rank from "./commands/rank";
 import roleDelete from "./commands/role-delete";
 import roleSet from "./commands/role-set";
+import ticketClose from "./commands/ticket-close.ts";
 import top from "./commands/top";
 import xpMee6Import from "./commands/xp-mee6-import";
 import xpReset from "./commands/xp-reset";
@@ -64,6 +65,7 @@ const argentium = new Argentium()
             .use(rank)
             .use(roleDelete)
             .use(roleSet)
+            .use(ticketClose)
             .use(top)
             .use(xpReset)
             .use(xpMee6Import),
