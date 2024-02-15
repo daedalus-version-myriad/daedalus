@@ -8,6 +8,7 @@ import type {
     GuildAutoresponderSettings,
     GuildAutorolesSettings,
     GuildCoOpSettings,
+    GuildCountSettings,
     GuildCustomRolesSettings,
     GuildLoggingSettings,
     GuildModmailSettings,
@@ -419,6 +420,13 @@ export async function getRedditFeedsSettings(guild: string): Promise<GuildReddit
             .select({ subreddit: tables.guildRedditFeedsItems.subreddit, channel: tables.guildRedditFeedsItems.channel })
             .from(tables.guildRedditFeedsItems)
             .where(eq(tables.guildRedditFeedsItems.guild, guild)),
+    };
+}
+
+export async function getCountSettings(guild: string): Promise<GuildCountSettings<true>> {
+    return {
+        guild,
+        channels: (await db.select().from(tables.guildCountItems).where(eq(tables.guildCountItems.guild, guild))).map(({ guild, ...data }) => data),
     };
 }
 
@@ -1870,5 +1878,55 @@ export default {
                 await tx.delete(tables.guildRedditFeedsItems).where(eq(tables.guildRedditFeedsItems.guild, guild));
                 if (feeds.length > 0) await tx.insert(tables.guildRedditFeedsItems).values(feeds.map((feed) => ({ guild, ...feed })));
             });
+        }),
+    getCountSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getCountSettings(guild);
+    }),
+    setCountSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                channels: z
+                    .object({
+                        id: z.number().int(),
+                        channel: snowflake.nullable(),
+                        interval: z.number().int(),
+                        next: z.number().int(),
+                        allowDoubleCounting: z.boolean(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, channels } }): Promise<[string | null, GuildCountSettings<true>]> => {
+            if (!(await hasPermission(id, guild))) return [NO_PERMISSION, { guild, channels }];
+
+            if (channels.some(({ channel }) => !channel)) return ["All count channels must be assigned to a channel.", { guild, channels }];
+            if (new Set(channels.map(({ channel }) => channel)).size < channels.length)
+                return ["All count channels must be in a unique channel.", { guild, channels }];
+
+            await db.transaction(async (tx) => {
+                if (channels.length === 0) await tx.delete(tables.guildCountItems);
+                else
+                    await tx.delete(tables.guildCountItems).where(
+                        not(
+                            inArray(
+                                tables.guildCountItems.id,
+                                channels.map(({ id }) => id),
+                            ),
+                        ),
+                    );
+
+                for (const { id, channel: ch, ...channel } of channels)
+                    if (id === -1) await tx.insert(tables.guildCountItems).values({ guild, ...channel, channel: ch! });
+                    else
+                        await tx
+                            .insert(tables.guildCountItems)
+                            .values({ guild, id, ...channel, channel: ch! })
+                            .onDuplicateKeyUpdate({ set: { ...channel, channel: ch! } });
+            });
+
+            return [null, await getCountSettings(guild)];
         }),
 } as const;

@@ -413,6 +413,17 @@ export type GuildRedditFeedsSettings = {
     }[];
 };
 
+export type GuildCountSettings<T extends boolean = false> = {
+    guild: string;
+    channels: {
+        id: number;
+        channel: T extends false ? string : string | null;
+        interval: number;
+        next: number;
+        allowDoubleCounting: boolean;
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

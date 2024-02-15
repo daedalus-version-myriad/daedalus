@@ -456,6 +456,22 @@ export const guildRedditFeedsItems = mysqlTable(
     }),
 );
 
+export const guildCountItems = mysqlTable(
+    "guild_count_items",
+    {
+        id: int("id").notNull().autoincrement().primaryKey(),
+        guild: varchar("guild", { length: 20 }).notNull(),
+        channel: varchar("channel", { length: 20 }).notNull(),
+        interval: int("interval").notNull(),
+        next: int("next").notNull(),
+        allowDoubleCounting: boolean("allow_double_counting").notNull(),
+    },
+    (t) => ({
+        idx_guild: index("idx_guild").on(t.guild),
+        idx_channel: index("idx_channel").on(t.channel),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {

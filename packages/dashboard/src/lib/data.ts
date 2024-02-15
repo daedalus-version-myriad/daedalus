@@ -53,6 +53,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/suggestions", moduleIcons.suggestions, "Suggestions"],
     ["/co-op", moduleIcons["co-op"], "Co-op (Genshin Impact)"],
     ["/reddit-feeds", moduleIcons["reddit-feeds"], "Reddit Feeds"],
+    ["/count", moduleIcons.count, "Counting Channels"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [
