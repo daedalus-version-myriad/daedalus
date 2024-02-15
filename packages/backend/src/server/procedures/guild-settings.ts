@@ -11,6 +11,7 @@ import type {
     GuildLoggingSettings,
     GuildModmailSettings,
     GuildModulesPermissionsSettings,
+    GuildNukeguardSettings,
     GuildPremiumSettings,
     GuildReactionRolesSettings,
     GuildSettings,
@@ -339,6 +340,47 @@ export async function getTicketsSettings(guild: string): Promise<GuildTicketsSet
                 customOpenParsed: customOpenParsed as ParsedMessage,
             })),
         })),
+    };
+}
+
+export async function getNukeguardSettings(guild: string): Promise<GuildNukeguardSettings> {
+    const data = (await db.select().from(tables.guildNukeguardSettings).where(eq(tables.guildNukeguardSettings.guild, guild))).at(0) ?? {
+        guild,
+        adminChannel: null,
+        pingRoles: "",
+        pingHere: false,
+        exemptedRoles: "",
+        watchChannelsByDefault: false,
+        ignoredChannels: "",
+        watchedChannels: "",
+        watchRolesByDefault: false,
+        ignoredRoles: "",
+        watchedRoles: "",
+        watchEmoji: false,
+        watchStickers: false,
+        watchSounds: false,
+        preventWebhookCreation: false,
+        watchWebhookDeletion: false,
+        enableRatelimit: false,
+        ratelimitKicking: false,
+        ratelimitThreshold: null,
+        ratelimitTime: null,
+        restrictRolesLenient: false,
+        restrictRolesByDefault: false,
+        restrictRolesAllowedRoles: "",
+        restrictRolesBlockedRoles: "",
+    };
+
+    return {
+        ...data,
+        pingRoles: decodeArray(data.pingRoles),
+        exemptedRoles: decodeArray(data.exemptedRoles),
+        ignoredChannels: decodeArray(data.ignoredChannels),
+        watchedChannels: decodeArray(data.watchedChannels),
+        ignoredRoles: decodeArray(data.ignoredRoles),
+        watchedRoles: decodeArray(data.watchedRoles),
+        restrictRolesAllowedRoles: decodeArray(data.restrictRolesAllowedRoles),
+        restrictRolesBlockedRoles: decodeArray(data.restrictRolesBlockedRoles),
     };
 }
 
@@ -1655,4 +1697,74 @@ export default {
 
             return [null, { guild, prompts }];
         }),
+    getNukeguardSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!hasPermission(id, guild)) throw NO_PERMISSION;
+        return await getNukeguardSettings(guild);
+    }),
+    setNukeguardSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                adminChannel: snowflake.nullable(),
+                pingRoles: snowflake.array(),
+                pingHere: z.boolean(),
+                exemptedRoles: snowflake.array(),
+                watchChannelsByDefault: z.boolean(),
+                ignoredChannels: snowflake.array(),
+                watchedChannels: snowflake.array(),
+                watchRolesByDefault: z.boolean(),
+                ignoredRoles: snowflake.array(),
+                watchedRoles: snowflake.array(),
+                watchEmoji: z.boolean(),
+                watchStickers: z.boolean(),
+                watchSounds: z.boolean(),
+                preventWebhookCreation: z.boolean(),
+                watchWebhookDeletion: z.boolean(),
+                enableRatelimit: z.boolean(),
+                ratelimitKicking: z.boolean(),
+                ratelimitThreshold: z.number().int().min(2, "Ratelimit threshold must be at least 2.").nullable(),
+                ratelimitTime: z.number().int().min(1, "Ratelimit time must be at least 1.").nullable(),
+                restrictRolesLenient: z.boolean(),
+                restrictRolesByDefault: z.boolean(),
+                restrictRolesAllowedRoles: snowflake.array(),
+                restrictRolesBlockedRoles: snowflake.array(),
+            }),
+        )
+        .mutation(
+            async ({
+                input: {
+                    id,
+                    guild,
+                    pingRoles,
+                    exemptedRoles,
+                    ignoredChannels,
+                    watchedChannels,
+                    ignoredRoles,
+                    watchedRoles,
+                    restrictRolesAllowedRoles,
+                    restrictRolesBlockedRoles,
+                    ...data
+                },
+            }) => {
+                if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+                const values = {
+                    pingRoles: pingRoles.join("/"),
+                    exemptedRoles: exemptedRoles.join("/"),
+                    ignoredChannels: ignoredChannels.join("/"),
+                    watchedChannels: watchedChannels.join("/"),
+                    ignoredRoles: ignoredRoles.join("/"),
+                    watchedRoles: watchedRoles.join("/"),
+                    restrictRolesAllowedRoles: restrictRolesAllowedRoles.join("/"),
+                    restrictRolesBlockedRoles: restrictRolesBlockedRoles.join("/"),
+                    ...data,
+                };
+
+                await db
+                    .insert(tables.guildNukeguardSettings)
+                    .values({ guild, ...values })
+                    .onDuplicateKeyUpdate({ set: values });
+            },
+        ),
 } as const;

@@ -10,6 +10,7 @@ module.exports = {
             "interactions",
             "logging",
             "modmail",
+            "nukeguard",
             "reaction-roles-reactions",
             "starboard",
             "stats-channels",

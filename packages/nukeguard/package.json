@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/nukeguard",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

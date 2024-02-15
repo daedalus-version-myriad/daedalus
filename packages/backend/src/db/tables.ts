@@ -390,6 +390,33 @@ export const guildTicketsTargets = mysqlTable(
     }),
 );
 
+export const guildNukeguardSettings = mysqlTable("guild_nukeguard_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    adminChannel: varchar("admin_channel", { length: 20 }),
+    pingRoles: text("ping_roles").notNull(),
+    pingHere: boolean("ping_here").notNull(),
+    exemptedRoles: text("exempted_roles").notNull(),
+    watchChannelsByDefault: boolean("watch_channels_by_default").notNull(),
+    ignoredChannels: text("ignored_channels").notNull(),
+    watchedChannels: text("watched_channels").notNull(),
+    watchRolesByDefault: boolean("watch_roles_by_default").notNull(),
+    ignoredRoles: text("ignored_roles").notNull(),
+    watchedRoles: text("watched_roles").notNull(),
+    watchEmoji: boolean("watch_emoji").notNull(),
+    watchStickers: boolean("watch_stickers").notNull(),
+    watchSounds: boolean("watch_sounds").notNull(),
+    preventWebhookCreation: boolean("prevent_webhook_creation").notNull(),
+    watchWebhookDeletion: boolean("watch_webhook_deletion").notNull(),
+    enableRatelimit: boolean("enable_ratelimit").notNull(),
+    ratelimitKicking: boolean("ratelimit_kicking").notNull(),
+    ratelimitThreshold: int("ratelimit_threshold"),
+    ratelimitTime: int("ratelimit_time"),
+    restrictRolesLenient: boolean("restrict_roles_lenient").notNull(),
+    restrictRolesByDefault: boolean("restrict_roles_by_default").notNull(),
+    restrictRolesAllowedRoles: text("restrict_roles_allowed_roles").notNull(),
+    restrictRolesBlockedRoles: text("restrict_roles_blocked_roles").notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {

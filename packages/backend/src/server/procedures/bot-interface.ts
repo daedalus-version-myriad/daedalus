@@ -22,6 +22,7 @@ import {
     getAutoresponderSettings,
     getAutorolesSettings,
     getCustomRolesSettings,
+    getNukeguardSettings,
     getStarboardSettings,
     getStickyRolesSettings,
     getTicketsSettings,
@@ -790,6 +791,9 @@ export default {
     closeTicket: proc.input(z.object({ uuid: z.string().length(36), author: snowflake })).mutation(async ({ input: { uuid, author } }) => {
         await db.update(tables.tickets).set({ closed: true }).where(eq(tables.tickets.uuid, uuid));
         await db.insert(tables.ticketMessages).values({ ...defaultTicketMessage, uuid, type: "close", author });
+    }),
+    getNukeguardConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getNukeguardSettings(guild);
     }),
 } as const;
 

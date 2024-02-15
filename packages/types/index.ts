@@ -368,6 +368,33 @@ export type GuildTicketsSettings = {
     }[];
 };
 
+export type GuildNukeguardSettings = {
+    guild: string;
+    adminChannel: string | null;
+    pingRoles: string[];
+    pingHere: boolean;
+    exemptedRoles: string[];
+    watchChannelsByDefault: boolean;
+    ignoredChannels: string[];
+    watchedChannels: string[];
+    watchRolesByDefault: boolean;
+    ignoredRoles: string[];
+    watchedRoles: string[];
+    watchEmoji: boolean;
+    watchStickers: boolean;
+    watchSounds: boolean;
+    preventWebhookCreation: boolean;
+    watchWebhookDeletion: boolean;
+    enableRatelimit: boolean;
+    ratelimitKicking: boolean;
+    ratelimitThreshold: number | null;
+    ratelimitTime: number | null;
+    restrictRolesLenient: boolean;
+    restrictRolesByDefault: boolean;
+    restrictRolesAllowedRoles: string[];
+    restrictRolesBlockedRoles: string[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

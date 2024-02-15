@@ -99,7 +99,7 @@ export function Body({ data: initial, disabled, limit }: { data: GuildAutorespon
                                                         maxLength={4000}
                                                     ></Input>
                                                 </div>
-                                                <div className="center-row gap-8 flex-wrap">
+                                                <div className="center-row gap-x-8 gap-y-2 flex-wrap">
                                                     <div className="center-row gap-4">
                                                         <Switch
                                                             checked={trigger.wildcard}

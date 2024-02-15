@@ -617,7 +617,7 @@ function Item({
                 </Panel>
                 <Panel>
                     <h1 className="text-xl">Actions</h1>
-                    <div className="center-row gap-8 flex-wrap">
+                    <div className="center-row gap-x-8 gap-y-2 flex-wrap">
                         <div className="center-row gap-4">
                             <Switch
                                 checked={rule.reportToChannel}
