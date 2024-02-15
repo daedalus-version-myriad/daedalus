@@ -424,6 +424,29 @@ export type GuildCountSettings<T extends boolean = false> = {
     }[];
 };
 
+export type GiveawayBase = {
+    channel: string | null;
+    message: MessageData;
+    stackWeights: boolean;
+    weights: { role: string | null; weight: number }[];
+    winners: number;
+    allowRepeatWinners: boolean;
+} & Record<`${"required" | "blocked" | "bypass"}Roles`, string[]> &
+    Record<`${"required" | "blocked" | "bypass"}RolesAll`, boolean>;
+
+export type GuildGiveawaySettings = {
+    guild: string;
+    template: GiveawayBase;
+    giveaways: (GiveawayBase & {
+        id: number;
+        name: string;
+        deadline: number;
+        messageId: string | null;
+        error: string | null;
+        closed: boolean;
+    })[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

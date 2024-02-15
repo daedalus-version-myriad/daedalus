@@ -26,3 +26,18 @@ export const baseMessageData = z.object({
     content: z.string(),
     embeds: embedData.array().max(10, "Only up to 10 embeds per message are allowed."),
 });
+
+export const giveawayBase = z.object({
+    channel: snowflake.nullable(),
+    message: baseMessageData,
+    requiredRoles: snowflake.array(),
+    requiredRolesAll: z.boolean(),
+    blockedRoles: snowflake.array(),
+    blockedRolesAll: z.boolean(),
+    bypassRoles: snowflake.array(),
+    bypassRolesAll: z.boolean(),
+    stackWeights: z.boolean(),
+    weights: z.object({ role: snowflake.nullable(), weight: z.number().int().min(1) }).array(),
+    winners: z.number().int().min(1),
+    allowRepeatWinners: z.boolean(),
+});

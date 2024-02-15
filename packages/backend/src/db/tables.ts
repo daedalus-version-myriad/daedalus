@@ -472,6 +472,45 @@ export const guildCountItems = mysqlTable(
     }),
 );
 
+const giveawayTemplate = () =>
+    ({
+        channel: varchar("channel", { length: 20 }),
+        message: json("message").notNull(),
+        requiredRoles: text("required_roles").notNull(),
+        requiredRolesAll: boolean("required_roles_all").notNull(),
+        blockedRoles: text("blocked_roles").notNull(),
+        blockedRolesAll: boolean("blocked_roles_all").notNull(),
+        bypassRoles: text("bypass_roles").notNull(),
+        bypassRolesAll: boolean("bypass_roles_all").notNull(),
+        stackWeights: boolean("stack_weights").notNull(),
+        weights: text("weights").notNull(),
+        winners: int("winners").notNull(),
+        allowRepeatWinners: boolean("allow_repeat_winners").notNull(),
+    }) as const;
+
+export const guildGiveawayTemplates = mysqlTable("guild_giveaway_templates", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    ...giveawayTemplate(),
+});
+
+export const guildGiveawayItems = mysqlTable(
+    "guild_giveaway_items",
+    {
+        id: int("id").notNull().autoincrement().primaryKey(),
+        guild: varchar("guild", { length: 20 }).notNull(),
+        name: varchar("name", { length: 128 }).notNull(),
+        ...giveawayTemplate(),
+        deadline: bigint("deadline", { mode: "number" }).notNull(),
+        messageId: varchar("message_id", { length: 20 }),
+        error: text("error"),
+        closed: boolean("closed").notNull(),
+    },
+    (t) => ({
+        idx_message: index("idx_message").on(t.messageId),
+        idx_deadline: index("idx_deadline").on(t.deadline),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {

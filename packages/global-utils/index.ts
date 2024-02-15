@@ -97,3 +97,15 @@ export function fuzzy(string: string, query: string) {
 
     return false;
 }
+
+export function serializeGiveawayBase<
+    T extends { requiredRoles: string[]; blockedRoles: string[]; bypassRoles: string[]; weights: { role: string | null; weight: number }[] },
+>(entry: T) {
+    return {
+        ...entry,
+        requiredRoles: entry.requiredRoles.join("/"),
+        blockedRoles: entry.blockedRoles.join("/"),
+        bypassRoles: entry.bypassRoles.join("/"),
+        weights: entry.weights.map(({ role, weight }) => `${role}:${weight}`).join("/"),
+    };
+}

@@ -10,6 +10,7 @@ import type {
     GuildCoOpSettings,
     GuildCountSettings,
     GuildCustomRolesSettings,
+    GuildGiveawaySettings,
     GuildLoggingSettings,
     GuildModmailSettings,
     GuildModulesPermissionsSettings,
@@ -37,7 +38,7 @@ import { triggerCustomRoleSweep } from "../../../../custom-roles/index";
 import { clients } from "../../bot";
 import { tables } from "../../db";
 import { db } from "../../db/db";
-import { baseMessageData, snowflake } from "../schemas";
+import { baseMessageData, giveawayBase, snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
 import { getLimit } from "./premium";
@@ -427,6 +428,45 @@ export async function getCountSettings(guild: string): Promise<GuildCountSetting
     return {
         guild,
         channels: (await db.select().from(tables.guildCountItems).where(eq(tables.guildCountItems.guild, guild))).map(({ guild, ...data }) => data),
+    };
+}
+
+function transformGiveawayBase<T extends { message: unknown; requiredRoles: string; blockedRoles: string; bypassRoles: string; weights: string }>(entry: T) {
+    return {
+        ...entry,
+        message: entry.message as MessageData,
+        requiredRoles: decodeArray(entry.requiredRoles),
+        blockedRoles: decodeArray(entry.blockedRoles),
+        bypassRoles: decodeArray(entry.bypassRoles),
+        weights: decodeArray(entry.weights).map((s) => {
+            const [l, r] = s.split(":");
+            return { role: l === "null" ? null : l, weight: +r };
+        }),
+    };
+}
+
+export async function getGiveawaySettings(guild: string): Promise<GuildGiveawaySettings> {
+    const entry = (await db.select().from(tables.guildGiveawayTemplates).where(eq(tables.guildGiveawayTemplates.guild, guild))).at(0) ?? {
+        channel: null,
+        message: { content: "", embeds: [] },
+        requiredRoles: "",
+        requiredRolesAll: false,
+        blockedRoles: "",
+        blockedRolesAll: false,
+        bypassRoles: "",
+        bypassRolesAll: false,
+        stackWeights: false,
+        weights: "",
+        winners: 1,
+        allowRepeatWinners: false,
+    };
+
+    return {
+        guild,
+        template: transformGiveawayBase(entry),
+        giveaways: (await db.select().from(tables.guildGiveawayItems).where(eq(tables.guildGiveawayItems.guild, guild))).map(({ guild, ...entry }) =>
+            transformGiveawayBase(entry),
+        ),
     };
 }
 
@@ -1928,5 +1968,33 @@ export default {
             });
 
             return [null, await getCountSettings(guild)];
+        }),
+    getGiveawaySettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getGiveawaySettings(guild);
+    }),
+    setGiveawaySettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                template: giveawayBase,
+                giveaways: z
+                    .intersection(
+                        giveawayBase,
+                        z.object({
+                            id: z.number().int(),
+                            name: z.string().max(128),
+                            deadline: z.number().int(),
+                            messageId: snowflake.nullable(),
+                            error: z.string().nullable(),
+                            closed: z.boolean(),
+                        }),
+                    )
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, template, giveaways } }): Promise<[string | null, GuildGiveawaySettings]> => {
+            if (!(await hasPermission(id, guild))) return [NO_PERMISSION, { guild, template, giveaways }];
         }),
 } as const;
