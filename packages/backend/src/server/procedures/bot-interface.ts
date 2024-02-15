@@ -855,6 +855,18 @@ export default {
     getCoOpConfig: proc.input(snowflake).query(async ({ input: guild }) => {
         return await getCoOpSettings(guild);
     }),
+    getAllRedditFeeds: proc.query(async () => {
+        const entries = await db.select().from(tables.guildRedditFeedsItems);
+
+        const guilds = new Map<string, { subreddit: string; channel: string | null }[]>();
+
+        for (const { guild, subreddit, channel } of entries) {
+            if (!guilds.has(guild)) guilds.set(guild, []);
+            guilds.get(guild)!.push({ subreddit, channel });
+        }
+
+        return [...guilds];
+    }),
 } as const;
 
 const defaultModmailMessage = {

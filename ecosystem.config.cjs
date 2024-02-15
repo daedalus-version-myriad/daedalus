@@ -12,6 +12,7 @@ module.exports = {
             "modmail",
             "nukeguard",
             "reaction-roles-reactions",
+            "reddit-feeds",
             "starboard",
             "stats-channels",
             "sticky-roles",

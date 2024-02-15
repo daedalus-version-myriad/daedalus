@@ -10,7 +10,7 @@ process.on("uncaughtException", console.error);
 const Intents = IntentsBitField.Flags;
 
 const manager = new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds }),
+    factory: () => new Client({ intents: Intents.Guilds, allowedMentions: { parse: [] } }),
 });
 
 async function runModerationRemovalTasks() {

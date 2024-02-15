@@ -10,6 +10,7 @@ new ClientManager({
         new Client({
             intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildEmojisAndStickers,
             sweepers: { messages: { lifetime: 86400, interval: 3600 } },
+            allowedMentions: { parse: [] },
         }),
     postprocess: (client) =>
         client

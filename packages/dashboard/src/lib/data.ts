@@ -52,6 +52,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/nukeguard", moduleIcons.nukeguard, "Nukeguard"],
     ["/suggestions", moduleIcons.suggestions, "Suggestions"],
     ["/co-op", moduleIcons["co-op"], "Co-op (Genshin Impact)"],
+    ["/reddit-feeds", moduleIcons["reddit-feeds"], "Reddit Feeds"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

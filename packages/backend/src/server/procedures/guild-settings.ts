@@ -15,6 +15,7 @@ import type {
     GuildNukeguardSettings,
     GuildPremiumSettings,
     GuildReactionRolesSettings,
+    GuildRedditFeedsSettings,
     GuildSettings,
     GuildStarboardSettings,
     GuildStatsChannelsSettings,
@@ -409,6 +410,16 @@ export async function getCoOpSettings(guild: string): Promise<GuildCoOpSettings>
             ].map((x) => [x, null]),
         ),
     } as GuildCoOpSettings;
+}
+
+export async function getRedditFeedsSettings(guild: string): Promise<GuildRedditFeedsSettings> {
+    return {
+        guild,
+        feeds: await db
+            .select({ subreddit: tables.guildRedditFeedsItems.subreddit, channel: tables.guildRedditFeedsItems.channel })
+            .from(tables.guildRedditFeedsItems)
+            .where(eq(tables.guildRedditFeedsItems.guild, guild)),
+    };
 }
 
 const buttonStyles = {
@@ -1843,5 +1854,21 @@ export default {
                 .insert(tables.guildCoOpSettings)
                 .values({ guild, ...data })
                 .onDuplicateKeyUpdate({ set: data });
+        }),
+    getRedditFeedsSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getRedditFeedsSettings(guild);
+    }),
+    setRedditFeedsSettings: proc
+        .input(
+            z.object({ id: snowflake.nullable(), guild: snowflake, feeds: z.object({ subreddit: z.string().max(32), channel: snowflake.nullable() }).array() }),
+        )
+        .mutation(async ({ input: { id, guild, feeds } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            await db.transaction(async (tx) => {
+                await tx.delete(tables.guildRedditFeedsItems).where(eq(tables.guildRedditFeedsItems.guild, guild));
+                if (feeds.length > 0) await tx.insert(tables.guildRedditFeedsItems).values(feeds.map((feed) => ({ guild, ...feed })));
+            });
         }),
 } as const;

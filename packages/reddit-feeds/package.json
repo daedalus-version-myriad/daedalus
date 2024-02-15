@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/reddit-feeds",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

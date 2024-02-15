@@ -13,6 +13,7 @@ new ClientManager({
         new Client({
             intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildModeration | Intents.GuildEmojisAndStickers,
             partials: [Partials.Channel, Partials.GuildMember],
+            allowedMentions: { parse: [] },
         }),
     postprocess: (client) =>
         client

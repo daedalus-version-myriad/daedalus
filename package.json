@@ -12,6 +12,7 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
     "@types/bun": "latest",
+    "@types/he": "^1.2.3",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.5",
     "@types/react": "^18.2.48",
@@ -39,6 +40,7 @@
     "discord.js": "latest",
     "drizzle-orm": "^0.29.3",
     "emoji-mart": "^5.5.2",
+    "he": "^1.2.0",
     "lodash": "^4.17.21",
     "next": "^14.1.0",
     "next-themes": "^0.2.1",

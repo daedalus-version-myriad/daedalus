@@ -444,6 +444,18 @@ export const guildCoOpSettings = mysqlTable("guild_co_op_settings", {
     helperSA: varchar("helper_sa", { length: 20 }),
 });
 
+export const guildRedditFeedsItems = mysqlTable(
+    "guild_reddit_feeds_items",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        subreddit: varchar("subreddit", { length: 32 }).notNull(),
+        channel: varchar("channel", { length: 20 }),
+    },
+    (t) => ({
+        idx_guild: index("idx_guild").on(t.guild),
+    }),
+);
+
 export const news = mysqlTable(
     "news",
     {

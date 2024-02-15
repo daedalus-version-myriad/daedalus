@@ -405,6 +405,14 @@ export type GuildCoOpSettings = {
     guild: string;
 } & Record<`wl${"0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8"}` | `${"region" | "helper"}${"NA" | "EU" | "AS" | "SA"}`, string | null>;
 
+export type GuildRedditFeedsSettings = {
+    guild: string;
+    feeds: {
+        subreddit: string;
+        channel: string | null;
+    }[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;
