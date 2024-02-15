@@ -6,7 +6,7 @@ process.on("uncaughtException", console.error);
 
 const Intents = IntentsBitField.Flags;
 
-new ClientManager({
+export const clients = new ClientManager({
     factory: () =>
         new Client({
             intents: Intents.Guilds | Intents.GuildMessages | Intents.DirectMessages | Intents.MessageContent | Intents.GuildMembers,

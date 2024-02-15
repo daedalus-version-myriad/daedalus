@@ -417,6 +417,12 @@ export const guildNukeguardSettings = mysqlTable("guild_nukeguard_settings", {
     restrictRolesBlockedRoles: text("restrict_roles_blocked_roles").notNull(),
 });
 
+export const guildSuggestionsSettings = mysqlTable("guild_suggestions_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    channel: varchar("channel", { length: 20 }),
+    anon: boolean("anon").notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {
@@ -692,5 +698,37 @@ export const ticketMessages = mysqlTable(
     },
     (t) => ({
         idx_uuid: index("idx_uuid").on(t.uuid),
+    }),
+);
+
+export const suggestionIds = mysqlTable("suggestion_ids", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    id: int("id").notNull(),
+});
+
+export const suggestions = mysqlTable(
+    "suggestions",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        id: int("id").notNull(),
+        channel: varchar("channel", { length: 20 }).notNull(),
+        message: varchar("message", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+    },
+    (t) => ({
+        pk_guild_id: primaryKey({ name: "pk_guild_id", columns: [t.guild, t.id] }),
+    }),
+);
+
+export const suggestionVotes = mysqlTable(
+    "suggestion_votes",
+    {
+        message: varchar("message", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        yes: boolean("yes").notNull(),
+    },
+    (t) => ({
+        pk_message_user: primaryKey({ name: "pk_message_user", columns: [t.message, t.user] }),
+        idx_yes: index("idx_yes").on(t.yes),
     }),
 );

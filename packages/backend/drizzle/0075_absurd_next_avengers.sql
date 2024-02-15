@@ -1,0 +1,1 @@
+ALTER TABLE `suggestions` ADD `message` varchar(20) NOT NULL;

@@ -50,6 +50,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/modmail", moduleIcons.modmail, "Modmail"],
     ["/tickets", moduleIcons.tickets, "Tickets"],
     ["/nukeguard", moduleIcons.nukeguard, "Nukeguard"],
+    ["/suggestions", moduleIcons.suggestions, "Suggestions"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

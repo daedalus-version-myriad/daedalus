@@ -505,6 +505,48 @@
       "when": 1707958254097,
       "tag": "0071_colossal_iron_man",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "5",
+      "when": 1707967636406,
+      "tag": "0072_nervous_puma",
+      "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "5",
+      "when": 1707968576725,
+      "tag": "0073_melodic_nuke",
+      "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "5",
+      "when": 1707968926716,
+      "tag": "0074_ancient_rage",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "5",
+      "when": 1707968952678,
+      "tag": "0075_absurd_next_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "5",
+      "when": 1707969227686,
+      "tag": "0076_typical_thaddeus_ross",
+      "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "5",
+      "when": 1707970135420,
+      "tag": "0077_messy_stingray",
+      "breakpoints": true
     }
   ]
 }

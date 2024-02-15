@@ -25,6 +25,7 @@ import {
     getNukeguardSettings,
     getStarboardSettings,
     getStickyRolesSettings,
+    getSuggestionsSettings,
     getTicketsSettings,
     getXpSettings,
     transformXpSettings,
@@ -794,6 +795,61 @@ export default {
     }),
     getNukeguardConfig: proc.input(snowflake).query(async ({ input: guild }) => {
         return await getNukeguardSettings(guild);
+    }),
+    getSuggestionsConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getSuggestionsSettings(guild);
+    }),
+    getNextSuggestionId: proc.input(snowflake).mutation(async ({ input: guild }) => {
+        return await db.transaction(async (tx) => {
+            const [entry] = await tx.select({ id: tables.suggestionIds.id }).from(tables.suggestionIds).where(eq(tables.suggestionIds.guild, guild));
+
+            if (entry)
+                await tx
+                    .update(tables.suggestionIds)
+                    .set({ id: sql`id + 1` })
+                    .where(eq(tables.suggestionIds.guild, guild));
+            else await tx.insert(tables.suggestionIds).values({ guild, id: 2 });
+
+            return entry?.id ?? 1;
+        });
+    }),
+    postSuggestion: proc
+        .input(z.object({ guild: snowflake, id: z.number().int().min(1), channel: snowflake, message: snowflake, user: snowflake }))
+        .mutation(async ({ input: data }) => {
+            await db.insert(tables.suggestions).values(data);
+        }),
+    suggestionVote: proc.input(z.object({ message: snowflake, user: snowflake, yes: z.boolean() })).mutation(async ({ input: { message, user, yes } }) => {
+        return await db.transaction(async (tx) => {
+            await db.insert(tables.suggestionVotes).values({ message, user, yes }).onDuplicateKeyUpdate({ set: { yes } });
+
+            return await Promise.all(
+                [true, false].map(
+                    async (yes) =>
+                        (
+                            await db
+                                .select({ count: sql<number>`COUNT(*)` })
+                                .from(tables.suggestionVotes)
+                                .where(and(eq(tables.suggestionVotes.message, message), eq(tables.suggestionVotes.yes, yes)))
+                        )[0].count,
+                ),
+            );
+        });
+    }),
+    getSuggestion: proc.input(snowflake).query(async ({ input: message }) => {
+        return (
+            await db
+                .select({ id: tables.suggestions.id, user: tables.suggestions.user })
+                .from(tables.suggestions)
+                .where(eq(tables.suggestions.message, message))
+        ).at(0);
+    }),
+    getSuggestionById: proc.input(z.object({ guild: snowflake, id: z.number().int().min(1) })).query(async ({ input: { guild, id } }) => {
+        return (
+            await db
+                .select()
+                .from(tables.suggestions)
+                .where(and(eq(tables.suggestions.guild, guild), eq(tables.suggestions.id, id)))
+        ).at(0);
     }),
 } as const;
 

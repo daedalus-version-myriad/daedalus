@@ -1,5 +1,5 @@
-import { db } from "./src/db/db.ts";
-import { tables } from "./src/db/index.ts";
+import { tables } from "./src/db";
+import { db } from "./src/db/db";
 import "./src/server";
 export type { AppRouter } from "./src/server";
 

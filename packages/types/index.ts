@@ -395,6 +395,12 @@ export type GuildNukeguardSettings = {
     restrictRolesBlockedRoles: string[];
 };
 
+export type GuildSuggestionsSettings = {
+    guild: string;
+    channel: string | null;
+    anon: boolean;
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

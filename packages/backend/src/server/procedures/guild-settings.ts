@@ -18,6 +18,7 @@ import type {
     GuildStarboardSettings,
     GuildStatsChannelsSettings,
     GuildStickyRolesSettings,
+    GuildSuggestionsSettings,
     GuildSupporterAnnouncementsSettings,
     GuildTicketsSettings,
     GuildWelcomeSettings,
@@ -36,7 +37,7 @@ import { db } from "../../db/db";
 import { baseMessageData, snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
-import { getLimit } from "./premium.ts";
+import { getLimit } from "./premium";
 import { isAdmin } from "./users";
 
 export const NO_PERMISSION = "You do not have permission to manage settings within this guild.";
@@ -382,6 +383,16 @@ export async function getNukeguardSettings(guild: string): Promise<GuildNukeguar
         restrictRolesAllowedRoles: decodeArray(data.restrictRolesAllowedRoles),
         restrictRolesBlockedRoles: decodeArray(data.restrictRolesBlockedRoles),
     };
+}
+
+export async function getSuggestionsSettings(guild: string): Promise<GuildSuggestionsSettings> {
+    return (
+        (await db.select().from(tables.guildSuggestionsSettings).where(eq(tables.guildSuggestionsSettings.guild, guild))).at(0) ?? {
+            guild,
+            channel: null,
+            anon: false,
+        }
+    );
 }
 
 const buttonStyles = {
@@ -1767,4 +1778,19 @@ export default {
                     .onDuplicateKeyUpdate({ set: values });
             },
         ),
+    getSuggestionsSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+
+        return await getSuggestionsSettings(guild);
+    }),
+    setSuggestionsSetttings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake, channel: snowflake.nullable(), anon: z.boolean() }))
+        .mutation(async ({ input: { id, guild, ...data } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            await db
+                .insert(tables.guildSuggestionsSettings)
+                .values({ guild, ...data })
+                .onDuplicateKeyUpdate({ set: data });
+        }),
 } as const;
