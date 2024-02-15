@@ -781,3 +781,21 @@ export const suggestionVotes = mysqlTable(
         idx_yes: index("idx_yes").on(t.yes),
     }),
 );
+
+export const countLast = mysqlTable("count_last", {
+    id: int("id").notNull().primaryKey(),
+    last: varchar("last", { length: 20 }),
+});
+
+export const countScoreboard = mysqlTable(
+    "count_scoreboard",
+    {
+        id: int("id").notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        score: int("score").notNull(),
+    },
+    (t) => ({
+        pk_id_user: primaryKey({ name: "pk_id_user", columns: [t.id, t.user] }),
+        idx_score: index("idx_score").on(t.score),
+    }),
+);

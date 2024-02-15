@@ -16,6 +16,7 @@ import modmailSnippetView from "./commands/modmail-snippet-view";
 import rank from "./commands/rank";
 import roleDelete from "./commands/role-delete";
 import roleSet from "./commands/role-set";
+import scoreboard from "./commands/scoreboard";
 import suggest from "./commands/suggest";
 import suggestion from "./commands/suggestion";
 import ticketClose from "./commands/ticket-close";
@@ -69,6 +70,7 @@ const argentium = new Argentium()
             .use(rank)
             .use(roleDelete)
             .use(roleSet)
+            .use(scoreboard)
             .use(suggest)
             .use(suggestion)
             .use(ticketClose)

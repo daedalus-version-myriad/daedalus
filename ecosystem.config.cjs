@@ -6,6 +6,7 @@ module.exports = {
             "autoroles",
             "backend",
             "commander",
+            "count",
             "custom-roles",
             "interactions",
             "logging",

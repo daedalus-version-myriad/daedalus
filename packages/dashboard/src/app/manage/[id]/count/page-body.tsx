@@ -17,7 +17,7 @@ import save from "./save";
 
 export function Body({ data: initial, disabled, limit }: { data: GuildCountSettings<true>; disabled: boolean; limit: number }) {
     const [data, setData] = useState<GuildCountSettings<true>>(initial);
-    const [channels, setChannels] = useState<GuildCountSettings<true>["channels"]>(data.channels);
+    const [channels, setChannels] = useState<GuildCountSettings<true>["channels"]>(structuredClone(data.channels));
 
     const updated = { guild: data.guild, channels };
 
@@ -88,9 +88,10 @@ export function Body({ data: initial, disabled, limit }: { data: GuildCountSetti
                 unsaved={!_.isEqual(updated, data)}
                 reset={() => setChannels(data.channels)}
                 save={async () => {
-                    const error = await save(updated);
+                    const [error, output] = (await save(updated)) ?? [null, data];
                     if (error) return alert(error);
-                    setData(updated);
+                    setData(output);
+                    setChannels(structuredClone(output.channels));
                 }}
             ></SaveChangesBar>
         </>

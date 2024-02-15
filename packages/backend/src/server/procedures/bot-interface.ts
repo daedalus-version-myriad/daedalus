@@ -9,7 +9,7 @@ import type {
     GuildStickyRolesSettings,
     ParsedMessage,
 } from "@daedalus/types";
-import { and, desc, eq, gt, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
@@ -866,6 +866,58 @@ export default {
         }
 
         return [...guilds];
+    }),
+    getCountChannel: proc.input(z.object({ guild: snowflake, channel: snowflake })).query(async ({ input: { guild, channel } }) => {
+        const sq = db
+            .select()
+            .from(tables.guildCountItems)
+            .limit((await getLimit(guild, "countCountLimit")) as number)
+            .as("subquery");
+
+        return (await db.select().from(sq).where(eq(sq.channel, channel))).at(0);
+    }),
+    getCountLast: proc.input(z.number().int().min(1)).query(async ({ input: id }) => {
+        return (await db.select({ last: tables.countLast.last }).from(tables.countLast).where(eq(tables.countLast.id, id))).at(0)?.last ?? null;
+    }),
+    updateCount: proc.input(z.object({ id: z.number().int().min(1), user: snowflake })).mutation(async ({ input: { id, user } }) => {
+        await db.transaction(async (tx) => {
+            await tx
+                .insert(tables.countScoreboard)
+                .values({ id, user, score: 1 })
+                .onDuplicateKeyUpdate({ set: { score: sql`score + 1` } });
+
+            await tx
+                .update(tables.guildCountItems)
+                .set({ next: sql`${tables.guildCountItems.next} + ${tables.guildCountItems.interval}` })
+                .where(eq(tables.guildCountItems.id, id));
+        });
+    }),
+    getScoreboard: proc.input(z.object({ id: z.number().int().min(1), page: z.number().int().min(1) })).query(async ({ input: { id, page } }) => {
+        return await db
+            .select()
+            .from(tables.countScoreboard)
+            .where(eq(tables.countScoreboard.id, id))
+            .orderBy(desc(tables.countScoreboard.score))
+            .offset((page - 1) * 20)
+            .limit(20);
+    }),
+    getGuildScoreboard: proc.input(z.object({ guild: snowflake, page: z.number().int().min(1) })).query(async ({ input: { guild, page } }) => {
+        const sq = db
+            .select({ id: tables.guildCountItems.id })
+            .from(tables.guildCountItems)
+            .where(eq(tables.guildCountItems.guild, guild))
+            .limit((await getLimit(guild, "countCountLimit")) as number)
+            .as("sq");
+
+        return await db
+            .select({ user: tables.countScoreboard.user, score: sum(tables.countScoreboard.score) })
+            .from(tables.guildCountItems)
+            .innerJoin(sq, eq(tables.guildCountItems.id, sq.id))
+            .innerJoin(tables.countScoreboard, eq(tables.guildCountItems.id, tables.countScoreboard.id))
+            .groupBy(tables.countScoreboard.user)
+            .orderBy(desc(sum(tables.countScoreboard.score)))
+            .offset((page - 1) * 20)
+            .limit(20);
     }),
 } as const;
 
