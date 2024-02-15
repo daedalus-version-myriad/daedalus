@@ -21,6 +21,7 @@ import {
     getAutomodSettings,
     getAutoresponderSettings,
     getAutorolesSettings,
+    getCoOpSettings,
     getCustomRolesSettings,
     getNukeguardSettings,
     getStarboardSettings,
@@ -850,6 +851,9 @@ export default {
                 .from(tables.suggestions)
                 .where(and(eq(tables.suggestions.guild, guild), eq(tables.suggestions.id, id)))
         ).at(0);
+    }),
+    getCoOpConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getCoOpSettings(guild);
     }),
 } as const;
 

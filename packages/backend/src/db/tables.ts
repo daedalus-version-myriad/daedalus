@@ -423,6 +423,27 @@ export const guildSuggestionsSettings = mysqlTable("guild_suggestions_settings",
     anon: boolean("anon").notNull(),
 });
 
+export const guildCoOpSettings = mysqlTable("guild_co_op_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    wl0: varchar("wl0", { length: 20 }),
+    wl1: varchar("wl1", { length: 20 }),
+    wl2: varchar("wl2", { length: 20 }),
+    wl3: varchar("wl3", { length: 20 }),
+    wl4: varchar("wl4", { length: 20 }),
+    wl5: varchar("wl5", { length: 20 }),
+    wl6: varchar("wl6", { length: 20 }),
+    wl7: varchar("wl7", { length: 20 }),
+    wl8: varchar("wl8", { length: 20 }),
+    regionNA: varchar("region_na", { length: 20 }),
+    regionEU: varchar("region_eu", { length: 20 }),
+    regionAS: varchar("region_as", { length: 20 }),
+    regionSA: varchar("region_sa", { length: 20 }),
+    helperNA: varchar("helper_na", { length: 20 }),
+    helperEU: varchar("helper_eu", { length: 20 }),
+    helperAS: varchar("helper_as", { length: 20 }),
+    helperSA: varchar("helper_sa", { length: 20 }),
+});
+
 export const news = mysqlTable(
     "news",
     {

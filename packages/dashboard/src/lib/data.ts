@@ -51,6 +51,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/tickets", moduleIcons.tickets, "Tickets"],
     ["/nukeguard", moduleIcons.nukeguard, "Nukeguard"],
     ["/suggestions", moduleIcons.suggestions, "Suggestions"],
+    ["/co-op", moduleIcons["co-op"], "Co-op (Genshin Impact)"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

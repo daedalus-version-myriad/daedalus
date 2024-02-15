@@ -1,0 +1,21 @@
+CREATE TABLE `guild_co_op_settings` (
+	`guild` varchar(20) NOT NULL,
+	`wl0` varchar(20),
+	`wl1` varchar(20),
+	`wl2` varchar(20),
+	`wl3` varchar(20),
+	`wl4` varchar(20),
+	`wl5` varchar(20),
+	`wl6` varchar(20),
+	`wl7` varchar(20),
+	`wl8` varchar(20),
+	`region_na` varchar(20),
+	`region_eu` varchar(20),
+	`region_as` varchar(20),
+	`region_sa` varchar(20),
+	`helper_na` varchar(20),
+	`helper_eu` varchar(20),
+	`helper_as` varchar(20),
+	`helper_sa` varchar(20),
+	CONSTRAINT `guild_co_op_settings_guild` PRIMARY KEY(`guild`)
+);

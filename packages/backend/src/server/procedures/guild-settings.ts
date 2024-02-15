@@ -7,6 +7,7 @@ import type {
     GuildAutomodSettings,
     GuildAutoresponderSettings,
     GuildAutorolesSettings,
+    GuildCoOpSettings,
     GuildCustomRolesSettings,
     GuildLoggingSettings,
     GuildModmailSettings,
@@ -393,6 +394,21 @@ export async function getSuggestionsSettings(guild: string): Promise<GuildSugges
             anon: false,
         }
     );
+}
+
+export async function getCoOpSettings(guild: string): Promise<GuildCoOpSettings> {
+    const [entry] = await db.select().from(tables.guildCoOpSettings).where(eq(tables.guildCoOpSettings.guild, guild));
+    if (entry) return entry;
+
+    return {
+        guild,
+        ...Object.fromEntries(
+            [
+                ...["0", "1", "2", "3", "4", "5", "6", "7", "8"].map((x) => `wl${x}`),
+                ...["region", "helper"].flatMap((x) => ["NA", "EU", "AS", "SA"].map((y) => `${x}${y}`)),
+            ].map((x) => [x, null]),
+        ),
+    } as GuildCoOpSettings;
 }
 
 const buttonStyles = {
@@ -1780,7 +1796,6 @@ export default {
         ),
     getSuggestionsSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
-
         return await getSuggestionsSettings(guild);
     }),
     setSuggestionsSetttings: proc
@@ -1790,6 +1805,42 @@ export default {
 
             await db
                 .insert(tables.guildSuggestionsSettings)
+                .values({ guild, ...data })
+                .onDuplicateKeyUpdate({ set: data });
+        }),
+    getCoOpSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getCoOpSettings(guild);
+    }),
+    setCoOpSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                wl0: snowflake.nullable(),
+                wl1: snowflake.nullable(),
+                wl2: snowflake.nullable(),
+                wl3: snowflake.nullable(),
+                wl4: snowflake.nullable(),
+                wl5: snowflake.nullable(),
+                wl6: snowflake.nullable(),
+                wl7: snowflake.nullable(),
+                wl8: snowflake.nullable(),
+                regionNA: snowflake.nullable(),
+                regionEU: snowflake.nullable(),
+                regionAS: snowflake.nullable(),
+                regionSA: snowflake.nullable(),
+                helperNA: snowflake.nullable(),
+                helperEU: snowflake.nullable(),
+                helperAS: snowflake.nullable(),
+                helperSA: snowflake.nullable(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, ...data } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            await db
+                .insert(tables.guildCoOpSettings)
                 .values({ guild, ...data })
                 .onDuplicateKeyUpdate({ set: data });
         }),

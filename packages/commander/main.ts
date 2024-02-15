@@ -2,6 +2,7 @@ import { checkPermissions, isWrongClient, reply, template } from "@daedalus/bot-
 import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
 import { ApplicationCommandOptionType, Client, IntentsBitField } from "discord.js";
+import coOp from "./commands/co-op";
 import modmailClose from "./commands/modmail-close";
 import modmailContact from "./commands/modmail-contact";
 import modmailLogLink from "./commands/modmail-log-link";
@@ -54,6 +55,7 @@ const argentium = new Argentium()
                         `${_.isChatInputCommand() ? `/${[_.commandName, _.options.getSubcommandGroup(false), _.options.getSubcommand(false)].filter((x) => x).join(" ")}` : _.commandName} (${_.user.tag} (${_.user.id}) in ${_.guild ? `${_.guild.name} (${_.guild.id})` : "DMs"}) ${denied ? "(permission denied)" : ""}`,
                     );
             })
+            .use(coOp)
             .use(modmailClose)
             .use(modmailContact)
             .use(modmailLogLink)

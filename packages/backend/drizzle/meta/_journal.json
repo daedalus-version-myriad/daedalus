@@ -547,6 +547,13 @@
       "when": 1707970135420,
       "tag": "0077_messy_stingray",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "5",
+      "when": 1707971423898,
+      "tag": "0078_sleepy_scorpion",
+      "breakpoints": true
     }
   ]
 }
