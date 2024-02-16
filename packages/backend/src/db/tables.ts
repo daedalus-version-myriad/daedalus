@@ -513,6 +513,14 @@ export const guildGiveawayItems = mysqlTable(
     }),
 );
 
+export const guildReportsSettings = mysqlTable("guild_reports_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    channel: varchar("channel", { length: 20 }),
+    pingRoles: text("ping_roles").notNull(),
+    anon: boolean("anon").notNull(),
+    viewRoles: text("view_roles").notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {
@@ -857,3 +865,8 @@ export const giveawayEntries = mysqlTable(
         pk_guild_id_user: primaryKey({ name: "pk_guild_id_user", columns: [t.guild, t.id, t.user] }),
     }),
 );
+
+export const reporters = mysqlTable("reporters", {
+    message: varchar("message", { length: 20 }).notNull().primaryKey(),
+    user: varchar("user", { length: 20 }).notNull(),
+});

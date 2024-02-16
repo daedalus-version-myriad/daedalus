@@ -24,6 +24,7 @@ import {
     getCoOpSettings,
     getCustomRolesSettings,
     getNukeguardSettings,
+    getReportsSettings,
     getStarboardSettings,
     getStickyRolesSettings,
     getSuggestionsSettings,
@@ -982,6 +983,15 @@ export default {
                 return results;
             })
         ).map(transformGiveawayBase);
+    }),
+    getReportsConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getReportsSettings(guild);
+    }),
+    addReporter: proc.input(z.object({ message: snowflake, user: snowflake })).mutation(async ({ input: { message, user } }) => {
+        await db.insert(tables.reporters).values({ message, user }).onDuplicateKeyUpdate({ set: { user } });
+    }),
+    getReporter: proc.input(snowflake).query(async ({ input: message }) => {
+        return (await db.select({ user: tables.reporters.user }).from(tables.reporters).where(eq(tables.reporters.message, message))).at(0)?.user ?? null;
     }),
 } as const;
 

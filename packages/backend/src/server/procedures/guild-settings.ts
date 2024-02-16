@@ -19,6 +19,7 @@ import type {
     GuildPremiumSettings,
     GuildReactionRolesSettings,
     GuildRedditFeedsSettings,
+    GuildReportsSettings,
     GuildSettings,
     GuildStarboardSettings,
     GuildStatsChannelsSettings,
@@ -471,6 +472,17 @@ export async function getGiveawaySettings(guild: string): Promise<GuildGiveawayS
             transformGiveawayBase(entry),
         ),
     };
+}
+
+export async function getReportsSettings(guild: string): Promise<GuildReportsSettings> {
+    const entry = (await db.select().from(tables.guildReportsSettings).where(eq(tables.guildReportsSettings.guild, guild))).at(0) ?? {
+        channel: null,
+        pingRoles: "",
+        anon: false,
+        viewRoles: "",
+    };
+
+    return { guild, ...entry, pingRoles: decodeArray(entry.pingRoles), viewRoles: decodeArray(entry.viewRoles) };
 }
 
 const buttonStyles = {
@@ -2125,5 +2137,30 @@ export default {
             });
 
             return [null, { guild, template, giveaways }];
+        }),
+    getReportsSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getReportsSettings(guild);
+    }),
+    setReportsSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                channel: snowflake.nullable(),
+                pingRoles: snowflake.array(),
+                anon: z.boolean(),
+                viewRoles: snowflake.array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, channel, pingRoles, anon, viewRoles } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            const data = { channel, pingRoles: pingRoles.join("/"), anon, viewRoles: viewRoles.join("/") };
+
+            await db
+                .insert(tables.guildReportsSettings)
+                .values({ guild, ...data })
+                .onDuplicateKeyUpdate({ set: { ...data } });
         }),
 } as const;

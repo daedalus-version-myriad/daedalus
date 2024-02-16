@@ -447,6 +447,14 @@ export type GuildGiveawaySettings = {
     })[];
 };
 
+export type GuildReportsSettings = {
+    guild: string;
+    channel: string | null;
+    pingRoles: string[];
+    anon: boolean;
+    viewRoles: string[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

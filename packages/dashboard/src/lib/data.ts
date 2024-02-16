@@ -55,6 +55,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/reddit-feeds", moduleIcons["reddit-feeds"], "Reddit Feeds"],
     ["/count", moduleIcons.count, "Counting Channels"],
     ["/giveaways", moduleIcons.giveaways, "Giveaways"],
+    ["/reports", moduleIcons.reports, "Reports"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

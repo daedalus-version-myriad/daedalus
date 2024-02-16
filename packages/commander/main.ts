@@ -3,6 +3,8 @@ import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
 import { ApplicationCommandOptionType, Client, IntentsBitField } from "discord.js";
 import coOp from "./commands/co-op";
+import flag from "./commands/flag";
+import flagMessage from "./commands/flag-message";
 import giveawayReroll from "./commands/giveaway-reroll";
 import modmailClose from "./commands/modmail-close";
 import modmailContact from "./commands/modmail-contact";
@@ -15,6 +17,8 @@ import modmailSnippetSend from "./commands/modmail-snippet-send";
 import modmailSnippetUseAsTemplate from "./commands/modmail-snippet-use-as-template";
 import modmailSnippetView from "./commands/modmail-snippet-view";
 import rank from "./commands/rank";
+import report from "./commands/report";
+import reportUser from "./commands/report-user";
 import roleDelete from "./commands/role-delete";
 import roleSet from "./commands/role-set";
 import scoreboard from "./commands/scoreboard";
@@ -58,6 +62,8 @@ const argentium = new Argentium()
                     );
             })
             .use(coOp)
+            .use(flagMessage)
+            .use(flag)
             .use(giveawayReroll)
             .use(modmailClose)
             .use(modmailContact)
@@ -70,6 +76,8 @@ const argentium = new Argentium()
             .use(modmailSnippetUseAsTemplate)
             .use(modmailSnippetView)
             .use(rank)
+            .use(reportUser)
+            .use(report)
             .use(roleDelete)
             .use(roleSet)
             .use(scoreboard)
