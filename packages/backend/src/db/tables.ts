@@ -666,7 +666,7 @@ export const moderationRemovalTasks = mysqlTable(
 export const userHistory = mysqlTable(
     "user_history",
     {
-        id: int("id").autoincrement().primaryKey(),
+        id: int("id").notNull(),
         guild: varchar("guild", { length: 20 }).notNull(),
         user: varchar("user", { length: 20 }).notNull(),
         type: mysqlEnum("type", ["ban", "kick", "timeout", "mute", "informal_warn", "warn", "bulk"]).notNull(),
@@ -679,6 +679,7 @@ export const userHistory = mysqlTable(
         reason: varchar("reason", { length: 512 }),
     },
     (t) => ({
+        pk_guild_id: primaryKey({ name: "pk_guild_id", columns: [t.guild, t.id] }),
         idx_guild_user: index("idx_guild_user").on(t.guild, t.user),
     }),
 );
@@ -878,3 +879,20 @@ export const reporters = mysqlTable("reporters", {
     message: varchar("message", { length: 20 }).notNull().primaryKey(),
     user: varchar("user", { length: 20 }).notNull(),
 });
+
+export const historyIds = mysqlTable("history_ids", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    id: int("id").notNull(),
+});
+
+export const notes = mysqlTable(
+    "notes",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        notes: varchar("notes", { length: 4096 }).notNull(),
+    },
+    (t) => ({
+        pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
+    }),
+);

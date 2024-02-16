@@ -8,8 +8,10 @@ import type { CustomMessageContext, ParsedMessage } from "@daedalus/types";
 import type Argentium from "argentium";
 import {
     Attachment,
+    ButtonInteraction,
     ButtonStyle,
     ChannelType,
+    ChatInputCommandInteraction,
     Client,
     Colors,
     ComponentType,
@@ -17,6 +19,7 @@ import {
     GuildChannel,
     GuildMember,
     Message,
+    MessageComponentInteraction,
     PermissionFlagsBits,
     Role,
     User,
@@ -46,6 +49,10 @@ export async function isWrongClient(client: Client, guild: Guild | string) {
 
 export async function isModuleDisabled(guild: Guild | string, module: string) {
     return !(await trpc.isModuleEnabled.query({ guild: typeof guild === "string" ? guild : guild.id, module }));
+}
+
+export async function isCommandDisabled(guild: Guild | string, command: string) {
+    return !(await trpc.isCommandEnabled.query({ guild: typeof guild === "string" ? guild : guild.id, command }));
 }
 
 export async function getColor(guild: Guild | string) {
@@ -434,4 +441,178 @@ export async function checkPunishment(
 
     if ((action === "ban" && !targetMember.bannable) || (action === "kick" && !targetMember.kickable) || (action === "timeout" && !targetMember.moderatable))
         throw `${targetMember} is higher than or equal to the bot in role hierarchy, so it cannot ${action} them.`;
+}
+
+export async function confirm(
+    interaction: RepliableInteraction,
+    data: BaseMessageOptions,
+    timeout: number,
+    yesLabel: string = "CONFIRM",
+    noLabel: string = "CANCEL",
+): Promise<ButtonInteraction | null> {
+    const uuid = crypto.randomUUID();
+
+    const send: InteractionReplyOptions = {
+        ...data,
+        fetchReply: true,
+        components: [
+            {
+                type: ComponentType.ActionRow,
+                components: [
+                    { type: ComponentType.Button, customId: `#/${uuid}`, style: ButtonStyle.Success, label: yesLabel ?? "Confirm" },
+                    { type: ComponentType.Button, customId: `:${interaction.user.id}:cancel`, style: ButtonStyle.Danger, label: noLabel ?? "Cancel" },
+                ],
+            },
+        ],
+    };
+
+    const reply = interaction.replied
+        ? await interaction.followUp(send)
+        : interaction.deferred
+          ? await interaction.editReply(send)
+          : await interaction.reply(send);
+
+    const timer =
+        timeout > 0
+            ? setTimeout(async () => {
+                  await reply.edit({
+                      content: null,
+                      embeds: [],
+                      files: [],
+                      components: [
+                          {
+                              type: ComponentType.ActionRow,
+                              components: [
+                                  { type: ComponentType.Button, style: ButtonStyle.Secondary, customId: ".", label: "Confirmation Timed Out", disabled: true },
+                              ],
+                          },
+                      ],
+                  });
+              }, timeout)
+            : null;
+
+    try {
+        const response = await reply.awaitMessageComponent({
+            componentType: ComponentType.Button,
+            filter: (x) => x.user.id === interaction.user.id,
+            time: timeout || undefined,
+        });
+
+        if (response.customId === `#/${uuid}`) {
+            if (timer) clearTimeout(timer);
+            return response;
+        } else return null;
+    } catch {
+        return null;
+    }
+}
+
+export const dmStatuses = {
+    silent: "No DM was sent.",
+    sent: "The user was DM'd.",
+    failed: "The user could not be DM'd (possible reasons: the user is not in the server, the user has blocked me, the user has DMs closed).",
+};
+
+export async function sendDM(ctx: { guild: Guild | null }, user: User, silent: boolean, message: BaseMessageOptions): Promise<string> {
+    if (!ctx.guild || silent || user.bot) return dmStatuses.silent;
+
+    try {
+        await ctx.guild.members.fetch({ user: user.id, force: true });
+    } catch {
+        return dmStatuses.silent;
+    }
+
+    try {
+        await user.send(message);
+        return dmStatuses.sent;
+    } catch {
+        return dmStatuses.failed;
+    }
+}
+
+export async function pagify(cmd: ChatInputCommandInteraction, messages: any[], ephemeral?: boolean, initial?: number) {
+    const reply = async (x: any) => {
+        if (cmd.deferred || cmd.replied) return await cmd.editReply(x);
+        else return await cmd.reply(x);
+    };
+
+    if (messages.length === 0) throw "Attempted to return pages, but there was nothing found.";
+
+    if (messages.length === 1) return await reply({ ...messages[0], ephemeral });
+
+    let page = initial ?? 0;
+
+    messages.forEach((message, index) => {
+        if (message?.embeds?.length)
+            message.embeds[message.embeds.length - 1].footer = {
+                text: `Page ${index + 1}/${messages.length}`,
+            };
+
+        message.components ??= [];
+        message.components = [
+            {
+                type: ComponentType.ActionRow,
+                components: [
+                    ["⏪", "pages.first", ButtonStyle.Secondary],
+                    ["◀️", "pages.left", ButtonStyle.Secondary],
+                    ["🛑", "pages.stop", ButtonStyle.Danger],
+                    ["▶️", "pages.right", ButtonStyle.Secondary],
+                    ["⏩", "pages.last", ButtonStyle.Secondary],
+                ].map(([emoji, customId, style]) => ({
+                    type: ComponentType.Button,
+                    style,
+                    customId,
+                    emoji,
+                })),
+            },
+            ...message.components.slice(0, 4),
+        ];
+    });
+
+    const message = await reply({
+        ...messages[Math.min(page, messages.length - 1)],
+        ephemeral,
+        fetchReply: true,
+    });
+
+    const collector = message.createMessageComponentCollector({
+        filter: (click: MessageComponentInteraction) => click.user.id === cmd.user.id,
+        time: 890000,
+    });
+
+    let deleted = false;
+
+    collector.on("collect", async (click: MessageComponentInteraction) => {
+        switch (click.customId) {
+            case "pages.first":
+                page = 0;
+                break;
+            case "pages.left":
+                page = (page + messages.length - 1) % messages.length;
+                break;
+            case "pages.right":
+                page = (page + 1) % messages.length;
+                break;
+            case "pages.last":
+                page = messages.length - 1;
+                break;
+            case "pages.stop":
+                await click.update({
+                    components: click.message.components.slice(1),
+                });
+
+                deleted = true;
+                collector.stop();
+                return;
+            default:
+                return;
+        }
+
+        await click.update(messages[page]);
+    });
+
+    collector.on("end", async () => {
+        if (deleted) return;
+        await message.edit({ components: message.components.slice(1) }).catch(() => {});
+    });
 }

@@ -35,6 +35,8 @@ import {
 } from "./guild-settings";
 import { getLimit } from "./premium";
 
+const haltedActions = new Set<string>();
+
 export default {
     getColor: proc.input(snowflake).query(async ({ input: guild }) => {
         const [entry] = await db.select({ color: tables.guildSettings.embedColor }).from(tables.guildSettings).where(eq(tables.guildSettings.guild, guild));
@@ -67,6 +69,15 @@ export default {
             .where(and(eq(tables.guildModulesSettings.guild, guild), eq(tables.guildModulesSettings.module, module)));
 
         if (!entry) return modules[module].default ?? true;
+        return entry.enabled;
+    }),
+    isCommandEnabled: proc.input(z.object({ guild: snowflake, command: z.string() })).query(async ({ input: { guild, command } }) => {
+        const [entry] = await db
+            .select({ enabled: tables.guildCommandsSettings.enabled })
+            .from(tables.guildCommandsSettings)
+            .where(and(eq(tables.guildCommandsSettings.guild, guild), eq(tables.guildCommandsSettings.command, command)));
+
+        if (!entry) return commandMap[command].default ?? true;
         return entry.enabled;
     }),
     getGlobalCommandSettings: proc.input(snowflake).query(async ({ input: guild }) => {
@@ -398,13 +409,67 @@ export default {
                 user: snowflake,
                 type: z.enum(["ban", "kick", "timeout", "mute", "informal_warn", "warn", "bulk"]),
                 mod: snowflake,
-                duration: z.number().optional(),
+                duration: z.number().nullable().optional(),
                 origin: z.string().max(128).optional(),
-                reason: z.string().max(512).optional(),
+                reason: z.string().max(512).nullable().optional(),
             }),
         )
         .mutation(async ({ input }) => {
-            await db.insert(tables.userHistory).values(input);
+            const id = await db.transaction(async (tx) => {
+                const [entry] = await tx.select({ id: tables.historyIds.id }).from(tables.historyIds).where(eq(tables.historyIds.guild, input.guild));
+
+                if (entry)
+                    await tx
+                        .update(tables.historyIds)
+                        .set({ id: sql`id + 1` })
+                        .where(eq(tables.historyIds.guild, input.guild));
+                else await tx.insert(tables.historyIds).values({ guild: input.guild, id: 2 });
+
+                return entry?.id ?? 1;
+            });
+
+            input.duration ??= 0;
+            await db.insert(tables.userHistory).values({ id, ...input });
+
+            return id;
+        }),
+    addMultipleUserHistory: proc
+        .input(
+            z.object({
+                guild: snowflake,
+                entries: z
+                    .object({
+                        user: snowflake,
+                        type: z.enum(["ban", "kick", "timeout", "mute", "informal_warn", "warn", "bulk"]),
+                        mod: snowflake,
+                        duration: z.number().nullable().optional(),
+                        origin: z.string().max(128).optional(),
+                        reason: z.string().max(512).nullable().optional(),
+                    })
+                    .array(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            if (input.entries.length === 0) return;
+
+            const id = await db.transaction(async (tx) => {
+                const [entry] = await tx.select({ id: tables.historyIds.id }).from(tables.historyIds).where(eq(tables.historyIds.guild, input.guild));
+
+                if (entry)
+                    await tx
+                        .update(tables.historyIds)
+                        .set({ id: sql`id + ${input.entries.length}` })
+                        .where(eq(tables.historyIds.guild, input.guild));
+                else await tx.insert(tables.historyIds).values({ guild: input.guild, id: 1 + input.entries.length });
+
+                return entry?.id ?? 1;
+            });
+
+            await db
+                .insert(tables.userHistory)
+                .values(input.entries.map((entry, index) => ({ guild: input.guild, id: id + index, ...entry, duration: entry.duration ?? 0 })));
+
+            return id;
         }),
     getStickyRolesConfig: proc.input(snowflake).query(async ({ input: guild }): Promise<GuildStickyRolesSettings> => {
         return await getStickyRolesSettings(guild);
@@ -424,6 +489,12 @@ export default {
                 .from(tables.stickyRoles)
                 .where(and(eq(tables.stickyRoles.guild, guild), eq(tables.stickyRoles.user, user)))
         ).map(({ role }) => role);
+    }),
+    addStickyRole: proc.input(z.object({ guild: snowflake, user: snowflake, role: snowflake })).mutation(async ({ input: { guild, user, role } }) => {
+        await db
+            .insert(tables.stickyRoles)
+            .values({ guild, user, role })
+            .onDuplicateKeyUpdate({ set: { guild: sql`guild` } });
     }),
     deleteStickyRole: proc.input(z.object({ guild: snowflake, user: snowflake, role: snowflake })).mutation(async ({ input: { guild, user, role } }) => {
         await db
@@ -993,6 +1064,61 @@ export default {
     getReporter: proc.input(snowflake).query(async ({ input: message }) => {
         return (await db.select({ user: tables.reporters.user }).from(tables.reporters).where(eq(tables.reporters.message, message))).at(0)?.user ?? null;
     }),
+    halt: proc.input(snowflake).mutation(async ({ input: message }) => {
+        haltedActions.add(message);
+    }),
+    isHalted: proc.input(snowflake).query(async ({ input: message }) => {
+        if (haltedActions.has(message)) {
+            haltedActions.delete(message);
+            return true;
+        }
+
+        return false;
+    }),
+    getUserHistory: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        return await db
+            .select()
+            .from(tables.userHistory)
+            .where(and(eq(tables.userHistory.guild, guild), eq(tables.userHistory.user, user)));
+    }),
+    getUserNotes: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        return (
+            (
+                await db
+                    .select({ notes: tables.notes.notes })
+                    .from(tables.notes)
+                    .where(and(eq(tables.notes.guild, guild), eq(tables.notes.user, user)))
+            ).at(0)?.notes ?? ""
+        );
+    }),
+    getHistoryEntry: proc.input(z.object({ guild: snowflake, id: z.number().int().min(1) })).query(async ({ input: { guild, id } }) => {
+        return (
+            await db
+                .select()
+                .from(tables.userHistory)
+                .where(and(eq(tables.userHistory.guild, guild), eq(tables.userHistory.id, id)))
+        ).at(0);
+    }),
+    deleteHistoryEntry: proc.input(z.object({ guild: snowflake, id: z.number().int().min(1) })).mutation(async ({ input: { guild, id } }) => {
+        await db.delete(tables.userHistory).where(and(eq(tables.userHistory.guild, guild), eq(tables.userHistory.id, id)));
+    }),
+    countHistoryEntries: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        return (
+            await db
+                .select({ count: count() })
+                .from(tables.userHistory)
+                .where(and(eq(tables.userHistory.guild, guild), eq(tables.userHistory.user, user)))
+        )[0].count;
+    }),
+    clearHistory: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
+        const { rowsAffected } = await db.delete(tables.userHistory).where(and(eq(tables.userHistory.guild, guild), eq(tables.userHistory.user, user)));
+        return rowsAffected;
+    }),
+    setUserNotes: proc
+        .input(z.object({ guild: snowflake, user: snowflake, notes: z.string().max(4096) }))
+        .mutation(async ({ input: { guild, user, notes } }) => {
+            await db.insert(tables.notes).values({ guild, user, notes }).onDuplicateKeyUpdate({ set: { notes } });
+        }),
 } as const;
 
 const defaultModmailMessage = {

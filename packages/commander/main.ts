@@ -2,10 +2,16 @@ import { checkPermissions, isWrongClient, reply, template } from "@daedalus/bot-
 import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
 import { ApplicationCommandOptionType, Client, IntentsBitField } from "discord.js";
+import ban from "./commands/ban.ts";
+import clearHistory from "./commands/clear-history.ts";
 import coOp from "./commands/co-op";
+import deleteHistory from "./commands/delete-history.ts";
 import flag from "./commands/flag";
 import flagMessage from "./commands/flag-message";
 import giveawayReroll from "./commands/giveaway-reroll";
+import history from "./commands/history.ts";
+import kick from "./commands/kick.ts";
+import massban from "./commands/massban.ts";
 import modmailClose from "./commands/modmail-close";
 import modmailContact from "./commands/modmail-contact";
 import modmailLogLink from "./commands/modmail-log-link";
@@ -16,18 +22,27 @@ import modmailReplyModal from "./commands/modmail-reply-modal";
 import modmailSnippetSend from "./commands/modmail-snippet-send";
 import modmailSnippetUseAsTemplate from "./commands/modmail-snippet-use-as-template";
 import modmailSnippetView from "./commands/modmail-snippet-view";
+import mute from "./commands/mute.ts";
+import purge from "./commands/purge.ts";
 import rank from "./commands/rank";
 import report from "./commands/report";
 import reportUser from "./commands/report-user";
 import roleDelete from "./commands/role-delete";
 import roleSet from "./commands/role-set";
 import scoreboard from "./commands/scoreboard";
+import slowmode from "./commands/slowmode.ts";
 import suggest from "./commands/suggest";
 import suggestion from "./commands/suggestion";
 import ticketClose from "./commands/ticket-close";
+import timeout from "./commands/timeout.ts";
 import top from "./commands/top";
+import unban from "./commands/unban.ts";
+import unmute from "./commands/unmute.ts";
+import warn from "./commands/warn.ts";
 import xpMee6Import from "./commands/xp-mee6-import";
 import xpReset from "./commands/xp-reset";
+import notesEdit from "./commands/notes-edit.ts";
+import notesView from "./commands/notes-view.ts";
 
 process.on("uncaughtException", console.error);
 
@@ -61,10 +76,16 @@ const argentium = new Argentium()
                         `${_.isChatInputCommand() ? `/${[_.commandName, _.options.getSubcommandGroup(false), _.options.getSubcommand(false)].filter((x) => x).join(" ")}` : _.commandName} (${_.user.tag} (${_.user.id}) in ${_.guild ? `${_.guild.name} (${_.guild.id})` : "DMs"}) ${denied ? "(permission denied)" : ""}`,
                     );
             })
+            .use(ban)
+            .use(clearHistory)
             .use(coOp)
+            .use(deleteHistory)
             .use(flagMessage)
             .use(flag)
             .use(giveawayReroll)
+            .use(history)
+            .use(kick)
+            .use(massban)
             .use(modmailClose)
             .use(modmailContact)
             .use(modmailLogLink)
@@ -75,16 +96,25 @@ const argentium = new Argentium()
             .use(modmailSnippetSend)
             .use(modmailSnippetUseAsTemplate)
             .use(modmailSnippetView)
+            .use(mute)
+            .use(notesEdit)
+            .use(notesView)
+            .use(purge)
             .use(rank)
             .use(reportUser)
             .use(report)
             .use(roleDelete)
             .use(roleSet)
             .use(scoreboard)
+            .use(slowmode)
             .use(suggest)
             .use(suggestion)
             .use(ticketClose)
+            .use(timeout)
             .use(top)
+            .use(unban)
+            .use(unmute)
+            .use(warn)
             .use(xpReset)
             .use(xpMee6Import),
     )
