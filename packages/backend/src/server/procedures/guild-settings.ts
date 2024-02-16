@@ -1,6 +1,7 @@
 import { secrets } from "@daedalus/config";
 import { parseCustomMessageString, parseMessage } from "@daedalus/custom-messages";
 import { modules } from "@daedalus/data";
+import { serializeGiveawayBase } from "@daedalus/global-utils";
 import { logCategories, logEvents } from "@daedalus/logging";
 import type {
     CustomMessageText,
@@ -31,7 +32,7 @@ import type {
     ParsedMessage,
 } from "@daedalus/types";
 import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMessageOptions } from "discord.js";
-import { and, eq, inArray, not } from "drizzle-orm";
+import { and, eq, inArray, not, sql } from "drizzle-orm";
 import _ from "lodash";
 import { z } from "zod";
 import { triggerCustomRoleSweep } from "../../../../custom-roles/index";
@@ -431,7 +432,9 @@ export async function getCountSettings(guild: string): Promise<GuildCountSetting
     };
 }
 
-function transformGiveawayBase<T extends { message: unknown; requiredRoles: string; blockedRoles: string; bypassRoles: string; weights: string }>(entry: T) {
+export function transformGiveawayBase<T extends { message: unknown; requiredRoles: string; blockedRoles: string; bypassRoles: string; weights: string }>(
+    entry: T,
+) {
     return {
         ...entry,
         message: entry.message as MessageData,
@@ -1630,7 +1633,7 @@ export default {
             const promptMap = Object.fromEntries((await getTicketsSettings(guild)).prompts.map((prompt) => [prompt.id, prompt]));
 
             const client = await clients.getBot(guild);
-            const obj = await client?.guilds.fetch(guild);
+            const obj = await client?.guilds.fetch(guild).catch(() => null);
 
             const promptLimit = (await getLimit(guild, "ticketPromptCountLimit")) as number;
 
@@ -1996,5 +1999,131 @@ export default {
         )
         .mutation(async ({ input: { id, guild, template, giveaways } }): Promise<[string | null, GuildGiveawaySettings]> => {
             if (!(await hasPermission(id, guild))) return [NO_PERMISSION, { guild, template, giveaways }];
+
+            const giveawayMap = Object.fromEntries((await getGiveawaySettings(guild)).giveaways.map((giveaway) => [giveaway.id, giveaway]));
+
+            const client = await clients.getBot(guild);
+            const obj = await client?.guilds.fetch(guild).catch(() => null);
+
+            const requiredIds = giveaways.filter((x) => x.id === -1);
+
+            if (requiredIds.length > 0) {
+                const base = await db.transaction(async (tx) => {
+                    const [entry] = await tx.select({ id: tables.giveawayIds.id }).from(tables.giveawayIds).where(eq(tables.giveawayIds.guild, guild));
+
+                    if (entry)
+                        await tx
+                            .update(tables.giveawayIds)
+                            .set({ id: sql`id + ${requiredIds.length}` })
+                            .where(eq(tables.giveawayIds.guild, guild));
+                    else await tx.insert(tables.giveawayIds).values({ guild, id: 1 + requiredIds.length });
+
+                    return entry?.id ?? 1;
+                });
+
+                requiredIds.forEach((x, i) => (x.id = base + i));
+            }
+
+            for (let index = 0; index < giveaways.length; index++) {
+                const giveaway = giveaways[index];
+                if (giveaway.deadline >= Date.now()) giveaway.closed = false;
+
+                try {
+                    if (!client)
+                        throw "Could not load the client for this guild. If you are using a custom client, please make sure its token is valid. If not, please contact support.";
+                    if (!obj) throw "Could not load this guild. Please make sure the bot is in the server.";
+                    if (!giveaway.channel) throw "No channel was set for this giveaway. It was still saved but cannot be posted.";
+
+                    const data: (post: boolean) => BaseMessageOptions = (post) => ({
+                        ...(!post && giveaway.id in giveawayMap && _.isEqual(giveaway.message, giveawayMap[giveaway.id].message) ? {} : giveaway.message),
+                        components: [
+                            {
+                                type: ComponentType.ActionRow,
+                                components: [
+                                    {
+                                        type: ComponentType.Button,
+                                        style: ButtonStyle.Secondary,
+                                        customId: "::giveaway/enter",
+                                        emoji: "🎉",
+                                        label: "Enter Giveaway",
+                                        disabled: giveaway.deadline < Date.now(),
+                                    },
+                                ],
+                            },
+                        ],
+                    });
+
+                    let message: Message | null = null;
+
+                    if (giveaway.id in giveawayMap) {
+                        const old = giveawayMap[giveaway.id];
+
+                        if (giveaway.channel === old.channel) {
+                            const channel = await obj.channels.fetch(giveaway.channel!).catch(() => null);
+                            if (!channel?.isTextBased()) throw "Could not fetch channel.";
+
+                            let edit = false;
+
+                            try {
+                                if (!old.messageId) throw 0;
+                                message = await channel.messages.fetch({ message: old.messageId, force: true });
+                                edit = true;
+                            } catch {
+                                message = await channel.send(data(true)).catch((error) => {
+                                    throw `Could neither fetch the message in #${channel.name} to edit nor send a new one: ${error}`;
+                                });
+                            }
+
+                            if (edit) await message.edit(data(false));
+                        } else {
+                            try {
+                                if (!old.messageId || !old.channel) throw 0;
+                                const channel = await obj.channels.fetch(old.channel);
+                                if (!channel?.isTextBased()) throw 0;
+                                await (await channel.messages.fetch(old.messageId)).delete();
+                            } catch {}
+                        }
+                    }
+
+                    if (!message && !giveaway.closed) {
+                        const channel = await obj.channels.fetch(giveaway.channel!).catch(() => null);
+                        if (!channel?.isTextBased()) throw "Could not fetch channel.";
+
+                        message = await channel.send(data(true)).catch(() => {
+                            throw `Could not send message in #${channel.name}.`;
+                        });
+                    }
+
+                    giveaway.messageId = message?.id ?? null;
+                    giveaway.error = null;
+                } catch (error) {
+                    if (typeof error !== "string") console.error(error);
+                    giveaway.error = `${error}`;
+                }
+            }
+
+            if (obj)
+                for (const giveaway of Object.values(giveawayMap))
+                    if (!giveaways.some((search) => search.id === giveaway.id))
+                        try {
+                            const channel = await obj.channels.fetch(giveaway.channel!);
+                            if (!channel?.isTextBased()) throw 0;
+                            await (await channel.messages.fetch(giveaway.messageId!)).delete();
+                        } catch {}
+
+            const dbTemplate = serializeGiveawayBase(template);
+            const serialized = giveaways.map((giveaway) => ({ guild, ...serializeGiveawayBase(giveaway) }));
+
+            await db.transaction(async (tx) => {
+                await tx
+                    .insert(tables.guildGiveawayTemplates)
+                    .values({ guild, ...dbTemplate })
+                    .onDuplicateKeyUpdate({ set: dbTemplate });
+
+                await tx.delete(tables.guildGiveawayItems).where(eq(tables.guildGiveawayItems.guild, guild));
+                if (serialized.length > 0) await tx.insert(tables.guildGiveawayItems).values(serialized);
+            });
+
+            return [null, { guild, template, giveaways }];
         }),
 } as const;

@@ -114,3 +114,13 @@ li:not(.not-prose) {
 .center-row {
     @apply flex items-center;
 }
+
+input.textlike[type="number"]::-webkit-outer-spin-button,
+input.textlike[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input.textlike[type="number"] {
+    -moz-appearance: textfield;
+}

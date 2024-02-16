@@ -496,8 +496,8 @@ export const guildGiveawayTemplates = mysqlTable("guild_giveaway_templates", {
 export const guildGiveawayItems = mysqlTable(
     "guild_giveaway_items",
     {
-        id: int("id").notNull().autoincrement().primaryKey(),
         guild: varchar("guild", { length: 20 }).notNull(),
+        id: int("id").notNull(),
         name: varchar("name", { length: 128 }).notNull(),
         ...giveawayTemplate(),
         deadline: bigint("deadline", { mode: "number" }).notNull(),
@@ -506,8 +506,10 @@ export const guildGiveawayItems = mysqlTable(
         closed: boolean("closed").notNull(),
     },
     (t) => ({
+        pk_guild_id: primaryKey({ name: "pk_guild_id", columns: [t.guild, t.id] }),
         idx_message: index("idx_message").on(t.messageId),
         idx_deadline: index("idx_deadline").on(t.deadline),
+        idx_closed: index("idx_closed").on(t.closed),
     }),
 );
 
@@ -836,5 +838,22 @@ export const countScoreboard = mysqlTable(
     (t) => ({
         pk_id_user: primaryKey({ name: "pk_id_user", columns: [t.id, t.user] }),
         idx_score: index("idx_score").on(t.score),
+    }),
+);
+
+export const giveawayIds = mysqlTable("giveaway_ids", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    id: int("id").notNull(),
+});
+
+export const giveawayEntries = mysqlTable(
+    "giveaway_entries",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        id: int("id").notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+    },
+    (t) => ({
+        pk_guild_id_user: primaryKey({ name: "pk_guild_id_user", columns: [t.guild, t.id, t.user] }),
     }),
 );

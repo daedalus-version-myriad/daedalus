@@ -9,7 +9,7 @@ import type {
     GuildStickyRolesSettings,
     ParsedMessage,
 } from "@daedalus/types";
-import { and, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../../db/db";
 import { tables } from "../../db/index";
@@ -29,6 +29,7 @@ import {
     getSuggestionsSettings,
     getTicketsSettings,
     getXpSettings,
+    transformGiveawayBase,
     transformXpSettings,
 } from "./guild-settings";
 import { getLimit } from "./premium";
@@ -918,6 +919,69 @@ export default {
             .orderBy(desc(sum(tables.countScoreboard.score)))
             .offset((page - 1) * 20)
             .limit(20);
+    }),
+    getGiveaway: proc.input(z.object({ guild: snowflake, message: snowflake })).query(async ({ input: { guild, message } }) => {
+        const [entry] = await db
+            .select()
+            .from(tables.guildGiveawayItems)
+            .where(and(eq(tables.guildGiveawayItems.guild, guild), eq(tables.guildGiveawayItems.messageId, message)));
+
+        if (!entry) return null;
+        return transformGiveawayBase(entry);
+    }),
+    getGiveawayById: proc.input(z.object({ guild: snowflake, id: z.number().int().min(1) })).query(async ({ input: { guild, id } }) => {
+        const [entry] = await db
+            .select()
+            .from(tables.guildGiveawayItems)
+            .where(and(eq(tables.guildGiveawayItems.guild, guild), eq(tables.guildGiveawayItems.id, id)));
+
+        if (!entry) return null;
+        return transformGiveawayBase(entry);
+    }),
+    hasGiveawayEntry: proc.input(z.object({ guild: snowflake, id: z.number().int().min(1), user: snowflake })).query(async ({ input: { guild, id, user } }) => {
+        return (
+            (
+                await db
+                    .select({ count: count() })
+                    .from(tables.giveawayEntries)
+                    .where(and(eq(tables.giveawayEntries.guild, guild), eq(tables.giveawayEntries.id, id), eq(tables.giveawayEntries.user, user)))
+            )[0].count > 0
+        );
+    }),
+    addGiveawayEntry: proc
+        .input(z.object({ guild: snowflake, id: z.number().int().min(1), user: snowflake }))
+        .mutation(async ({ input: { guild, id, user } }) => {
+            await db
+                .insert(tables.giveawayEntries)
+                .values({ guild, id, user })
+                .onDuplicateKeyUpdate({ set: { id: sql`id` } });
+        }),
+    removeGiveawayEntry: proc
+        .input(z.object({ guild: snowflake, id: z.number().int().min(1), user: snowflake }))
+        .mutation(async ({ input: { guild, id, user } }) => {
+            const { rowsAffected } = await db
+                .delete(tables.giveawayEntries)
+                .where(and(eq(tables.giveawayEntries.guild, guild), eq(tables.giveawayEntries.id, id), eq(tables.giveawayEntries.user, user)));
+
+            return rowsAffected === 0;
+        }),
+    getGiveawayEntries: proc.input(z.object({ guild: snowflake, id: z.number().int().min(1) })).query(async ({ input: { guild, id } }) => {
+        return (
+            await db
+                .select({ user: tables.giveawayEntries.user })
+                .from(tables.giveawayEntries)
+                .where(and(eq(tables.giveawayEntries.guild, guild), eq(tables.giveawayEntries.id, id)))
+        ).map(({ user }) => user);
+    }),
+    getGiveawaysToClose: proc.query(async () => {
+        return (
+            await db.transaction(async (tx) => {
+                const condition = and(lt(tables.guildGiveawayItems.deadline, Date.now()), eq(tables.guildGiveawayItems.closed, false));
+                const results = await tx.select().from(tables.guildGiveawayItems).where(condition);
+                await tx.update(tables.guildGiveawayItems).set({ closed: true }).where(condition);
+                return results;
+            })
+        ).map(transformGiveawayBase);
     }),
 } as const;
 

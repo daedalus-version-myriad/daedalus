@@ -582,6 +582,34 @@
       "when": 1708025961374,
       "tag": "0082_great_mac_gargan",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "5",
+      "when": 1708038482364,
+      "tag": "0083_flawless_crusher_hogan",
+      "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "5",
+      "when": 1708038485898,
+      "tag": "0084_cooing_slayback",
+      "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "5",
+      "when": 1708057634341,
+      "tag": "0085_curly_tinkerer",
+      "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "5",
+      "when": 1708058508393,
+      "tag": "0086_condemned_whiplash",
+      "breakpoints": true
     }
   ]
 }

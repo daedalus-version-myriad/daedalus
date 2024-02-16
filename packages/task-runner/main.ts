@@ -1,6 +1,8 @@
 import { trpc } from "@daedalus/api";
-import { getMuteRole } from "@daedalus/bot-utils";
+import { getColor, getMuteRole } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
+import { englishList } from "@daedalus/formatting";
+import { draw } from "@daedalus/giveaways";
 import { logError } from "@daedalus/log-interface";
 import { closeModmailThread } from "@daedalus/modmail";
 import { Client, IntentsBitField } from "discord.js";
@@ -68,9 +70,60 @@ async function runModmailCloseTasks() {
     }
 }
 
-async function cycle() {
-    await Promise.all([runModerationRemovalTasks, runModmailCloseTasks].map((fn) => fn().catch(() => null)));
+async function rollGiveaways() {
+    const giveaways = await trpc.getGiveawaysToClose.query();
 
+    for (const giveaway of giveaways) {
+        if (!giveaway.channel) continue;
+
+        const client = await manager.getBot(giveaway.guild);
+        if (!client) continue;
+
+        const guild = await client.guilds.fetch(giveaway.guild).catch(() => null);
+        if (!guild) continue;
+
+        const channel = await guild.channels.fetch(giveaway.channel).catch(() => null);
+        if (!channel?.isTextBased()) continue;
+
+        const result = await draw(guild, giveaway).catch((error) => {
+            console.error(error);
+            logError(guild.id, "Rolling Giveaway", "An unexpected error occurred computing the results of your giveaway. Please contact support.");
+        });
+
+        if (!result) continue;
+
+        try {
+            if (!giveaway.messageId) throw 0;
+
+            const message = await channel.messages.fetch(giveaway.messageId);
+
+            await message.edit({
+                components: message.components.map((row) => ({ type: row.type, components: row.toJSON().components.map((x) => ({ ...x, disabled: true })) })),
+            });
+        } catch {}
+
+        await channel
+            .send({
+                embeds: [
+                    {
+                        title: `**Giveaway Results (ID: \`${giveaway.id}\`)**`,
+                        description: result.length > 0 ? `Congratulations to ${englishList(result)}!` : "Nobody was eligible!",
+                        color: await getColor(guild),
+                    },
+                ],
+            })
+            .catch(() =>
+                logError(
+                    guild.id,
+                    "Rolling Giveaway",
+                    `Your giveaway's results were computed (${result.length > 0 ? englishList(result) : "nobody was eligble"}) but the notice could not be sent to ${channel}. Check the bot's permissions. Use **/giveaway reroll** to run this again.`,
+                ),
+            );
+    }
+}
+
+async function cycle() {
+    await Promise.all([runModerationRemovalTasks, runModmailCloseTasks, rollGiveaways].map((fn) => fn().catch(console.error)));
     setTimeout(cycle, 10000);
 }
 

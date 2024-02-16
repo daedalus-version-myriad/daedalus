@@ -3,6 +3,7 @@ import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
 import { ApplicationCommandOptionType, Client, IntentsBitField } from "discord.js";
 import coOp from "./commands/co-op";
+import giveawayReroll from "./commands/giveaway-reroll";
 import modmailClose from "./commands/modmail-close";
 import modmailContact from "./commands/modmail-contact";
 import modmailLogLink from "./commands/modmail-log-link";
@@ -57,6 +58,7 @@ const argentium = new Argentium()
                     );
             })
             .use(coOp)
+            .use(giveawayReroll)
             .use(modmailClose)
             .use(modmailContact)
             .use(modmailLogLink)
