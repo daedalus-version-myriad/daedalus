@@ -23,8 +23,11 @@ import modmailSnippetSend from "./commands/modmail-snippet-send";
 import modmailSnippetUseAsTemplate from "./commands/modmail-snippet-use-as-template";
 import modmailSnippetView from "./commands/modmail-snippet-view";
 import mute from "./commands/mute.ts";
+import notesEdit from "./commands/notes-edit.ts";
+import notesView from "./commands/notes-view.ts";
 import purge from "./commands/purge.ts";
 import rank from "./commands/rank";
+import reminders from "./commands/reminders.ts";
 import report from "./commands/report";
 import reportUser from "./commands/report-user";
 import roleDelete from "./commands/role-delete";
@@ -41,8 +44,6 @@ import unmute from "./commands/unmute.ts";
 import warn from "./commands/warn.ts";
 import xpMee6Import from "./commands/xp-mee6-import";
 import xpReset from "./commands/xp-reset";
-import notesEdit from "./commands/notes-edit.ts";
-import notesView from "./commands/notes-view.ts";
 
 process.on("uncaughtException", console.error);
 
@@ -118,6 +119,7 @@ const argentium = new Argentium()
             .use(xpReset)
             .use(xpMee6Import),
     )
+    .use(reminders)
     .onCommandError((e, _) => {
         if (_.isRepliable() && typeof e === "string") {
             reply(_, template.error(e));

@@ -896,3 +896,26 @@ export const notes = mysqlTable(
         pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
     }),
 );
+
+export const reminders = mysqlTable(
+    "reminders",
+    {
+        id: int("id").notNull(),
+        guild: varchar("guild", { length: 20 }),
+        client: varchar("client", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        time: bigint("time", { mode: "number" }).notNull(),
+        query: varchar("query", { length: 1024 }),
+        origin: varchar("origin", { length: 128 }).notNull(),
+    },
+    (t) => ({
+        pk_user_id: primaryKey({ name: "pk_guild_id", columns: [t.user, t.id] }),
+        idx_guild: index("idx_guild").on(t.guild),
+        idx_time: index("idx_time").on(t.time),
+    }),
+);
+
+export const reminderIds = mysqlTable("reminder_ids", {
+    user: varchar("user", { length: 20 }).notNull().primaryKey(),
+    id: int("id").notNull(),
+});

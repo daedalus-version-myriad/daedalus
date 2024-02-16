@@ -1119,6 +1119,67 @@ export default {
         .mutation(async ({ input: { guild, user, notes } }) => {
             await db.insert(tables.notes).values({ guild, user, notes }).onDuplicateKeyUpdate({ set: { notes } });
         }),
+    countReminders: proc.input(snowflake).query(async ({ input: user }) => {
+        return (await db.select({ count: count() }).from(tables.reminders).where(eq(tables.reminders.user, user)))[0].count;
+    }),
+    getNextReminderId: proc.input(snowflake).mutation(async ({ input: user }) => {
+        return await db.transaction(async (tx) => {
+            const [entry] = await tx.select({ id: tables.reminderIds.id }).from(tables.reminderIds).where(eq(tables.reminderIds.user, user));
+
+            if (entry)
+                await tx
+                    .update(tables.reminderIds)
+                    .set({ id: sql`id + 1` })
+                    .where(eq(tables.reminderIds.user, user));
+            else await tx.insert(tables.reminderIds).values({ user, id: 2 });
+
+            return entry?.id ?? 1;
+        });
+    }),
+    setReminder: proc
+        .input(
+            z.object({
+                guild: snowflake.nullable(),
+                id: z.number().int().min(1),
+                client: snowflake,
+                user: snowflake,
+                time: z.number().int(),
+                query: z.string().max(1024).nullable(),
+                origin: z.string().max(128),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            await db.insert(tables.reminders).values(input);
+        }),
+    listReminders: proc.input(z.object({ guild: snowflake.nullable().optional(), user: snowflake })).query(async ({ input: { guild, user } }) => {
+        return await db
+            .select()
+            .from(tables.reminders)
+            .where(
+                guild === undefined
+                    ? eq(tables.reminders.user, user)
+                    : and(guild === null ? isNull(tables.reminders.guild) : eq(tables.reminders.guild, guild), eq(tables.reminders.user, user)),
+            );
+    }),
+    cancelReminder: proc.input(z.object({ user: snowflake, id: z.number().int().min(1) })).mutation(async ({ input: { user, id } }) => {
+        const condition = and(eq(tables.reminders.user, user), eq(tables.reminders.id, id));
+
+        return await db.transaction(async (tx) => {
+            const entry = (await db.select().from(tables.reminders).where(condition)).at(0);
+            if (entry) await db.delete(tables.reminders).where(condition);
+            return entry;
+        });
+    }),
+    getAndClearPastReminders: proc.query(async () => {
+        return await db.transaction(async (tx) => {
+            const condition = lt(tables.reminders.time, Date.now());
+
+            const entries = await tx.select().from(tables.reminders).where(condition);
+            await tx.delete(tables.reminders).where(condition);
+
+            return entries;
+        });
+    }),
 } as const;
 
 const defaultModmailMessage = {

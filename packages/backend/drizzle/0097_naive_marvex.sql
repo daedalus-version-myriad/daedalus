@@ -1,0 +1,1 @@
+ALTER TABLE `reminders` MODIFY COLUMN `origin` varchar(128) NOT NULL;

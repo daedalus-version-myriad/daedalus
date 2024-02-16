@@ -1,6 +1,7 @@
 import { trpc } from "@daedalus/api";
 import { getColor, getMuteRole } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
+import { secrets } from "@daedalus/config";
 import { englishList } from "@daedalus/formatting";
 import { draw } from "@daedalus/giveaways";
 import { logError } from "@daedalus/log-interface";
@@ -122,8 +123,76 @@ async function rollGiveaways() {
     }
 }
 
+function formatReminder(reminder: { id: number; origin: string; query: string | null }, color: number) {
+    return {
+        embeds: [
+            {
+                title: `Reminder #${reminder.id}`,
+                description: `You asked to be reminded [here](${reminder.origin})${reminder.query ? `: ${reminder.query}` : ""}`,
+                color,
+            },
+        ],
+    };
+}
+
+async function runReminders() {
+    const reminders = await trpc.getAndClearPastReminders.query();
+
+    const guildReminders: Record<string, typeof reminders> = {};
+    const dmReminders: Record<string, typeof reminders> = {};
+
+    for (const reminder of reminders) {
+        if (reminder.guild) (guildReminders[reminder.guild] ??= []).push(reminder);
+        else (dmReminders[reminder.client] ??= []).push(reminder);
+    }
+
+    for (const [guild, reminders] of Object.entries(guildReminders)) {
+        const client = await manager.getBot(guild);
+        const color = await getColor(guild);
+
+        if (!client) {
+            for (const reminder of reminders) (dmReminders[reminder.client] ??= []).push(reminder);
+            continue;
+        }
+
+        for (const reminder of reminders)
+            try {
+                const user = await client.users.fetch(reminder.user);
+                await user.send(formatReminder(reminder, color));
+            } catch {
+                (dmReminders[secrets.DISCORD.CLIENT.ID] ??= []).push(reminder);
+            }
+    }
+
+    const clients = await manager.getBots();
+    const ids = new Set(clients.map((client) => client.user.id));
+
+    const fallbackReminders = new Map(
+        Object.entries(dmReminders)
+            .filter(([client]) => !ids.has(client))
+            .flatMap(([, reminders]) => reminders.map((reminder) => [`${reminder.user}/${reminder.id}`, reminder])),
+    );
+
+    for (const client of clients)
+        for (const reminder of dmReminders[client.user.id] ?? [])
+            try {
+                const user = await client.users.fetch(reminder.user);
+                await user.send(formatReminder(reminder, 0x009688));
+            } catch {
+                fallbackReminders.set(`${reminder.user}/${reminder.id}`, reminder);
+            }
+
+    for (const client of clients)
+        for (const [key, reminder] of fallbackReminders)
+            try {
+                const user = await client.users.fetch(reminder.user);
+                await user.send(formatReminder(reminder, 0x009688));
+                fallbackReminders.delete(key);
+            } catch {}
+}
+
 async function cycle() {
-    await Promise.all([runModerationRemovalTasks, runModmailCloseTasks, rollGiveaways].map((fn) => fn().catch(console.error)));
+    await Promise.all([runModerationRemovalTasks, runModmailCloseTasks, rollGiveaways, runReminders].map((fn) => fn().catch(console.error)));
     setTimeout(cycle, 10000);
 }
 
