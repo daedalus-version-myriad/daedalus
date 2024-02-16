@@ -56,6 +56,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/count", moduleIcons.count, "Counting Channels"],
     ["/giveaways", moduleIcons.giveaways, "Giveaways"],
     ["/reports", moduleIcons.reports, "Reports"],
+    ["/utility", moduleIcons.utility, "Utility"],
 ];
 
 export const manageAccountCategories: [string, IconType, string][] = [

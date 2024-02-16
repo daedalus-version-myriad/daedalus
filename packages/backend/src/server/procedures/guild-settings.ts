@@ -27,6 +27,7 @@ import type {
     GuildSuggestionsSettings,
     GuildSupporterAnnouncementsSettings,
     GuildTicketsSettings,
+    GuildUtilitySettings,
     GuildWelcomeSettings,
     GuildXpSettings,
     MessageData,
@@ -483,6 +484,23 @@ export async function getReportsSettings(guild: string): Promise<GuildReportsSet
     };
 
     return { guild, ...entry, pingRoles: decodeArray(entry.pingRoles), viewRoles: decodeArray(entry.viewRoles) };
+}
+
+export async function getUtilitySettings(guild: string): Promise<GuildUtilitySettings> {
+    const entry = (await db.select().from(tables.guildUtilitySettings).where(eq(tables.guildUtilitySettings.guild, guild))).at(0) ?? {
+        roleCommandBlockByDefault: false,
+        roleCommandBlockedRoles: "",
+        roleCommandAllowedRoles: "",
+        roleCommandBypassRoles: "",
+    };
+
+    return {
+        guild,
+        ...entry,
+        roleCommandBlockedRoles: decodeArray(entry.roleCommandBlockedRoles),
+        roleCommandAllowedRoles: decodeArray(entry.roleCommandAllowedRoles),
+        roleCommandBypassRoles: decodeArray(entry.roleCommandBypassRoles),
+    };
 }
 
 const buttonStyles = {
@@ -2162,5 +2180,33 @@ export default {
                 .insert(tables.guildReportsSettings)
                 .values({ guild, ...data })
                 .onDuplicateKeyUpdate({ set: { ...data } });
+        }),
+    getUtilitySettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
+        if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+        return await getUtilitySettings(guild);
+    }),
+    setUtilitySettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                roleCommandBlockByDefault: z.boolean(),
+                roleCommandBlockedRoles: snowflake.array(),
+                roleCommandAllowedRoles: snowflake.array(),
+                roleCommandBypassRoles: snowflake.array(),
+            }),
+        )
+        .mutation(async ({ input: { id, guild, roleCommandBlockedRoles, roleCommandAllowedRoles, roleCommandBypassRoles, ...data } }) => {
+            const values = {
+                ...data,
+                roleCommandBlockedRoles: roleCommandBlockedRoles.join("/"),
+                roleCommandAllowedRoles: roleCommandAllowedRoles.join("/"),
+                roleCommandBypassRoles: roleCommandBypassRoles.join("/"),
+            };
+
+            await db
+                .insert(tables.guildUtilitySettings)
+                .values({ guild, ...values })
+                .onDuplicateKeyUpdate({ set: values });
         }),
 } as const;

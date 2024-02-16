@@ -455,6 +455,14 @@ export type GuildReportsSettings = {
     viewRoles: string[];
 };
 
+export type GuildUtilitySettings = {
+    guild: string;
+    roleCommandBlockByDefault: boolean;
+    roleCommandBlockedRoles: string[];
+    roleCommandAllowedRoles: string[];
+    roleCommandBypassRoles: string[];
+};
+
 export type PremiumStripeSession = {
     subscriptions: {
         created: number;

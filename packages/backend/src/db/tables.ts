@@ -521,6 +521,14 @@ export const guildReportsSettings = mysqlTable("guild_reports_settings", {
     viewRoles: text("view_roles").notNull(),
 });
 
+export const guildUtilitySettings = mysqlTable("guild_utility_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    roleCommandBlockByDefault: boolean("role_command_block_by_default").notNull(),
+    roleCommandBlockedRoles: text("role_command_blocked_roles").notNull(),
+    roleCommandAllowedRoles: text("role_command_allowed_roles").notNull(),
+    roleCommandBypassRoles: text("role_command_bypass_roles").notNull(),
+});
+
 export const news = mysqlTable(
     "news",
     {
