@@ -29,5 +29,5 @@ export default async function getUser(token?: string, guild?: string): Promise<U
     const id = await getId(token);
     if (id === null) return null;
 
-    return await trpc.userGet.query({ id, guild });
+    return await trpc.userGet.query({ id, guild }).catch(() => null);
 }

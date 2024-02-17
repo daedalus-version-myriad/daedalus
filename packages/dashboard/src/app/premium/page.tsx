@@ -12,7 +12,7 @@ export default function Premium() {
     return (
         <Container>
             <div className="center-col gap-4">
-                <div className={`mt-8 grid grid-cols-[repeat(${isDesktop ? 3 : 2},minmax(min(200px,100%),1fr))] gap-4`}>
+                <div className={`mt-8 ${isDesktop ? "center-row" : "center-col"} gap-4`}>
                     {isDesktop ? (
                         <Panel>
                             <h1 className="text-2xl">Free Plan</h1>
