@@ -1,5 +1,6 @@
 import { trpc } from "@daedalus/api";
 import { confirm, defer, obtainLimit, template, type Commands } from "@daedalus/bot-utils";
+import { secrets } from "@daedalus/config";
 import { PremiumTier, premiumBenefits } from "@daedalus/data";
 import { parseMessageURL } from "@daedalus/global-utils";
 import { stopButton } from "@daedalus/interactions";
@@ -23,7 +24,7 @@ export default (x: Commands) =>
                     const limit = (await obtainLimit(_.guild!.id, "purgeAtOnceLimit")) as number;
 
                     if (count > limit)
-                        throw `You can only scan ${limit} messages at once. Upgrade to [premium](${Bun.env.DOMAIN}/premium) to unlock up to ${
+                        throw `You can only scan ${limit} messages at once. Upgrade to [premium](${secrets.DOMAIN}/premium) to unlock up to ${
                             premiumBenefits[PremiumTier.PREMIUM].purgeAtOnceLimit
                         }.`;
 
@@ -86,7 +87,7 @@ export default (x: Commands) =>
                             throw `You can only scan ${limit} messages at once.${
                                 limit === premiumBenefits[PremiumTier.PREMIUM].purgeAtOnceLimit
                                     ? ""
-                                    : ` Upgrade to [premium](${Bun.env.DOMAIN}/premium) to unlock up to ${
+                                    : ` Upgrade to [premium](${secrets.DOMAIN}/premium) to unlock up to ${
                                           premiumBenefits[PremiumTier.PREMIUM].purgeAtOnceLimit
                                       }.`
                             }`;

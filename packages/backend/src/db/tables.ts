@@ -959,3 +959,8 @@ export const pollVotes = mysqlTable(
         pk_message_user: primaryKey({ name: "pk_message_user", columns: [t.message, t.user] }),
     }),
 );
+
+export const currencies = mysqlTable("currencies", {
+    key: varchar("key", { length: 32 }).notNull().primaryKey(),
+    value: float("value").notNull(),
+});

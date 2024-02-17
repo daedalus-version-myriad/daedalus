@@ -17,6 +17,7 @@
     "@types/node": "^20.11.5",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
+    "@types/wcag-contrast": "^3.0.3",
     "autoprefixer": "^10.4.17",
     "drizzle-kit": "^0.20.13",
     "eslint": "^8.56.0",
@@ -53,6 +54,7 @@
     "sharp": "^0.33.2",
     "stripe": "^14.14.0",
     "usehooks-ts": "^2.9.5",
+    "wcag-contrast": "^3.0.0",
     "zlib-sync": "^0.1.9",
     "zod": "^3.22.4",
     "zx": "^7.2.3"

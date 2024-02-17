@@ -50,9 +50,11 @@ import timeout from "./commands/timeout.ts";
 import top from "./commands/top";
 import unban from "./commands/unban.ts";
 import unmute from "./commands/unmute.ts";
+import utility from "./commands/utility.ts";
 import warn from "./commands/warn.ts";
 import xpMee6Import from "./commands/xp-mee6-import";
 import xpReset from "./commands/xp-reset";
+import { setManager } from "./lib/clients.ts";
 
 process.on("uncaughtException", console.error);
 
@@ -138,6 +140,7 @@ const argentium = new Argentium()
             .use(xpMee6Import),
     )
     .use(reminders)
+    .use(utility)
     .onCommandError((e, _) => {
         if (_.isRepliable() && typeof e === "string") {
             reply(_, template.error(e));
@@ -154,7 +157,7 @@ const argentium = new Argentium()
 
 const Intents = IntentsBitField.Flags;
 
-new ClientManager({
+const clients = new ClientManager({
     factory: () => {
         const client = new Client({ intents: Intents.Guilds, allowedMentions: { parse: [] } });
         argentium.preApply(client);
@@ -162,3 +165,5 @@ new ClientManager({
     },
     postprocess: (client) => argentium.postApply(client),
 });
+
+setManager(clients);

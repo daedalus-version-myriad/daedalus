@@ -1368,6 +1368,35 @@ export default {
     setPollQuestion: proc.input(z.object({ message: snowflake, question: z.string().max(1024) })).mutation(async ({ input: { message, question } }) => {
         await db.update(tables.polls).set({ question }).where(eq(tables.polls.message, message));
     }),
+    getCurrencies: proc.query(async () => {
+        return Object.fromEntries((await db.select().from(tables.currencies)).map((x) => [x.key, x.value]));
+    }),
+    setCurrencies: proc.input(z.record(z.number())).mutation(async ({ input: currencies }) => {
+        await db.transaction(async (tx) => {
+            await tx.delete(tables.currencies);
+            await tx.insert(tables.currencies).values(Object.entries(currencies).map(([k, v]) => ({ key: k, value: v })));
+        });
+    }),
+    getRoleCommandConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        const [entry] = await db
+            .select({
+                blockByDefault: tables.guildUtilitySettings.roleCommandBlockByDefault,
+                blockedRoles: tables.guildUtilitySettings.roleCommandBlockedRoles,
+                allowedRoles: tables.guildUtilitySettings.roleCommandAllowedRoles,
+                bypassRoles: tables.guildUtilitySettings.roleCommandBypassRoles,
+            })
+            .from(tables.guildUtilitySettings)
+            .where(eq(tables.guildUtilitySettings.guild, guild));
+
+        if (!entry) return { blockByDefault: false, blockedRoles: [], allowedRoles: [], bypassRoles: [] };
+
+        return {
+            ...entry,
+            blockedRoles: decodeArray(entry.blockedRoles),
+            allowedRoles: decodeArray(entry.allowedRoles),
+            bypassRoles: decodeArray(entry.bypassRoles),
+        };
+    }),
 } as const;
 
 const defaultModmailMessage = {
