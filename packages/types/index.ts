@@ -477,3 +477,13 @@ export type AccountSettings = {
     notifyPremiumOwnedServers: boolean;
     notifyPremiumManagedServers: boolean;
 };
+
+export type Poll = {
+    type: "yes-no" | "binary" | "multi";
+    question: string;
+    allowNeutral: boolean;
+    allowMulti: boolean;
+    leftOption: string;
+    rightOption: string;
+    options: string[];
+};

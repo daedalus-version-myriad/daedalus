@@ -1321,6 +1321,53 @@ export default {
             blockedUsers: decodeArray(entry.blockedUsers),
         }));
     }),
+    getPoll: proc.input(snowflake).query(async ({ input: message }) => {
+        const entry = (await db.select().from(tables.polls).where(eq(tables.polls.message, message))).at(0);
+        if (!entry) return null;
+
+        return {
+            ...entry,
+            options: entry.options as string[],
+            votes: (await db.select({ vote: tables.pollVotes.vote }).from(tables.pollVotes).where(eq(tables.pollVotes.message, message))).map(
+                ({ vote }) => vote,
+            ),
+        };
+    }),
+    getPollWithoutVotes: proc.input(snowflake).query(async ({ input: message }) => {
+        const entry = (await db.select().from(tables.polls).where(eq(tables.polls.message, message))).at(0);
+        if (!entry) return null;
+
+        return { ...entry, options: entry.options as string[] };
+    }),
+    getPollQuestion: proc.input(snowflake).query(async ({ input: message }) => {
+        return (await db.select({ question: tables.polls.question }).from(tables.polls).where(eq(tables.polls.message, message))).at(0)?.question;
+    }),
+    addPoll: proc
+        .input(
+            z.object({
+                message: snowflake,
+                type: z.enum(["yes-no", "binary", "multi"]),
+                question: z.string().max(1024),
+                allowNeutral: z.boolean(),
+                allowMulti: z.boolean(),
+                leftOption: z.string().max(80),
+                rightOption: z.string().max(80),
+                options: z.string().max(100).array(),
+            }),
+        )
+        .mutation(async ({ input: data }) => {
+            await db.insert(tables.polls).values(data);
+        }),
+    pollAbstain: proc.input(z.object({ message: snowflake, user: snowflake })).mutation(async ({ input: { message, user } }) => {
+        const { rowsAffected } = await db.delete(tables.pollVotes).where(and(eq(tables.pollVotes.message, message), eq(tables.pollVotes.user, user)));
+        return rowsAffected === 0;
+    }),
+    pollVote: proc.input(z.object({ message: snowflake, user: snowflake, vote: z.string() })).mutation(async ({ input: { message, user, vote } }) => {
+        await db.insert(tables.pollVotes).values({ message, user, vote }).onDuplicateKeyUpdate({ set: { vote } });
+    }),
+    setPollQuestion: proc.input(z.object({ message: snowflake, question: z.string().max(1024) })).mutation(async ({ input: { message, question } }) => {
+        await db.update(tables.polls).set({ question }).where(eq(tables.polls.message, message));
+    }),
 } as const;
 
 const defaultModmailMessage = {

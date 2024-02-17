@@ -33,6 +33,7 @@ import modmailSnippetView from "./commands/modmail-snippet-view";
 import mute from "./commands/mute.ts";
 import notesEdit from "./commands/notes-edit.ts";
 import notesView from "./commands/notes-view.ts";
+import poll from "./commands/poll.ts";
 import purge from "./commands/purge.ts";
 import rank from "./commands/rank";
 import reminders from "./commands/reminders.ts";
@@ -116,6 +117,7 @@ const argentium = new Argentium()
             .use(mute)
             .use(notesEdit)
             .use(notesView)
+            .use(poll)
             .use(purge)
             .use(rank)
             .use(reportUser)

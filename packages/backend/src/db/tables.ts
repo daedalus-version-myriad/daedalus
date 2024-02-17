@@ -936,3 +936,26 @@ export const highlights = mysqlTable(
         pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
     }),
 );
+
+export const polls = mysqlTable("polls", {
+    message: varchar("message", { length: 20 }).notNull().primaryKey(),
+    type: mysqlEnum("type", ["yes-no", "binary", "multi"]).notNull(),
+    question: varchar("question", { length: 1024 }).notNull(),
+    allowNeutral: boolean("allow_neutral").notNull(),
+    allowMulti: boolean("allow_multi").notNull(),
+    leftOption: varchar("left_option", { length: 80 }).notNull(),
+    rightOption: varchar("right_option", { length: 80 }).notNull(),
+    options: json("options").notNull(),
+});
+
+export const pollVotes = mysqlTable(
+    "poll_votes",
+    {
+        message: varchar("message", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        vote: text("vote").notNull(),
+    },
+    (t) => ({
+        pk_message_user: primaryKey({ name: "pk_message_user", columns: [t.message, t.user] }),
+    }),
+);
