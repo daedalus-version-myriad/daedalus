@@ -1397,6 +1397,29 @@ export default {
             bypassRoles: decodeArray(entry.bypassRoles),
         };
     }),
+    getStickyMessage: proc.input(snowflake).query(async ({ input: channel }) => {
+        return (await db.select().from(tables.stickyMessages).where(eq(tables.stickyMessages.channel, channel))).at(0);
+    }),
+    deleteStickyMessage: proc.input(snowflake).mutation(async ({ input: channel }) => {
+        await db.delete(tables.stickyMessages).where(eq(tables.stickyMessages.channel, channel));
+    }),
+    bumpStickyMessage: proc.input(z.object({ channel: snowflake, message: snowflake })).mutation(async ({ input: { channel, message } }) => {
+        await db.update(tables.stickyMessages).set({ message }).where(eq(tables.stickyMessages.channel, channel));
+    }),
+    listStickyMessages: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await db.select().from(tables.stickyMessages).where(eq(tables.stickyMessages.guild, guild));
+    }),
+    deleteManyStickyMessages: proc.input(snowflake.array()).mutation(async ({ input: channels }) => {
+        await db.delete(tables.stickyMessages).where(inArray(tables.stickyMessages.channel, channels));
+    }),
+    setStickyMessage: proc
+        .input(z.object({ guild: snowflake, channel: snowflake, content: z.string().max(4000), seconds: z.number().int().min(4) }))
+        .mutation(async ({ input: { guild, channel, ...data } }) => {
+            await db
+                .insert(tables.stickyMessages)
+                .values({ guild, channel, ...data })
+                .onDuplicateKeyUpdate({ set: data });
+        }),
 } as const;
 
 const defaultModmailMessage = {

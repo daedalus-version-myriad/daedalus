@@ -43,6 +43,8 @@ import roleDelete from "./commands/role-delete";
 import roleSet from "./commands/role-set";
 import scoreboard from "./commands/scoreboard";
 import slowmode from "./commands/slowmode.ts";
+import stick from "./commands/stick.ts";
+import sticklist from "./commands/sticklist.ts";
 import suggest from "./commands/suggest";
 import suggestion from "./commands/suggestion";
 import ticketClose from "./commands/ticket-close";
@@ -50,6 +52,7 @@ import timeout from "./commands/timeout.ts";
 import top from "./commands/top";
 import unban from "./commands/unban.ts";
 import unmute from "./commands/unmute.ts";
+import unstick from "./commands/unstick.ts";
 import utility from "./commands/utility.ts";
 import warn from "./commands/warn.ts";
 import xpMee6Import from "./commands/xp-mee6-import";
@@ -128,6 +131,8 @@ const argentium = new Argentium()
             .use(roleSet)
             .use(scoreboard)
             .use(slowmode)
+            .use(stick)
+            .use(sticklist)
             .use(suggest)
             .use(suggestion)
             .use(ticketClose)
@@ -135,6 +140,7 @@ const argentium = new Argentium()
             .use(top)
             .use(unban)
             .use(unmute)
+            .use(unstick)
             .use(warn)
             .use(xpReset)
             .use(xpMee6Import),

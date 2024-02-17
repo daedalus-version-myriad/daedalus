@@ -17,6 +17,7 @@ module.exports = {
             "reddit-feeds",
             "starboard",
             "stats-channels",
+            "sticky-messages",
             "sticky-roles",
             "supporter-announcements",
             "task-runner",

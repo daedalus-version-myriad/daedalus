@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/sticky-messages",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

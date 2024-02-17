@@ -964,3 +964,17 @@ export const currencies = mysqlTable("currencies", {
     key: varchar("key", { length: 32 }).notNull().primaryKey(),
     value: float("value").notNull(),
 });
+
+export const stickyMessages = mysqlTable(
+    "sticky_messages",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        channel: varchar("channel", { length: 20 }).notNull().primaryKey(),
+        message: varchar("message", { length: 20 }),
+        content: varchar("content", { length: 4000 }).notNull(),
+        seconds: int("seconds").notNull(),
+    },
+    (t) => ({
+        idx_guild: index("idx_guild").on(t.guild),
+    }),
+);
