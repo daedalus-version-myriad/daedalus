@@ -35,6 +35,7 @@ import notesEdit from "./commands/notes-edit.ts";
 import notesView from "./commands/notes-view.ts";
 import poll from "./commands/poll.ts";
 import purge from "./commands/purge.ts";
+import random from "./commands/random.ts";
 import rank from "./commands/rank";
 import reminders from "./commands/reminders.ts";
 import report from "./commands/report";
@@ -145,6 +146,7 @@ const argentium = new Argentium()
             .use(xpReset)
             .use(xpMee6Import),
     )
+    .use(random)
     .use(reminders)
     .use(utility)
     .onCommandError((e, _) => {
