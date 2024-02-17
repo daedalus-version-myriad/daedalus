@@ -37,6 +37,15 @@ import { getLimit } from "./premium";
 
 const haltedActions = new Set<string>();
 
+async function getHighlightPhrases(guild: string, user: string) {
+    const [entry] = await db
+        .select({ phrases: tables.highlights.phrases })
+        .from(tables.highlights)
+        .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)));
+
+    return entry ? (entry.phrases as string[]) : [];
+}
+
 export default {
     getColor: proc.input(snowflake).query(async ({ input: guild }) => {
         const [entry] = await db.select({ color: tables.guildSettings.embedColor }).from(tables.guildSettings).where(eq(tables.guildSettings.guild, guild));
@@ -1179,6 +1188,138 @@ export default {
 
             return entries;
         });
+    }),
+    getHighlightData: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        const entry = (
+            await db
+                .select()
+                .from(tables.highlights)
+                .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)))
+        ).at(0) ?? {
+            guild,
+            user,
+            phrases: [],
+            replies: false,
+            cooldown: 300000,
+            delay: 300000,
+            blockedChannels: "",
+            blockedUsers: "",
+        };
+
+        return {
+            ...entry,
+            phrases: entry.phrases as string[],
+            blockedChannels: decodeArray(entry.blockedChannels),
+            blockedUsers: decodeArray(entry.blockedUsers),
+        };
+    }),
+    clearHighlights: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
+        await db
+            .update(tables.highlights)
+            .set({ phrases: [], replies: false })
+            .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)));
+    }),
+    getHighlightPhrases: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        return await getHighlightPhrases(guild, user);
+    }),
+    addHighlight: proc.input(z.object({ guild: snowflake, user: snowflake, phrase: z.string() })).mutation(async ({ input: { guild, user, phrase } }) => {
+        const phrases = [...(await getHighlightPhrases(guild, user)), phrase];
+
+        await db
+            .insert(tables.highlights)
+            .values({ guild, user, phrases: [phrase], replies: false, cooldown: 300000, delay: 300000, blockedChannels: "", blockedUsers: "" })
+            .onDuplicateKeyUpdate({ set: { phrases } });
+    }),
+    removeHighlight: proc.input(z.object({ guild: snowflake, user: snowflake, phrase: z.string() })).mutation(async ({ input: { guild, user, phrase } }) => {
+        const phrases = (await getHighlightPhrases(guild, user)).filter((x) => x !== phrase);
+
+        await db
+            .update(tables.highlights)
+            .set({ phrases })
+            .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)));
+    }),
+    setHighlightReplies: proc
+        .input(z.object({ guild: snowflake, user: snowflake, replies: z.boolean() }))
+        .mutation(async ({ input: { guild, user, replies } }) => {
+            await db
+                .insert(tables.highlights)
+                .values({ guild, user, phrases: [], replies, cooldown: 300000, delay: 300000, blockedChannels: "", blockedUsers: "" })
+                .onDuplicateKeyUpdate({ set: { replies } });
+        }),
+    highlightBlock: proc
+        .input(z.object({ guild: snowflake, user: snowflake, target: snowflake, key: z.enum(["blockedChannels", "blockedUsers"]) }))
+        .mutation(async ({ input: { guild, user, target, key } }) => {
+            const [entry] = await db
+                .select({ list: tables.highlights[key] })
+                .from(tables.highlights)
+                .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)));
+
+            if (entry)
+                if (!entry.list.match(`\\b${target}\\b`))
+                    await db
+                        .update(tables.highlights)
+                        .set({ [key]: entry.list === "" ? target : `${entry.list}/${target}` })
+                        .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)));
+                else return true;
+            else
+                await db.insert(tables.highlights).values({
+                    guild,
+                    user,
+                    phrases: [],
+                    replies: false,
+                    cooldown: 300000,
+                    delay: 300000,
+                    blockedChannels: "",
+                    blockedUsers: "",
+                    [key]: target,
+                });
+
+            return false;
+        }),
+    highlightUnblock: proc
+        .input(z.object({ guild: snowflake, user: snowflake, target: snowflake, key: z.enum(["blockedChannels", "blockedUsers"]) }))
+        .mutation(async ({ input: { guild, user, target, key } }) => {
+            const [entry] = await db
+                .select({ list: tables.highlights[key] })
+                .from(tables.highlights)
+                .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)));
+
+            if (entry)
+                if (entry.list.match(`\\b${target}\\b`))
+                    await db
+                        .update(tables.highlights)
+                        .set({
+                            [key]: decodeArray(entry.list)
+                                .filter((x) => x !== target)
+                                .join("/"),
+                        })
+                        .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)));
+                else return true;
+            else return true;
+
+            return false;
+        }),
+    clearHighlightBlockList: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
+        await db
+            .update(tables.highlights)
+            .set({ blockedChannels: "", blockedUsers: "" })
+            .where(and(eq(tables.highlights.guild, guild), eq(tables.highlights.user, user)));
+    }),
+    setHighlightTiming: proc
+        .input(z.object({ guild: snowflake, user: snowflake, time: z.number().int().min(0).max(3600000), key: z.enum(["delay", "cooldown"]) }))
+        .mutation(async ({ input: { guild, user, time, key } }) => {
+            await db
+                .insert(tables.highlights)
+                .values({ guild, user, phrases: [], replies: false, cooldown: 300000, delay: 300000, blockedChannels: "", blockedUsers: "", [key]: time })
+                .onDuplicateKeyUpdate({ set: { [key]: time } });
+        }),
+    getGuildHighlights: proc.input(snowflake).query(async ({ input: guild }) => {
+        return (await db.select().from(tables.highlights).where(eq(tables.highlights.guild, guild))).map((entry) => ({
+            ...entry,
+            phrases: entry.phrases as string[],
+            blockedChannels: decodeArray(entry.blockedChannels),
+            blockedUsers: decodeArray(entry.blockedUsers),
+        }));
     }),
 } as const;
 

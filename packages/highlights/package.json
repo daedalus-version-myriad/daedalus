@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/highlights",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

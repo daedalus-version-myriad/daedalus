@@ -919,3 +919,20 @@ export const reminderIds = mysqlTable("reminder_ids", {
     user: varchar("user", { length: 20 }).notNull().primaryKey(),
     id: int("id").notNull(),
 });
+
+export const highlights = mysqlTable(
+    "highlights",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        phrases: json("phrases").notNull(),
+        replies: boolean("replies").notNull(),
+        cooldown: int("cooldown").notNull(),
+        delay: int("delay").notNull(),
+        blockedChannels: text("blocked_channels").notNull(),
+        blockedUsers: text("blocked_users").notNull(),
+    },
+    (t) => ({
+        pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
+    }),
+);

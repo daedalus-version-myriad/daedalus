@@ -8,6 +8,7 @@ module.exports = {
             "commander",
             "count",
             "custom-roles",
+            "highlights",
             "interactions",
             "logging",
             "modmail",

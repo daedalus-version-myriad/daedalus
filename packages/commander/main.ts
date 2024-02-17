@@ -9,6 +9,14 @@ import deleteHistory from "./commands/delete-history.ts";
 import flag from "./commands/flag";
 import flagMessage from "./commands/flag-message";
 import giveawayReroll from "./commands/giveaway-reroll";
+import highlightAdd from "./commands/highlight-add.ts";
+import highlightBlocking from "./commands/highlight-blocking.ts";
+import highlightClear from "./commands/highlight-clear.ts";
+import highlightCooldown from "./commands/highlight-cooldown.ts";
+import highlightDelay from "./commands/highlight-delay.ts";
+import highlightList from "./commands/highlight-list.ts";
+import highlightRemove from "./commands/highlight-remove.ts";
+import highlightReplies from "./commands/highlight-replies.ts";
 import history from "./commands/history.ts";
 import kick from "./commands/kick.ts";
 import massban from "./commands/massban.ts";
@@ -84,6 +92,14 @@ const argentium = new Argentium()
             .use(flagMessage)
             .use(flag)
             .use(giveawayReroll)
+            .use(highlightAdd)
+            .use(highlightBlocking)
+            .use(highlightClear)
+            .use(highlightCooldown)
+            .use(highlightDelay)
+            .use(highlightList)
+            .use(highlightRemove)
+            .use(highlightReplies)
             .use(history)
             .use(kick)
             .use(massban)
