@@ -134,11 +134,11 @@ export const guildXpSettings = mysqlTable("guild_xp_settings", {
     blockedRoles: text("blocked_roles").notNull(),
     bonusChannels: text("bonus_channels").notNull(),
     bonusRoles: text("bonus_roles").notNull(),
-    rankCardBackground: varchar("rank_card_background", { length: 1024 }).notNull(),
+    rankCardBackground: text("rank_card_background").notNull(),
     announceLevelUp: boolean("announce_level_up").notNull(),
     announceInChannel: boolean("announce_in_channel").notNull(),
     announceChannel: varchar("announce_channel", { length: 20 }),
-    announcementBackground: varchar("announcement_background", { length: 1024 }).notNull(),
+    announcementBackground: text("announcement_background").notNull(),
     rewards: text("rewards").notNull(),
 });
 
@@ -236,7 +236,7 @@ export const guildAutomodItems = mysqlTable(
         notifyAuthor: boolean("notify_author").notNull(),
         reportChannel: varchar("report_channel", { length: 20 }),
         additionalAction: mysqlEnum("additional_action", ["nothing", "warn", "mute", "timeout", "kick", "ban"]).notNull(),
-        actionDuration: int("action_duration").notNull(),
+        actionDuration: bigint("action_duration", { mode: "number" }).notNull(),
         disregardDefaultIgnoredChannels: boolean("disregard_default_ignored_channels").notNull(),
         disregardDefaultIgnoredRoles: boolean("disregard_default_ignored_roles").notNull(),
         onlyWatchEnabledChannels: boolean("only_watch_enabled_channels").notNull(),
@@ -695,7 +695,7 @@ export const userHistory = mysqlTable(
         time: timestamp("time")
             .default(sql`CURRENT_TIMESTAMP`)
             .notNull(),
-        duration: int("duration"),
+        duration: bigint("duration", { mode: "number" }),
         origin: varchar("origin", { length: 128 }),
         reason: varchar("reason", { length: 512 }),
     },
@@ -757,7 +757,7 @@ export const modmailMessages = mysqlTable("modmail_messages", {
     author: varchar("author", { length: 20 }).notNull(),
     anon: boolean("anon").notNull(),
     targetName: varchar("target_name", { length: 100 }).notNull(),
-    content: varchar("content", { length: 4000 }).notNull(),
+    content: varchar("content", { length: 4096 }).notNull(),
     edits: json("edits").notNull(),
     attachments: json("attachments").notNull(),
     deleted: boolean("deleted").notNull(),

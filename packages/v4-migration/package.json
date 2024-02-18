@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/v4-migration",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

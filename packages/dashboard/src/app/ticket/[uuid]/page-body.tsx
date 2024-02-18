@@ -35,9 +35,10 @@ function Message({ ticket, message }: { ticket: Thread["ticket"]; message: Threa
     return (
         <Panel>
             <h4 className="text-lg">
-                {message.type ? types[message.type] : "Unknown Message Type by"} {message.username}{" "}
+                {message.type ? types[message.type] : "Unknown Message Type by"} {message.type === "open" ? ticket.username : message.username}{" "}
                 <span className="text-muted-foreground">
-                    ({message.author}) &mdash; {new Date(message.time).toLocaleString()} {message.deleted ? <>&mdash; deleted</> : null}
+                    ({message.type === "open" ? ticket.user : message.author}) &mdash; {new Date(message.time).toLocaleString()}{" "}
+                    {message.deleted ? <>&mdash; deleted</> : null}
                 </span>
             </h4>
             {message.type === "message" ? (

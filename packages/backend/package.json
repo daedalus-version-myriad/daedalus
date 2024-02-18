@@ -1,7 +1,7 @@
 {
     "name": "@daedalus/backend",
     "scripts": {
-        "start": "bun index.ts",
+        "start": "bun main.ts",
         "generate": "drizzle-kit generate:mysql",
         "migrate": "bun src/db/migrate.ts"
     },

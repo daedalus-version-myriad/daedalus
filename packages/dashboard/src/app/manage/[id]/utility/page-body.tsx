@@ -31,6 +31,7 @@ export function Body({ data: initial, disabled }: { data: GuildUtilitySettings; 
                 </p>
                 <div className="center-row gap-4">
                     <Switch checked={roleCommandBlockByDefault} onCheckedChange={setRoleCommandBlockByDefault}></Switch>
+                    <b>Block Roles By Default</b>
                 </div>
                 <h2 className="text-lg">{roleCommandBlockByDefault ? "Allowed" : "Blocked"} Roles</h2>
                 <MultiRoleSelector

@@ -1,0 +1,1 @@
+ALTER TABLE `limit_overrides` ADD `vanity_client` boolean;

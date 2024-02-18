@@ -153,12 +153,14 @@ export function Body({ data: initial, disabled }: { data: GuildXpSettings; disab
                     value={rankCardBackground}
                     onChange={({ currentTarget: { value } }) => setRankCardBackground(value)}
                     placeholder="(URL &mdash; 1000 &times; 400)"
+                    maxLength={8192}
                 ></Input>
                 <h2 className="text-lg">Level-Up Announcement Background</h2>
                 <Input
                     value={announcementBackground}
                     onChange={({ currentTarget: { value } }) => setAnnouncementBackground(value)}
                     placeholder="(URL &mdash; 1000 &times; 400)"
+                    maxLength={8192}
                 ></Input>
             </Panel>
             <Panel>

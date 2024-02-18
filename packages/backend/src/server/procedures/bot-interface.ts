@@ -458,6 +458,7 @@ export default {
                         duration: z.number().nullable().optional(),
                         origin: z.string().max(128).optional(),
                         reason: z.string().max(512).nullable().optional(),
+                        time: z.number().int().optional(),
                     })
                     .array(),
             }),
@@ -478,9 +479,15 @@ export default {
                 return entry?.id ?? 1;
             });
 
-            await db
-                .insert(tables.userHistory)
-                .values(input.entries.map((entry, index) => ({ guild: input.guild, id: id + index, ...entry, duration: entry.duration ?? 0 })));
+            await db.insert(tables.userHistory).values(
+                input.entries.map((entry, index) => ({
+                    guild: input.guild,
+                    id: id + index,
+                    ...entry,
+                    duration: entry.duration ?? 0,
+                    time: entry.time === undefined ? undefined : new Date(entry.time),
+                })),
+            );
 
             return id;
         }),

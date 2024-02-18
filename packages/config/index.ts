@@ -31,6 +31,10 @@ export type Secrets = {
         XP_RANK_CARD_IMAGE: string;
     };
     CURRENCY_API_KEY: string;
+    MIGRATION: {
+        MONGO_URI: string;
+        MONGO_NAME: string;
+    };
 };
 
 export * from "./secrets";

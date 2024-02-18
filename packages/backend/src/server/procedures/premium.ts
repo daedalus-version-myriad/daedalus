@@ -25,7 +25,7 @@ export async function getLimit(guild: string, key: keyof PremiumBenefits) {
     return premiumBenefits[premiumEntry?.premium ? PremiumTier.PREMIUM : PremiumTier.FREE][key];
 }
 
-async function recalculateGuild(guild: string) {
+async function recalculateGuild(guild: string, dm: boolean = true) {
     const activeKeys = await db
         .select({ key: tables.premiumKeys.key })
         .from(tables.premiumKeyBindings)
@@ -50,6 +50,8 @@ async function recalculateGuild(guild: string) {
     if (!client) return;
 
     (async () => {
+        if (!dm) return;
+
         try {
             const obj = await client.guilds.fetch(guild).catch(() => null);
             if (!obj) return;
@@ -87,10 +89,13 @@ async function recalculateGuild(guild: string) {
                               member.permissions.has(dashboardPermission === "admin" ? PermissionFlagsBits.Administrator : PermissionFlagsBits.ManageGuild),
                       );
 
-            const toNotify = await db
-                .select({ id: tables.accountSettings.user })
-                .from(tables.accountSettings)
-                .where(and(eq(tables.accountSettings.notifyPremiumManagedServers, true), inArray(tables.accountSettings.user, [...members.keys()])));
+            const toNotify =
+                members.size > 0
+                    ? await db
+                          .select({ id: tables.accountSettings.user })
+                          .from(tables.accountSettings)
+                          .where(and(eq(tables.accountSettings.notifyPremiumManagedServers, true), inArray(tables.accountSettings.user, [...members.keys()])))
+                    : [];
 
             for (const { id } of toNotify) users.push(members.get(id)!.user);
 
@@ -348,4 +353,7 @@ export default {
 
             return await getLimit(guild, key);
         }),
+    recalculateGuild: proc.input(snowflake).mutation(async ({ input: guild }) => {
+        await recalculateGuild(guild, false);
+    }),
 } as const;
