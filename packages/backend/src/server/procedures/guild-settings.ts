@@ -5,6 +5,7 @@ import { serializeGiveawayBase } from "@daedalus/global-utils";
 import { logCategories, logEvents } from "@daedalus/logging";
 import type {
     CustomMessageText,
+    GuildAutokickSettings,
     GuildAutomodSettings,
     GuildAutoresponderSettings,
     GuildAutorolesSettings,
@@ -186,6 +187,18 @@ export async function getAutomodSettings(
     const rules = (await (limit ? query.limit(limit) : query)).map(({ guild, ...data }) => data as GuildAutomodSettings["rules"][number]);
 
     return { ...entry, rules } as any;
+}
+
+export async function getAutokickSettings(guild: string): Promise<GuildAutokickSettings> {
+    const entry = (await db.select().from(tables.guildAutokickSettings).where(eq(tables.guildAutokickSettings.guild, guild))).at(0) ?? {
+        guild,
+        minimumAge: 0,
+        sendMessage: false,
+        message: { content: "", embeds: [] },
+        parsed: { content: [], embeds: [] },
+    };
+
+    return { ...entry, message: entry.message as MessageData, parsed: entry.parsed as ParsedMessage };
 }
 
 export async function getStickyRolesSettings(guild: string): Promise<GuildStickyRolesSettings> {
@@ -1343,6 +1356,37 @@ export default {
                 await tx.delete(tables.guildAutomodItems).where(eq(tables.guildAutomodItems.guild, guild));
                 if (rules.length > 0) await tx.insert(tables.guildAutomodItems).values(rules.map((rule) => ({ guild, ...rule })));
             });
+        }),
+    getAutokickSettings: proc
+        .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
+        .query(async ({ input: { id, guild } }): Promise<GuildAutokickSettings> => {
+            if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
+            return await getAutokickSettings(guild);
+        }),
+    setAutokickSettings: proc
+        .input(
+            z.object({
+                id: snowflake.nullable(),
+                guild: snowflake,
+                minimumAge: z.number().int().min(0),
+                sendMessage: z.boolean(),
+                message: baseMessageData,
+            }),
+        )
+        .mutation(async ({ input: { id, guild, minimumAge, sendMessage, message } }) => {
+            if (!(await hasPermission(id, guild))) return NO_PERMISSION;
+
+            try {
+                const parsed = parseMessage(message, false);
+                const data = { minimumAge, sendMessage, message, parsed };
+
+                await db
+                    .insert(tables.guildAutokickSettings)
+                    .values({ guild, ...data })
+                    .onDuplicateKeyUpdate({ set: data });
+            } catch (error) {
+                throw `An error occurred parsing your message: ${error}`;
+            }
         }),
     getStickyRolesSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;

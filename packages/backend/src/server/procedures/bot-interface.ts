@@ -18,6 +18,7 @@ import { decodeArray } from "../transformations";
 import { proc } from "../trpc";
 import { mapFiles } from "./file-service";
 import {
+    getAutokickSettings,
     getAutomodSettings,
     getAutoresponderSettings,
     getAutorolesSettings,
@@ -384,6 +385,9 @@ export default {
     }),
     getAutomodConfig: proc.input(snowflake).query(async ({ input: guild }) => {
         return await getAutomodSettings(guild, (await getLimit(guild, "automodCountLimit")) as number);
+    }),
+    getAutokickConfig: proc.input(snowflake).query(async ({ input: guild }) => {
+        return await getAutokickSettings(guild);
     }),
     removeModerationRemovalTask: proc
         .input(z.object({ guild: snowflake, user: snowflake, action: z.enum(["unmute", "unban"]) }))

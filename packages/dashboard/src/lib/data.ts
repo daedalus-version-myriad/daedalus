@@ -42,6 +42,7 @@ export const manageGuildCategories: [string, IconType, string][] = [
     ["/reaction-roles", moduleIcons["reaction-roles"], "Reaction Roles"],
     ["/starboard", moduleIcons.starboard, "Starboard"],
     ["/automod", moduleIcons.automod, "Automod"],
+    ["/autokick", moduleIcons.autokick, "Autokick"],
     ["/sticky-roles", moduleIcons["sticky-roles"], "Sticky Roles"],
     ["/autoroles", moduleIcons.autoroles, "Autoroles"],
     ["/custom-roles", moduleIcons["custom-roles"], "Custom Roles"],

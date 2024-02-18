@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/autokick",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}

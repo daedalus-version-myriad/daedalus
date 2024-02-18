@@ -1,0 +1,1 @@
+ALTER TABLE `guild_autokick_settings` MODIFY COLUMN `minimum_age` bigint NOT NULL;

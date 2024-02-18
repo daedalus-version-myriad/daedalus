@@ -258,6 +258,14 @@ export type GuildAutomodSettings = {
     }[];
 };
 
+export type GuildAutokickSettings = {
+    guild: string;
+    minimumAge: number;
+    sendMessage: boolean;
+    message: MessageData;
+    parsed: ParsedMessage;
+};
+
 export type GuildStickyRolesSettings = {
     guild: string;
     roles: string[];

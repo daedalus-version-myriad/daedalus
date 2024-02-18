@@ -276,6 +276,12 @@ export const modules: ModuleData = {
         description: "Automatically scan and filter messages and edits for blocked content.",
         selfPermissions: ["ManageMessages", "ManageRoles", "ModerateMembers", "KickMembers", "BanMembers"],
     },
+    autokick: {
+        name: "Autokick",
+        description: "Filter users by account age.",
+        selfPermissions: ["ModerateMembers", "KickMembers", "BanMembers"],
+        default: false,
+    },
     "sticky-roles": {
         name: "Sticky Roles",
         description: "Automatically re-add roles to members when they rejoin the server.",

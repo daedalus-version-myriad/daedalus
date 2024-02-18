@@ -238,6 +238,14 @@ export const guildAutomodItems = mysqlTable(
     }),
 );
 
+export const guildAutokickSettings = mysqlTable("guild_autokick_settings", {
+    guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
+    minimumAge: bigint("minimum_age", { mode: "number" }).notNull(),
+    sendMessage: boolean("send_message").notNull(),
+    message: json("message").notNull(),
+    parsed: json("parsed").notNull(),
+});
+
 export const guildStickyRolesSettings = mysqlTable("guild_sticky_roles_settings", {
     guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
     roles: text("roles").notNull(),

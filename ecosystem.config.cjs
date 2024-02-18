@@ -1,6 +1,7 @@
 module.exports = {
     apps: [
         ...[
+            "autokick",
             "automod",
             "autoresponder",
             "autoroles",
