@@ -92,6 +92,11 @@ export async function hasPermission(user: string | null, guildId: string) {
             : true;
 }
 
+async function audit(guild: string, user: string | null, module: string, data: any) {
+    if (!user) return;
+    await db.insert(tables.auditLogs).values({ guild, user, module, data });
+}
+
 export function transformXpSettings(data: {
     guild: string;
     blockedChannels: string;
@@ -598,6 +603,8 @@ export default {
                 .insert(tables.guildSettings)
                 .values({ guild, ...mapped })
                 .onDuplicateKeyUpdate({ set: mapped });
+
+            await audit(guild, id, "guild-settings", mapped);
         }),
     getPremiumSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
@@ -704,6 +711,8 @@ export default {
                     })),
                 );
             });
+
+            await audit(guild, id, "modules-permissions", { modules, commands });
         }),
     getLoggingSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
@@ -767,6 +776,8 @@ export default {
                 await tx.delete(tables.guildLoggingSettingsItems).where(eq(tables.guildLoggingSettingsItems.guild, guild));
                 await tx.insert(tables.guildLoggingSettingsItems).values(Object.entries(items).map(([key, entry]) => ({ guild, key, ...entry })));
             });
+
+            await audit(guild, id, "logging", { items, ignoredChannels, enableWebLogging, ...raw });
         }),
     getWelcomeSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
@@ -810,6 +821,8 @@ export default {
                 .insert(tables.guildWelcomeSettings)
                 .values({ guild, ...data })
                 .onDuplicateKeyUpdate({ set: data });
+
+            await audit(guild, id, "welcome", data);
         }),
     getSupporterAnnouncementsSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
@@ -852,6 +865,8 @@ export default {
                 await tx.delete(tables.guildSupporterAnnouncementsItems).where(eq(tables.guildSupporterAnnouncementsItems.guild, guild));
                 if (withParsed.length > 0) await tx.insert(tables.guildSupporterAnnouncementsItems).values(withParsed);
             });
+
+            await audit(guild, id, "supporter-announcements", { announcements });
         }),
     getXpSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }): Promise<GuildXpSettings> => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -918,6 +933,8 @@ export default {
                 .insert(tables.guildXpSettings)
                 .values({ guild, ...toInsert })
                 .onDuplicateKeyUpdate({ set: toInsert });
+
+            await audit(guild, id, "xp", toInsert);
         }),
     getReactionRolesSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
@@ -1164,6 +1181,8 @@ export default {
                 if (prompts.length > 0) await tx.insert(tables.guildReactionRolesItems).values(prompts.map((prompt) => ({ guild, ...prompt })));
             });
 
+            await audit(guild, id, "reaction-roles", { prompts });
+
             return [null, { guild, prompts }];
         }),
     getStarboardSettings: proc
@@ -1203,6 +1222,8 @@ export default {
                 await tx.delete(tables.guildStarboardOverrides).where(eq(tables.guildStarboardOverrides.guild, guild));
                 if (overrides.length > 0) await tx.insert(tables.guildStarboardOverrides).values(overrides.map((x) => ({ guild, ...x, channel: x.channel! })));
             });
+
+            await audit(guild, id, "starboard", { overrides, ...data });
         }),
     getAutomodSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
@@ -1356,6 +1377,8 @@ export default {
                 await tx.delete(tables.guildAutomodItems).where(eq(tables.guildAutomodItems.guild, guild));
                 if (rules.length > 0) await tx.insert(tables.guildAutomodItems).values(rules.map((rule) => ({ guild, ...rule })));
             });
+
+            await audit(guild, id, "automod", { rules });
         }),
     getAutokickSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
@@ -1384,6 +1407,8 @@ export default {
                     .insert(tables.guildAutokickSettings)
                     .values({ guild, ...data })
                     .onDuplicateKeyUpdate({ set: data });
+
+                await audit(guild, id, "autokick", data);
             } catch (error) {
                 throw `An error occurred parsing your message: ${error}`;
             }
@@ -1400,6 +1425,8 @@ export default {
             const roles = array.join("/");
 
             await db.insert(tables.guildStickyRolesSettings).values({ guild, roles }).onDuplicateKeyUpdate({ set: { roles } });
+
+            await audit(guild, id, "sticky-roles", { roles });
         }),
     getAutorolesSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -1413,6 +1440,8 @@ export default {
             const roles = array.join("/");
 
             await db.insert(tables.guildAutorolesSettings).values({ guild, roles }).onDuplicateKeyUpdate({ set: { roles } });
+
+            await audit(guild, id, "autoroles", { roles });
         }),
     getCustomRolesSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -1431,6 +1460,8 @@ export default {
                 .onDuplicateKeyUpdate({ set: data });
 
             await triggerCustomRoleSweep(guild).catch(() => null);
+
+            await audit(guild, id, "custom-roles", data);
         }),
     getStatsChannelsSettings: proc
         .input(z.object({ id: snowflake.nullable(), guild: snowflake }))
@@ -1470,6 +1501,8 @@ export default {
                 await tx.delete(tables.guildStatsChannelsItems).where(eq(tables.guildStatsChannelsItems.guild, guild));
                 if (channels.length > 0) await tx.insert(tables.guildStatsChannelsItems).values(data);
             });
+
+            await audit(guild, id, "stats-channels", data);
         }),
     getAutoresponderSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -1548,6 +1581,8 @@ export default {
                         })),
                     );
             });
+
+            await audit(guild, id, "autoresponder", { triggers, ...data });
         }),
     getModmailSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -1653,6 +1688,8 @@ export default {
                 if (snippets.length > 0)
                     await tx.insert(tables.guildModmailSnippets).values(snippets.map(({ parsed, ...snippet }) => ({ guild, ...snippet, parsed: parsed! })));
             });
+
+            await audit(guild, id, "modmail", { useMulti, targets, snippets });
 
             return [null, await getModmailSettings(guild)];
         }),
@@ -1858,6 +1895,8 @@ export default {
                     );
             });
 
+            await audit(guild, id, "tickets", { prompts });
+
             return [null, { guild, prompts }];
         }),
     getNukeguardSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
@@ -1928,6 +1967,8 @@ export default {
                     .insert(tables.guildNukeguardSettings)
                     .values({ guild, ...values })
                     .onDuplicateKeyUpdate({ set: values });
+
+                await audit(guild, id, "nukeguard", values);
             },
         ),
     getSuggestionsSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
@@ -1943,6 +1984,8 @@ export default {
                 .insert(tables.guildSuggestionsSettings)
                 .values({ guild, ...data })
                 .onDuplicateKeyUpdate({ set: data });
+
+            await audit(guild, id, "suggestions", data);
         }),
     getCoOpSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -1979,6 +2022,8 @@ export default {
                 .insert(tables.guildCoOpSettings)
                 .values({ guild, ...data })
                 .onDuplicateKeyUpdate({ set: data });
+
+            await audit(guild, id, "co-op", data);
         }),
     getRedditFeedsSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -1995,6 +2040,8 @@ export default {
                 await tx.delete(tables.guildRedditFeedsItems).where(eq(tables.guildRedditFeedsItems.guild, guild));
                 if (feeds.length > 0) await tx.insert(tables.guildRedditFeedsItems).values(feeds.map((feed) => ({ guild, ...feed })));
             });
+
+            await audit(guild, id, "reddit-feeds", { feeds });
         }),
     getCountSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -2043,6 +2090,8 @@ export default {
                             .values({ guild, id, ...channel, channel: ch! })
                             .onDuplicateKeyUpdate({ set: { ...channel, channel: ch! } });
             });
+
+            await audit(guild, id, "count", { channels });
 
             return [null, await getCountSettings(guild)];
         }),
@@ -2198,6 +2247,8 @@ export default {
                 if (serialized.length > 0) await tx.insert(tables.guildGiveawayItems).values(serialized);
             });
 
+            await audit(guild, id, "giveaways", { template, giveaways });
+
             return [null, { guild, template, giveaways }];
         }),
     getReportsSettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
@@ -2224,6 +2275,8 @@ export default {
                 .insert(tables.guildReportsSettings)
                 .values({ guild, ...data })
                 .onDuplicateKeyUpdate({ set: { ...data } });
+
+            await audit(guild, id, "reports", data);
         }),
     getUtilitySettings: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake })).query(async ({ input: { id, guild } }) => {
         if (!(await hasPermission(id, guild))) throw NO_PERMISSION;
@@ -2252,5 +2305,7 @@ export default {
                 .insert(tables.guildUtilitySettings)
                 .values({ guild, ...values })
                 .onDuplicateKeyUpdate({ set: values });
+
+            await audit(guild, id, "utility", values);
         }),
 } as const;

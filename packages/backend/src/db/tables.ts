@@ -15,6 +15,19 @@ export const tokens = mysqlTable("tokens", {
     token: varchar("token", { length: 128 }).notNull(),
 });
 
+export const auditLogs = mysqlTable(
+    "audit_logs",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+        module: varchar("module", { length: 32 }).notNull(),
+        data: json("data").notNull(),
+    },
+    (t) => ({
+        idx_guild_module: index("idx_guild_module").on(t.guild, t.module),
+    }),
+);
+
 export const guildSettings = mysqlTable("guild_settings", {
     guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
     dashboardPermission: mysqlEnum("dashboard_permission", ["owner", "admin", "manager"]).notNull().default("manager"),
