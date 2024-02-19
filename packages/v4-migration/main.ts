@@ -558,7 +558,7 @@ await migrate("limit-overrides", async () => {
     const entries = await src.premiumOverrides.find().toArray();
     if (entries.length > 0) await db.insert(tables.limitOverrides).values(entries);
 
-    for (const entry of entries)
+    for (const entry of [...entries, /* override for katsumi */ { vanityClient: true, guild: "1170881493099368479" }])
         if (entry.vanityClient) {
             const key = `ck_${new Array(20)
                 .fill(0)
