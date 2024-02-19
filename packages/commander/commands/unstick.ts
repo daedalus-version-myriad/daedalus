@@ -13,6 +13,7 @@ export default (x: Commands) =>
                 if (!entry) throw "This channel does not have a sticky message.";
 
                 await _.deferReply({ ephemeral: true });
+                await trpc.setStickyMessage.mutate({ guild: _.guild!.id, channel: _.channel!.id, content: "", seconds: 4 });
                 await updateStick(_.channel as GuildTextBasedChannel);
                 return template.success("Removed this channel's sticky message.");
             }),

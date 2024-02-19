@@ -37,7 +37,7 @@ export async function updateStick(channel: GuildTextBasedChannel) {
             // ignore this
         }
 
-    if (!entry.content) await trpc.deleteStickyMessage.mutate(channel.id);
+    if (!entry.content) return await trpc.deleteStickyMessage.mutate(channel.id);
 
     const message = await channel.send(entry.content);
     await trpc.bumpStickyMessage.mutate({ channel: channel.id, message: message.id });

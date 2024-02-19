@@ -29,9 +29,9 @@ new ClientManager({
             for (const item of entries) {
                 if (!item.channel) continue;
 
-                if (item.useBoosts)
+                if (item.useBoosts) {
                     if (before.premiumSince || !after.premiumSince) continue;
-                    else if (!item.role || before.roles.cache.has(item.role) || !after.roles.cache.has(item.role)) continue;
+                } else if (!item.role || before.roles.cache.has(item.role) || !after.roles.cache.has(item.role)) continue;
 
                 await fetchAndSendCustom(
                     after.guild,

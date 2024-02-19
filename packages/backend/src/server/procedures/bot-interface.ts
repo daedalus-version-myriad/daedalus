@@ -973,6 +973,8 @@ export default {
     }),
     updateCount: proc.input(z.object({ id: z.number().int().min(1), user: snowflake })).mutation(async ({ input: { id, user } }) => {
         await db.transaction(async (tx) => {
+            await tx.update(tables.countLast).set({ last: user }).where(eq(tables.countLast.id, id));
+
             await tx
                 .insert(tables.countScoreboard)
                 .values({ id, user, score: 1 })
@@ -1411,7 +1413,8 @@ export default {
         return (await db.select().from(tables.stickyMessages).where(eq(tables.stickyMessages.channel, channel))).at(0);
     }),
     deleteStickyMessage: proc.input(snowflake).mutation(async ({ input: channel }) => {
-        await db.delete(tables.stickyMessages).where(eq(tables.stickyMessages.channel, channel));
+        const { rowsAffected } = await db.delete(tables.stickyMessages).where(eq(tables.stickyMessages.channel, channel));
+        return rowsAffected > 0;
     }),
     bumpStickyMessage: proc.input(z.object({ channel: snowflake, message: snowflake })).mutation(async ({ input: { channel, message } }) => {
         await db.update(tables.stickyMessages).set({ message }).where(eq(tables.stickyMessages.channel, channel));

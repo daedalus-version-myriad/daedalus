@@ -4,13 +4,21 @@ import { ClientManager } from "@daedalus/clients";
 import { secrets } from "@daedalus/config";
 import { initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import { Client, Events, IntentsBitField } from "discord.js";
+import { Client, Events, GuildMember, IntentsBitField, type PartialGuildMember } from "discord.js";
 import { z } from "zod";
 import { isSupporter } from "./lib";
 
 process.on("uncaughtException", console.error);
 
 const Intents = IntentsBitField.Flags;
+
+async function deleteRoleFor(member: GuildMember | PartialGuildMember) {
+    const role = await trpc.getCustomRole.query({ guild: member.guild.id, user: member.id });
+    if (!role) return;
+
+    await member.guild.roles.delete(role).catch(() => null);
+    await trpc.deleteCustomRole.mutate({ guild: member.guild.id, user: member.id });
+}
 
 const manager = new ClientManager({
     factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, allowedMentions: { parse: [] } }),
@@ -20,13 +28,13 @@ const manager = new ClientManager({
                 if (await isWrongClient(member.client, member.guild)) return;
                 if (await isModuleDisabled(member.guild, "custom-roles")) return;
 
-                await trpc.deleteCustomRole.mutate({ guild: member.guild.id, user: member.id });
+                await deleteRoleFor(member);
             })
             .on(Events.GuildMemberUpdate, async (_, member) => {
                 if (await isWrongClient(member.client, member.guild)) return;
                 if (await isModuleDisabled(member.guild, "custom-roles")) return;
 
-                if (!(await isSupporter(member))) await trpc.deleteCustomRole.mutate({ guild: member.guild.id, user: member.id });
+                if (!(await isSupporter(member))) await deleteRoleFor(member);
             }),
 });
 

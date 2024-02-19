@@ -9,7 +9,7 @@ import { proc } from "../trpc";
 
 type ClientConfig = { guild: string; token: string | null };
 
-export const clientUpdateEmitter = new EventEmitter();
+export const clientUpdateEmitter = new EventEmitter().setMaxListeners(32);
 
 export default {
     vanityClientList: proc.input(snowflake.array().optional()).query(async ({ input: guildIds }) => {

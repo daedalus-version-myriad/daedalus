@@ -50,7 +50,7 @@ export default (x: Commands) =>
                 if (anchor && anchor.comparePositionTo((await _.guild!.members.fetchMe()).roles.highest) > 0) anchor = null;
 
                 try {
-                    role = await _.guild!.roles.create({ position: anchor?.position, name: name || "new role", color });
+                    role = await _.guild!.roles.create({ position: anchor?.position, name: name || "new role", color, permissions: [] });
                 } catch (error) {
                     await logError(_.guild!.id, "Assigning Custom Role", `${error}`);
                     throw "An unexpected error occurred trying to create your custom role. Make sure the bot has permission to manage roles.";

@@ -1,4 +1,5 @@
 import { trpc } from "@daedalus/api";
+import { willAutokick } from "@daedalus/autokick";
 import { fetchAndSendCustom, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, IntentsBitField } from "discord.js";
@@ -20,6 +21,7 @@ new ClientManager({
 
             if (await isWrongClient(client, member.guild)) return;
             if (await isModuleDisabled(member.guild, "welcome")) return;
+            if (await willAutokick(member)) return;
 
             const settings = await trpc.getWelcomeConfig.query(member.guild.id);
             if (!settings) return;

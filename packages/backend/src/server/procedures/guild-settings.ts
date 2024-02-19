@@ -83,11 +83,11 @@ export async function hasPermission(user: string | null, guildId: string) {
         )?.threshold ?? "manager";
 
     return threshold === "owner"
-        ? user !== guild.ownerId
+        ? user === guild.ownerId
         : threshold === "admin"
-          ? !member.permissions.has(PermissionFlagsBits.Administrator)
+          ? member.permissions.has(PermissionFlagsBits.Administrator)
           : threshold === "manager"
-            ? !member.permissions.has(PermissionFlagsBits.ManageGuild)
+            ? member.permissions.has(PermissionFlagsBits.ManageGuild)
             : true;
 }
 
@@ -1856,8 +1856,8 @@ export default {
                         const channel = await obj.channels.fetch(prompt.channel!).catch(() => null);
                         if (!channel?.isTextBased()) throw "Could not fetch channel.";
 
-                        message = await channel.send(data(true)).catch(() => {
-                            throw `Could not send message in #${channel.name}.`;
+                        message = await channel.send(data(true)).catch((error) => {
+                            throw `Could not send message in #${channel.name}: ${error}`;
                         });
                     }
 

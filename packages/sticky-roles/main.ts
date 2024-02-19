@@ -1,4 +1,5 @@
 import { trpc } from "@daedalus/api";
+import { willAutokick } from "@daedalus/autokick";
 import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, GuildMember, IntentsBitField, Partials, type PartialGuildMember } from "discord.js";
@@ -16,6 +17,7 @@ new ClientManager({
             .on(Events.GuildMemberAdd, async (member) => {
                 if (await isWrongClient(member.client, member.guild)) return;
                 if (await isModuleDisabled(member.guild, "sticky-roles")) return;
+                if (await willAutokick(member)) return;
 
                 let roles = await trpc.getStickyRoles.query({ guild: member.guild.id, user: member.id });
                 if (roles.length === 0) return;

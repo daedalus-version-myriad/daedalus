@@ -3,6 +3,7 @@ import { isModuleDisabled, isWrongClient, sendCustomMessage } from "@daedalus/bo
 import { ClientManager } from "@daedalus/clients";
 import { formatDuration } from "@daedalus/global-utils";
 import { Client, Events, IntentsBitField } from "discord.js";
+import { willAutokick } from "./lib";
 
 const Intents = IntentsBitField.Flags;
 
@@ -14,8 +15,7 @@ new ClientManager({
             if (await isModuleDisabled(member.guild, "autokick")) return;
 
             const config = await trpc.getAutokickConfig.query(member.guild.id);
-            console.log(config, Date.now() - member.user.createdTimestamp);
-            if (Date.now() - member.user.createdTimestamp >= config.minimumAge) return;
+            if (!(await willAutokick(member, config))) return;
 
             if (config.sendMessage)
                 try {
