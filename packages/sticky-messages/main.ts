@@ -1,7 +1,7 @@
 import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { Client, Events, IntentsBitField, type GuildTextBasedChannel } from "discord.js";
-import { updateStick } from "./lib.ts";
+import { updateStick } from "./lib";
 
 const Intents = IntentsBitField.Flags;
 

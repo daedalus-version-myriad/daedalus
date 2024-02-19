@@ -4,9 +4,9 @@ import { truncate } from "@daedalus/bot-utils";
 import { secrets } from "@daedalus/config";
 import { serializeGiveawayBase } from "@daedalus/global-utils";
 import { count, eq, sql } from "drizzle-orm";
-import { splitMessage } from "./lib.ts";
+import { splitMessage } from "./lib";
 import { connect, db as src } from "./mongo";
-import { PremiumTier } from "./premium.ts";
+import { PremiumTier } from "./premium";
 
 const keys = Bun.env.KEYS ? Bun.env.KEYS.split(":").filter((x) => x) : null;
 

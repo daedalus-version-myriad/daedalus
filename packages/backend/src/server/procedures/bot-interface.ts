@@ -1,5 +1,4 @@
-import { commandMap, modules, type PremiumBenefits } from "@daedalus/data";
-import { logEvents } from "@daedalus/logging";
+import { commandMap, logEvents, modules, type PremiumBenefits } from "@daedalus/data";
 import type {
     CustomMessageText,
     GuildAutorolesSettings,
@@ -11,8 +10,8 @@ import type {
 } from "@daedalus/types";
 import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import { z } from "zod";
+import { tables } from "../../db";
 import { db } from "../../db/db";
-import { tables } from "../../db/index";
 import { snowflake } from "../schemas";
 import { decodeArray } from "../transformations";
 import { proc } from "../trpc";

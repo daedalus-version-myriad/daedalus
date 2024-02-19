@@ -1,6 +1,6 @@
 import { SpoilerLevel, code, copyFiles, copyMedia, embed, expand, getMuteRoleId, timeinfo, to } from "@daedalus/bot-utils";
 import stickerCache from "@daedalus/bot-utils/sticker-cache";
-import { permissions } from "@daedalus/data";
+import { archiveDurations, permissions } from "@daedalus/data";
 import { englishList } from "@daedalus/formatting";
 import { DurationStyle, formatDuration } from "@daedalus/global-utils";
 import {
@@ -30,7 +30,7 @@ import {
     type PartialUser,
 } from "discord.js";
 import { invokeLog } from "./lib";
-import { archiveDurations, audit, auditEntry, channelTypes, eventStatuses, fieldsFor } from "./utils";
+import { audit, auditEntry, channelTypes, eventStatuses, fieldsFor } from "./utils";
 
 export async function channelUpdate(before: GuildChannel, after: GuildChannel): Promise<MessageCreateOptions[]> {
     for (const section of [0, 1]) {

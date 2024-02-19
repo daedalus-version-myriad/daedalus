@@ -2,7 +2,7 @@ import { trpc } from "@daedalus/api";
 import { checkPermissions, defer, getColor, isCommandDisabled, isModuleDisabled, pagify, timeinfo, type Commands } from "@daedalus/bot-utils";
 import { formatDuration } from "@daedalus/global-utils";
 import { ButtonStyle, ComponentType } from "discord.js";
-import { historyActionStrings, historyVerbs } from "../lib/moderation.ts";
+import { historyActionStrings, historyVerbs } from "../lib/moderation";
 
 export default (x: Commands) =>
     x.slash((x) =>

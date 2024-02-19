@@ -2,7 +2,7 @@ import { trpc } from "@daedalus/api";
 import { checkPermissions, getColor, isModuleDisabled, isWrongClient, timestamp, truncate } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { ChannelType, Client, Events, GuildMember, IntentsBitField, MessageType, PermissionFlagsBits, type GuildTextBasedChannel } from "discord.js";
-import { stem } from "./lib.ts";
+import { stem } from "./lib";
 
 const Intents = IntentsBitField.Flags;
 

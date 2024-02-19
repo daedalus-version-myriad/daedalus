@@ -1,5 +1,5 @@
-import { clients } from "../../bot/index.ts";
-import { proc } from "../trpc.ts";
+import { clients } from "../../bot";
+import { proc } from "../trpc";
 
 export default {
     checkStatus: proc.query(() => true),

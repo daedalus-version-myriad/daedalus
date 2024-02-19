@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { textTypes } from "@/lib/data";
-import { categoryToEventMap, logCategories, logEvents } from "@daedalus/logging";
+import { categoryToEventMap, logCategories, logEvents } from "@daedalus/data";
 import { GuildLoggingSettings } from "@daedalus/types";
 import _ from "lodash";
 import { Dispatch, SetStateAction, useState } from "react";

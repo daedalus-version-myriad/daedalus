@@ -57,14 +57,6 @@ export const channelTypes: Record<ChannelType, string> = {
     [ChannelType.GuildMedia]: "media channel",
 };
 
-export const archiveDurations = {
-    0: "Default (3 days)",
-    60: "1 hour",
-    1440: "1 day",
-    4320: "3 days",
-    10080: "7 days",
-};
-
 export const eventStatuses: Record<GuildScheduledEventStatus | "unknown", string> = {
     unknown: "Unknown",
     [GuildScheduledEventStatus.Active]: "Active",

@@ -4,7 +4,7 @@ import { secrets } from "@daedalus/config";
 import { PremiumTier, premiumBenefits } from "@daedalus/data";
 import { parseMessageURL } from "@daedalus/global-utils";
 import { stopButton } from "@daedalus/interactions";
-import type { SlashUtil } from "argentium/src/slash-util.ts";
+import type { SlashUtil } from "argentium/src/slash-util";
 import { Colors, ComponentType, type ChatInputCommandInteraction, type Message } from "discord.js";
 
 export default (x: Commands) =>

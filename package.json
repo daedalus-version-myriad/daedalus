@@ -56,7 +56,6 @@
     "stripe": "^14.14.0",
     "usehooks-ts": "^2.9.5",
     "wcag-contrast": "^3.0.0",
-    "zlib-sync": "^0.1.9",
     "zod": "^3.22.4",
     "zx": "^7.2.3"
   }

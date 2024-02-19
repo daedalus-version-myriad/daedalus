@@ -1,14 +1,13 @@
 import { trpc } from "@daedalus/api";
 import { checkPermissions, defer, expand, fetchCaller, getColor, template, timeinfo, timestamp } from "@daedalus/bot-utils";
 import { secrets } from "@daedalus/config";
-import { permissions } from "@daedalus/data";
+import { archiveDurations, permissions } from "@daedalus/data";
 import { formatDuration } from "@daedalus/global-utils";
-import { archiveDurations } from "@daedalus/logging";
 import Argentium from "argentium";
 import { ButtonStyle, ChannelType, ComponentType, Role, SnowflakeUtil, escapeMarkdown, type APIEmbed, type EmbedData } from "discord.js";
 import { hex } from "wcag-contrast";
-import { getManager } from "../lib/clients.ts";
-import { channelBreakdown, convert, ensureCanManageRole, guildInfo } from "../lib/utility.ts";
+import { getManager } from "../lib/clients";
+import { channelBreakdown, convert, ensureCanManageRole, guildInfo } from "../lib/utility";
 
 export default (app: Argentium) =>
     app.allowInDms("avatar", "code", "convert", "help", "info", "qr", "snowflake", "Extract IDs").commands((x) =>

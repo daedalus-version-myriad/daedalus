@@ -59,3 +59,11 @@ export const logEvents: Record<string, { name: string; category: string }> = {
 
 export const categoryToEventMap: Record<string, string[]> = Object.fromEntries(Object.keys(logCategories).map((key) => [key, []]));
 for (const [event, { category }] of Object.entries(logEvents)) categoryToEventMap[category].push(event);
+
+export const archiveDurations = {
+    0: "Default (3 days)",
+    60: "1 hour",
+    1440: "1 day",
+    4320: "3 days",
+    10080: "7 days",
+};

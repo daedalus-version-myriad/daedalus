@@ -29,7 +29,7 @@ export class ClientManager {
         const self = this;
 
         wsTRPC.vanityClientHook.subscribe(undefined, {
-            onData(data) {
+            onData(data: any) {
                 self.getBotFromToken(data.guild, data.token);
             },
         });

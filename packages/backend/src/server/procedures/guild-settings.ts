@@ -1,8 +1,8 @@
 import { secrets } from "@daedalus/config";
 import { parseCustomMessageString, parseMessage } from "@daedalus/custom-messages";
-import { modules } from "@daedalus/data";
+import { triggerCustomRoleSweep } from "@daedalus/custom-roles";
+import { logCategories, logEvents, modules } from "@daedalus/data";
 import { serializeGiveawayBase } from "@daedalus/global-utils";
-import { logCategories, logEvents } from "@daedalus/logging";
 import type {
     CustomMessageText,
     GuildAutokickSettings,
@@ -38,7 +38,6 @@ import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMess
 import { and, eq, inArray, not, sql } from "drizzle-orm";
 import _ from "lodash";
 import { z } from "zod";
-import { triggerCustomRoleSweep } from "../../../../custom-roles/index";
 import { clients } from "../../bot";
 import { tables } from "../../db";
 import { db } from "../../db/db";
