@@ -8,10 +8,14 @@ import { splitMessage } from "./lib";
 import { connect, db as src } from "./mongo";
 import { PremiumTier } from "./premium";
 
-const keys = Bun.env.KEYS ? Bun.env.KEYS.split(":").filter((x) => x) : null;
+let keys = Bun.env.KEYS ? Bun.env.KEYS.split(":").filter((x) => x) : null;
 
 async function migrate(key: string, fn: () => Promise<unknown>) {
     if (!keys || keys.includes(key)) {
+        await fn();
+        console.log(`migrated: ${key}`);
+    } else if (keys.includes(`after=${key}`)) {
+        keys = null;
         await fn();
         console.log(`migrated: ${key}`);
     }
@@ -707,7 +711,7 @@ await migrate("ticket-threads", async () => {
     await db.delete(tables.ticketMessages);
     const entries = await src.tickets.find().toArray();
     while (entries.length > 0) {
-        const block = entries.splice(0, 500);
+        const block = entries.splice(0, 100);
         await db.insert(tables.tickets).values(block);
         await db.insert(tables.ticketMessages).values(
             block.flatMap((x) =>
