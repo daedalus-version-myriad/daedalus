@@ -624,7 +624,7 @@ await migrate("unmod-tasks", async () => {
             .insert(tables.moderationRemovalTasks)
             .values(
                 entries
-                    .filter((x) => !isNaN(x.time))
+                    .filter((x) => !isNaN(x.time) && x.time !== Infinity)
                     .flatMap((x) => (x.action === "unmute" || x.action === "unban" ? [{ guild: x.guild!, user: x.user, action: x.action, time: x.time }] : [])),
             );
 });
