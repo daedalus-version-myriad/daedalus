@@ -24,6 +24,7 @@ export class ClientManager {
                 throw error;
             });
             postprocess?.(client, guild);
+            console.log(`[CM] ${client.user.tag} is online.`);
             return client;
         };
 
