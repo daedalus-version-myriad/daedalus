@@ -1,49 +1,41 @@
 import { trpc } from "@daedalus/api";
 import { fetchAndSendCustom, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
-import { Client, Events, IntentsBitField } from "discord.js";
+import { Client, Events } from "discord.js";
 
-process.on("uncaughtException", console.error);
+export const supporterAnnouncementsHook = (client: Client) => {
+    (async () => {
+        const guilds = await client.guilds.fetch();
+        for (const { id } of guilds.values()) client.guilds.cache.get(id)?.members.fetch();
+    })();
 
-const Intents = IntentsBitField.Flags;
+    client.on(Events.GuildMemberUpdate, async (before, after) => {
+        if (after.user.bot) return;
 
-new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, allowedMentions: { parse: [] } }),
-    postprocess: (client) => {
-        (async () => {
-            const guilds = await client.guilds.fetch();
-            for (const { id } of guilds.values()) client.guilds.cache.get(id)?.members.fetch();
-        })();
+        if (await isWrongClient(client, after.guild)) return;
+        if (await isModuleDisabled(after.guild, "supporter-announcements")) return;
 
-        client.on(Events.GuildMemberUpdate, async (before, after) => {
-            if (after.user.bot) return;
+        if (Date.now() - (after.joinedTimestamp ?? 0) < 5000) return; // don't re-announce sticky roles being re-applied
 
-            if (await isWrongClient(client, after.guild)) return;
-            if (await isModuleDisabled(after.guild, "supporter-announcements")) return;
+        const entries = await trpc.getSupporterAnnouncementsConfig.query(after.guild.id);
+        if (entries.length === 0) return;
 
-            if (Date.now() - (after.joinedTimestamp ?? 0) < 5000) return; // don't re-announce sticky roles being re-applied
+        for (const item of entries) {
+            if (!item.channel) continue;
 
-            const entries = await trpc.getSupporterAnnouncementsConfig.query(after.guild.id);
-            if (entries.length === 0) return;
+            if (item.useBoosts) {
+                if (before.premiumSince || !after.premiumSince) continue;
+            } else if (!item.role || before.roles.cache.has(item.role) || !after.roles.cache.has(item.role)) continue;
 
-            for (const item of entries) {
-                if (!item.channel) continue;
-
-                if (item.useBoosts) {
-                    if (before.premiumSince || !after.premiumSince) continue;
-                } else if (!item.role || before.roles.cache.has(item.role) || !after.roles.cache.has(item.role)) continue;
-
-                await fetchAndSendCustom(
-                    after.guild,
-                    item.channel,
-                    "Supporter Announcements",
-                    "supporter announcement",
-                    item.parsed,
-                    `The supporter announcement for ${after} ${item.useBoosts ? "boosting the server" : `gaining <@&${item.role}>`} could not be sent.`,
-                    () => ({ guild: after.guild, member: after, role: item.role === null ? undefined : after.roles.cache.get(item.role) }),
-                    true,
-                );
-            }
-        });
-    },
-});
+            await fetchAndSendCustom(
+                after.guild,
+                item.channel,
+                "Supporter Announcements",
+                "supporter announcement",
+                item.parsed,
+                `The supporter announcement for ${after} ${item.useBoosts ? "boosting the server" : `gaining <@&${item.role}>`} could not be sent.`,
+                () => ({ guild: after.guild, member: after, role: item.role === null ? undefined : after.roles.cache.get(item.role) }),
+                true,
+            );
+        }
+    });
+};

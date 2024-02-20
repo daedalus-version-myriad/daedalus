@@ -1,3 +1,4 @@
+import { and, eq, not, or } from "drizzle-orm";
 import { tables } from "./src/db";
 import { db } from "./src/db/db";
 import "./src/server";
@@ -16,7 +17,11 @@ async function updateXpAmounts() {
 
     if (Math.floor(now.getTime() / 604800000) !== Math.floor(last.getTime() / 604800000)) set.textWeekly = set.voiceWeekly = set.textDaily = set.voiceDaily = 0;
 
-    if (Object.keys(set).length > 0) await db.update(tables.xp).set(set);
+    if (Object.keys(set).length > 0)
+        await db
+            .update(tables.xp)
+            .set(set)
+            .where(or(not(eq(tables.xp.textMonthly, 0)), not(eq(tables.xp.voiceMonthly, 0))));
 
     await db
         .insert(tables.globals)

@@ -44,7 +44,7 @@ export default async function (button: ButtonInteraction) {
                         ? "You have entered the giveaway but are not eligible and have no entries. Eligibility is calculated immediately before the draw, so if you become eligible later, you'll have a chance to win."
                         : `You have entered the giveaway with **${count} ${
                               count === 1 ? "entry" : "entries"
-                          }**. ELigibility is calculated immediately before the draw, so if you gain more entries, you do not need to re-enter the giveaway.`
+                          }**. Eligibility is calculated immediately before the draw, so if you gain more entries, you do not need to re-enter the giveaway.`
                 } Click below to withdraw.`,
                 color: Colors.Green,
             },

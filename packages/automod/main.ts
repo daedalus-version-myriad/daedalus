@@ -1,26 +1,12 @@
 import { trpc } from "@daedalus/api";
 import { expand, getMuteRole, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
 import { englishList } from "@daedalus/formatting";
 import { formatDuration } from "@daedalus/global-utils";
 import { logError } from "@daedalus/log-interface";
-import { Client, Events, IntentsBitField, Partials, type Message, type PartialMessage, type TextBasedChannel } from "discord.js";
+import { Client, Events, type Message, type PartialMessage, type TextBasedChannel } from "discord.js";
 import { match, skip, type Rule } from "./lib";
 
-process.on("uncaughtException", console.error);
-
-const Intents = IntentsBitField.Flags;
-
-new ClientManager({
-    factory: () =>
-        new Client({
-            intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent,
-            partials: [Partials.Channel, Partials.Message],
-            sweepers: { messages: { lifetime: 600, interval: 3600 } },
-            allowedMentions: { parse: [] },
-        }),
-    postprocess: (client) => client.on(Events.MessageCreate, check).on(Events.MessageUpdate, async (_, message) => await check(message)),
-});
+export const automodHook = (client: Client) => client.on(Events.MessageCreate, check).on(Events.MessageUpdate, async (_, message) => await check(message));
 
 async function check(message: Message | PartialMessage) {
     if (!message.guild) return;
@@ -52,7 +38,6 @@ async function check(message: Message | PartialMessage) {
         fetched ??= await message.fetch();
 
         const result = await match(rule, fetched, multiDeleteTargets);
-        console.log(result);
         if (!result) continue;
 
         const [notif, report] = result;

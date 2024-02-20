@@ -1,7 +1,7 @@
 import { checkPermissions, isWrongClient, reply, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
-import { ApplicationCommandOptionType, Client, IntentsBitField } from "discord.js";
+import { ApplicationCommandOptionType, Client } from "discord.js";
 import ban from "./commands/ban";
 import clearHistory from "./commands/clear-history";
 import coOp from "./commands/co-op";
@@ -59,8 +59,6 @@ import warn from "./commands/warn";
 import xpMee6Import from "./commands/xp-mee6-import";
 import xpReset from "./commands/xp-reset";
 import { setManager } from "./lib/clients";
-
-process.on("uncaughtException", console.error);
 
 const argentium = new Argentium()
     .commands((x) =>
@@ -163,15 +161,8 @@ const argentium = new Argentium()
         );
     });
 
-const Intents = IntentsBitField.Flags;
-
-const clients = new ClientManager({
-    factory: () => {
-        const client = new Client({ intents: Intents.Guilds, allowedMentions: { parse: [] } });
-        argentium.preApply(client);
-        return client;
-    },
-    postprocess: (client) => argentium.postApply(client),
-});
-
-setManager(clients);
+export const commanderHook = (client: Client, manager: ClientManager) => {
+    argentium.preApply(client);
+    argentium.postApply(client);
+    setManager(manager);
+};

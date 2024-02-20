@@ -1,53 +1,47 @@
 import { trpc } from "@daedalus/api";
 import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
-import { Client, Events, GuildChannel, IntentsBitField, MessageType, OAuth2Guild, type Channel } from "discord.js";
+import type { ClientManager } from "@daedalus/clients";
+import { Client, Events, GuildChannel, MessageType, OAuth2Guild, type Channel } from "discord.js";
 import { addXp } from "./utils";
 
-process.on("uncaughtException", console.error);
-
-const Intents = IntentsBitField.Flags;
+let manager: ClientManager;
 
 const lastMessage = new Map<string, number>();
 
-const manager = new ClientManager({
-    factory: () =>
-        new Client({
-            intents: Intents.Guilds | Intents.GuildMessages | Intents.GuildVoiceStates,
-            sweepers: { messages: { lifetime: 0, interval: 60 } },
-            allowedMentions: { parse: [] },
-        }),
-    postprocess: (client) => {
-        client.on(Events.MessageCreate, async (message) => {
-            if (!message.guild) return;
-            if (message.author.bot) return;
-            if (![MessageType.Default, MessageType.Reply].includes(message.type)) return;
+export const xpHook = (client: Client, x: ClientManager) => {
+    manager = x;
 
-            if (await isWrongClient(client, message.guild)) return;
-            if (await isModuleDisabled(message.guild, "xp")) return;
+    client.on(Events.MessageCreate, async (message) => {
+        if (!message.guild) return;
+        if (message.author.bot) return;
+        if (![MessageType.Default, MessageType.Reply].includes(message.type)) return;
 
-            if (message.channel.isDMBased()) return;
-            let channel: Channel | null = message.channel;
+        if (await isWrongClient(client, message.guild)) return;
+        if (await isModuleDisabled(message.guild, "xp")) return;
 
-            const settings = await trpc.getXpConfig.query(message.guild.id);
+        if (message.channel.isDMBased()) return;
+        let channel: Channel | null = message.channel;
 
-            do if (settings.blockedChannels.includes(channel.id)) return;
-            while ((channel = channel.parent));
+        const settings = await trpc.getXpConfig.query(message.guild.id);
 
-            if (message.member?.roles.cache.hasAny(...settings.blockedRoles)) return;
+        do if (settings.blockedChannels.includes(channel.id)) return;
+        while ((channel = channel.parent));
 
-            const now = Date.now();
-            if (lastMessage.has(message.author.id) && now - lastMessage.get(message.author.id)! < 60000) return;
-            lastMessage.set(message.author.id, now);
+        if (message.member?.roles.cache.hasAny(...settings.blockedRoles)) return;
 
-            await addXp(message.channel, message.member!, 1, 0, settings);
-        });
-    },
-});
+        const now = Date.now();
+        if (lastMessage.has(message.author.id) && now - lastMessage.get(message.author.id)! < 60000) return;
+        lastMessage.set(message.author.id, now);
+
+        await addXp(message.channel, message.member!, 1, 0, settings);
+    });
+};
 
 const tracking = new Map<string, Set<string>>();
 
 async function cycle() {
+    if (!manager) return;
+
     try {
         const clients = await manager.getBots();
         const guilds: OAuth2Guild[] = [];

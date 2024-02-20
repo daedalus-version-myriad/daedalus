@@ -6,17 +6,13 @@ import { englishList } from "@daedalus/formatting";
 import { draw } from "@daedalus/giveaways";
 import { logError } from "@daedalus/log-interface";
 import { closeModmailThread } from "@daedalus/modmail";
-import { Client, IntentsBitField } from "discord.js";
 
-process.on("uncaughtException", console.error);
-
-const Intents = IntentsBitField.Flags;
-
-const manager = new ClientManager({
-    factory: () => new Client({ intents: Intents.Guilds, allowedMentions: { parse: [] } }),
-});
+let manager: ClientManager;
+export const taskRunnerHook = (_: unknown, x: ClientManager) => (manager = x);
 
 async function runModerationRemovalTasks() {
+    if (!manager) return;
+
     const tasks = await trpc.getAndClearModerationRemovalTasks.query();
 
     for (const task of tasks) {
@@ -55,6 +51,8 @@ async function runModerationRemovalTasks() {
 }
 
 async function runModmailCloseTasks() {
+    if (!manager) return;
+
     const tasks = await trpc.getAndClearModmailCloseTasks.query();
 
     for (const task of tasks) {
@@ -72,6 +70,8 @@ async function runModmailCloseTasks() {
 }
 
 async function rollGiveaways() {
+    if (!manager) return;
+
     const giveaways = await trpc.getGiveawaysToClose.query();
 
     for (const giveaway of giveaways) {
@@ -136,6 +136,8 @@ function formatReminder(reminder: { id: number; origin: string; query: string | 
 }
 
 async function runReminders() {
+    if (!manager) return;
+
     const reminders = await trpc.getAndClearPastReminders.query();
 
     const guildReminders: Record<string, typeof reminders> = {};

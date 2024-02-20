@@ -1,24 +1,11 @@
 import { trpc } from "@daedalus/api";
 import { isModuleDisabled, isWrongClient, obtainLimit } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
-import { Client, Events, IntentsBitField, MessageReaction, Partials, User, type PartialMessageReaction, type PartialUser } from "discord.js";
+import { Client, Events, MessageReaction, User, type PartialMessageReaction, type PartialUser } from "discord.js";
 
-process.on("uncaughtException", console.error);
-
-const Intents = IntentsBitField.Flags;
-
-new ClientManager({
-    factory: () =>
-        new Client({
-            intents: Intents.Guilds | Intents.GuildMessageReactions,
-            partials: [Partials.Channel, Partials.Message, Partials.Reaction],
-            allowedMentions: { parse: [] },
-        }),
-    postprocess: (client) =>
-        client
-            .on(Events.MessageReactionAdd, async (reaction, user) => await handle(reaction, user, true))
-            .on(Events.MessageReactionRemove, async (reaction, user) => await handle(reaction, user, false)),
-});
+export const reactionRolesReactionsHook = (client: Client) =>
+    client
+        .on(Events.MessageReactionAdd, async (reaction, user) => await handle(reaction, user, true))
+        .on(Events.MessageReactionRemove, async (reaction, user) => await handle(reaction, user, false));
 
 async function handle(reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser, added: boolean) {
     if (!reaction.message.guild || user.bot) return;

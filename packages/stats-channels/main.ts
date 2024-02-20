@@ -3,15 +3,13 @@ import { isModuleDisabled, obtainLimit } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import { formatCustomMessageString } from "@daedalus/custom-messages";
 import { logError } from "@daedalus/log-interface";
-import { Client, IntentsBitField } from "discord.js";
 
-process.on("uncaughtException", console.error);
-
-const Intents = IntentsBitField.Flags;
-
-const manager = new ClientManager({ factory: () => new Client({ intents: Intents.Guilds | Intents.GuildMembers, allowedMentions: { parse: [] } }) });
+let manager: ClientManager;
+export const statsChannelsHook = (_: unknown, x: ClientManager) => (manager = x);
 
 async function run() {
+    if (!manager) return;
+
     for (const [guildId, channels] of await trpc.getAllStatsChannels.query()) {
         if (await isModuleDisabled(guildId, "stats-channels")) continue;
 

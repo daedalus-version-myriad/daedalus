@@ -1,14 +1,14 @@
 import { trpc } from "@daedalus/api";
 import { getColor, isModuleDisabled, obtainLimit, truncate } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
-import { Client } from "discord.js";
+import type { ClientManager } from "@daedalus/clients";
 import he from "he";
 
-process.on("uncaughtException", console.error);
-
-const manager = new ClientManager({ factory: () => new Client({ intents: 0, allowedMentions: { parse: [] } }) });
+let manager: ClientManager;
+export const redditFeedsHook = (_: unknown, x: ClientManager) => (manager = x);
 
 async function run() {
+    if (!manager) return;
+
     for (const [guildId, feeds] of await trpc.getAllRedditFeeds.query()) {
         if (await isModuleDisabled(guildId, "reddit-feeds")) continue;
 

@@ -1,30 +1,16 @@
 import { trpc } from "@daedalus/api";
 import { SpoilerLevel, copyMedia, getColor, isModuleDisabled, isWrongClient, mdash } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
 import type { GuildStarboardSettings } from "@daedalus/types";
-import { Client, Events, IntentsBitField, Message, Partials, type APIEmbed, type Channel, type GuildBasedChannel, type PartialMessage } from "discord.js";
+import { Client, Events, Message, type APIEmbed, type Channel, type GuildBasedChannel, type PartialMessage } from "discord.js";
 
-process.on("uncaughtException", console.error);
-
-const Intents = IntentsBitField.Flags;
-
-new ClientManager({
-    factory: () =>
-        new Client({
-            intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMessageReactions,
-            partials: [Partials.Channel, Partials.Message, Partials.Reaction],
-            sweepers: { messages: { lifetime: 86400, interval: 3600 } },
-            allowedMentions: { parse: [] },
-        }),
-    postprocess: (client) =>
-        client
-            .on(Events.MessageReactionAdd, async (reaction) => await checkStars(reaction.message))
-            .on(Events.MessageReactionRemove, async (reaction) => await checkStars(reaction.message))
-            .on(Events.MessageReactionRemoveEmoji, async (reaction) => await checkStars(reaction.message))
-            .on(Events.MessageReactionRemoveAll, checkStars)
-            .on(Events.MessageDelete, async (message) => await checkDelete([message]))
-            .on(Events.MessageBulkDelete, async (messages) => await checkDelete(messages.toJSON())),
-});
+export const starboardHook = (client: Client) =>
+    client
+        .on(Events.MessageReactionAdd, async (reaction) => await checkStars(reaction.message))
+        .on(Events.MessageReactionRemove, async (reaction) => await checkStars(reaction.message))
+        .on(Events.MessageReactionRemoveEmoji, async (reaction) => await checkStars(reaction.message))
+        .on(Events.MessageReactionRemoveAll, checkStars)
+        .on(Events.MessageDelete, async (message) => await checkDelete([message]))
+        .on(Events.MessageBulkDelete, async (messages) => await checkDelete(messages.toJSON()));
 
 const stars = new Set<string>();
 

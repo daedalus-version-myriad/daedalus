@@ -20,7 +20,12 @@ export function DatePicker({ date, setDate }: { date: number; setDate: (date: nu
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
-                <Calendar mode="single" selected={obj} onSelect={(input) => input && setDate(input.getTime() + (date % 86400000))} initialFocus />
+                <Calendar
+                    mode="single"
+                    selected={obj}
+                    onSelect={(input) => input && setDate(input.getTime() + (date % 86400000) - new Date().getTimezoneOffset() * 60000)}
+                    initialFocus
+                />
             </PopoverContent>
         </Popover>
     );

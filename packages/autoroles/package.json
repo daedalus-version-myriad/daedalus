@@ -1,6 +1,0 @@
-{
-    "name": "@daedalus/autoroles",
-    "scripts": {
-        "start": "bun main.ts"
-    }
-}

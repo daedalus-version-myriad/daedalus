@@ -414,7 +414,7 @@ export default (app: Argentium) =>
                     .fn(async ({ _, id }) => {
                         if (!_.guild && !id) throw "You must specify a server ID when using this command in DMs.";
 
-                        const guild = id ? await (await getManager().getBot(id))?.guilds.fetch(id).catch(() => null) : _.guild!;
+                        const guild = id ? await (await getManager()?.getBot(id))?.guilds.fetch(id).catch(() => null) : _.guild!;
                         if (!guild) throw `Could not fetch the server with ID \`${id}\`.`;
 
                         return await guildInfo(guild);
@@ -482,7 +482,7 @@ export default (app: Argentium) =>
                             },
                         ];
 
-                        const guild = await (await getManager().getBot(invite.guild.id))?.guilds.fetch(invite.guild.id).catch(() => null);
+                        const guild = await (await getManager()?.getBot(invite.guild.id))?.guilds.fetch(invite.guild.id).catch(() => null);
                         if (guild?.members.cache.has(_.user.id)) embeds.push((await guildInfo(guild)).embeds[0]);
 
                         return { embeds };

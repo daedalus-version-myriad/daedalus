@@ -1,200 +1,186 @@
 import { trpc } from "@daedalus/api";
 import { expand, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
 import { englishList } from "@daedalus/formatting";
 import { audit } from "@daedalus/logging";
 import type { GuildNukeguardSettings } from "@daedalus/types";
-import { AuditLogEvent, Client, Colors, Events, GuildChannel, IntentsBitField, Partials, type APIRole, type Guild, type User } from "discord.js";
+import { AuditLogEvent, Client, Colors, Events, GuildChannel, type APIRole, type Guild, type User } from "discord.js";
 
-const Intents = IntentsBitField.Flags;
+export const nukeguardHook = (client: Client) =>
+    client
+        .on(Events.GuildAuditLogEntryCreate, async (entry, guild) => {
+            if (!entry.executorId) return;
 
-new ClientManager({
-    factory: () =>
-        new Client({
-            intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildModeration | Intents.GuildEmojisAndStickers,
-            partials: [Partials.Channel, Partials.GuildMember],
-            allowedMentions: { parse: [] },
-        }),
-    postprocess: (client) =>
-        client
-            .on(Events.GuildAuditLogEntryCreate, async (entry, guild) => {
-                if (!entry.executorId) return;
+            const user = await client.users.fetch(entry.executorId).catch(() => {});
+            if (!user) return;
 
-                const user = await client.users.fetch(entry.executorId).catch(() => {});
-                if (!user) return;
+            if (user.id === guild.ownerId) return;
+            if (user.id === guild.client.user.id) return;
 
-                // if (user.id === guild.ownerId) return;
-                if (user.id === guild.client.user.id) return;
+            if (
+                ![
+                    AuditLogEvent.RoleDelete,
+                    AuditLogEvent.EmojiDelete,
+                    AuditLogEvent.StickerDelete,
+                    AuditLogEvent.WebhookCreate,
+                    AuditLogEvent.WebhookDelete,
+                    AuditLogEvent.MemberBanAdd,
+                    AuditLogEvent.MemberKick,
+                    AuditLogEvent.MemberRoleUpdate,
+                ].includes(entry.action)
+            )
+                return;
 
-                if (
-                    ![
-                        AuditLogEvent.RoleDelete,
-                        AuditLogEvent.EmojiDelete,
-                        AuditLogEvent.StickerDelete,
-                        AuditLogEvent.WebhookCreate,
-                        AuditLogEvent.WebhookDelete,
-                        AuditLogEvent.MemberBanAdd,
-                        AuditLogEvent.MemberKick,
-                        AuditLogEvent.MemberRoleUpdate,
-                    ].includes(entry.action)
-                )
-                    return;
+            if (await isWrongClient(client, guild)) return;
+            if (await isModuleDisabled(guild, "nukeguard")) return;
 
-                if (await isWrongClient(client, guild)) return;
-                if (await isModuleDisabled(guild, "nukeguard")) return;
+            const config = await trpc.getNukeguardConfig.query(guild.id);
 
-                const config = await trpc.getNukeguardConfig.query(guild.id);
+            try {
+                const member = await guild.members.fetch(user);
+                if (member.roles.cache.hasAny(...config.exemptedRoles)) return;
+            } catch {
+                return;
+            }
+
+            let type: string | undefined;
+            let description: string;
+            let alert: string;
+
+            // TODO: add soundboard deletion detection
+
+            if (entry.action === AuditLogEvent.RoleDelete) {
+                if (config.ignoredRoles.includes(entry.targetId!) || (!config.watchRolesByDefault && !config.watchedRoles.includes(entry.targetId!))) return;
+                type = "role";
+            } else if (entry.action === AuditLogEvent.EmojiDelete) {
+                type = "emoji";
+            } else if (entry.action === AuditLogEvent.StickerDelete) {
+                type = "sticker";
+            } else if (entry.action === AuditLogEvent.WebhookCreate) {
+                if (!config.preventWebhookCreation) return;
+
+                const webhooks = await guild.fetchWebhooks();
+                const webhook = webhooks.find((x) => x.id === entry.targetId);
+                if (!webhook) return;
+
+                await webhook.delete("Nukeguard Action");
+
+                let warned = true;
+
+                await user
+                    .send({
+                        embeds: [
+                            {
+                                title: "Nukeguard Warning",
+                                description:
+                                    "Your newly created webhook was deleted by Daedalus Nukeguard. If you need a new webhook, please talk to server administration or the server owner.",
+                                color: Colors.Red,
+                            },
+                        ],
+                    })
+                    .catch(() => (warned = false));
+
+                const channel = config.adminChannel === null ? null : await guild.channels.fetch(config.adminChannel!).catch(() => {});
+                if (!channel?.isTextBased()) return;
+
+                await channel
+                    .send({
+                        embeds: [
+                            {
+                                title: "Nukeguard Alert (Webhook Deleted)",
+                                description: `<@${entry.executorId}> tried creating a webhook, which was removed by nukeguard, ${warned ? "and they were warned" : "but they could not be warned"}.`,
+                                color: Colors.Gold,
+                            },
+                        ],
+                        allowedMentions: { parse: ["everyone", "roles"] },
+                    })
+                    .catch(() => console.error);
+
+                return;
+            } else if (entry.action === AuditLogEvent.WebhookDelete) {
+                if (!config.watchWebhookDeletion) return;
+                description = "deleted a webhook, which is not permitted by nukeguard.";
+            } else if (entry.action === AuditLogEvent.MemberBanAdd) {
+                return void (await track(guild, user, config));
+            } else if (entry.action === AuditLogEvent.MemberKick) {
+                if (!config.ratelimitKicking) return;
+                return void (await track(guild, user, config));
+            } else if (entry.action === AuditLogEvent.MemberRoleUpdate) {
+                const roles = entry.changes
+                    .filter((x) => x.key === "$add")
+                    .flatMap((x) =>
+                        (x.new as APIRole[])
+                            .map((k) => k.id)
+                            .filter((x) =>
+                                config.restrictRolesByDefault ? !config.restrictRolesAllowedRoles.includes(x) : config.restrictRolesBlockedRoles.includes(x),
+                            ),
+                    );
+
+                if (roles.length === 0) return;
+
+                const names = englishList(roles.map((x) => guild.roles.cache.get(x)?.name ?? "(unknown role)"));
 
                 try {
-                    const member = await guild.members.fetch(user);
-                    if (member.roles.cache.hasAny(...config.exemptedRoles)) return;
-                } catch {
-                    return;
-                }
+                    const member = await guild.members.fetch(entry.targetId!);
+                    await member.roles.remove(roles);
+                } catch {}
 
-                let type: string | undefined;
-                let description: string;
-                let alert: string;
+                if (config.restrictRolesLenient) {
+                    const now = Date.now();
 
-                // TODO: add soundboard deletion detection
+                    if (!watchlist.has(user.id) || now - watchlist.get(user.id)! > 360000) {
+                        watchlist.set(user.id, now);
 
-                if (entry.action === AuditLogEvent.RoleDelete) {
-                    if (config.ignoredRoles.includes(entry.targetId!) || (!config.watchRolesByDefault && !config.watchedRoles.includes(entry.targetId!)))
-                        return;
-                    type = "role";
-                } else if (entry.action === AuditLogEvent.EmojiDelete) {
-                    type = "emoji";
-                } else if (entry.action === AuditLogEvent.StickerDelete) {
-                    type = "sticker";
-                } else if (entry.action === AuditLogEvent.WebhookCreate) {
-                    if (!config.preventWebhookCreation) return;
-
-                    const webhooks = await guild.fetchWebhooks();
-                    const webhook = webhooks.find((x) => x.id === entry.targetId);
-                    if (!webhook) return;
-
-                    await webhook.delete("Nukeguard Action");
-
-                    let warned = true;
-
-                    await user
-                        .send({
-                            embeds: [
-                                {
-                                    title: "Nukeguard Warning",
-                                    description:
-                                        "Your newly created webhook was deleted by Daedalus Nukeguard. If you need a new webhook, please talk to server administration or the server owner.",
-                                    color: Colors.Red,
-                                },
-                            ],
-                        })
-                        .catch(() => (warned = false));
-
-                    const channel = config.adminChannel === null ? null : await guild.channels.fetch(config.adminChannel!).catch(() => {});
-                    if (!channel?.isTextBased()) return;
-
-                    await channel
-                        .send({
-                            embeds: [
-                                {
-                                    title: "Nukeguard Alert (Webhook Deleted)",
-                                    description: `<@${entry.executorId}> tried creating a webhook, which was removed by nukeguard, ${warned ? "and they were warned" : "but they could not be warned"}.`,
-                                    color: Colors.Gold,
-                                },
-                            ],
-                            allowedMentions: { parse: ["everyone", "roles"] },
-                        })
-                        .catch(() => console.error);
-
-                    return;
-                } else if (entry.action === AuditLogEvent.WebhookDelete) {
-                    if (!config.watchWebhookDeletion) return;
-                    description = "deleted a webhook, which is not permitted by nukeguard.";
-                } else if (entry.action === AuditLogEvent.MemberBanAdd) {
-                    return void (await track(guild, user, config));
-                } else if (entry.action === AuditLogEvent.MemberKick) {
-                    if (!config.ratelimitKicking) return;
-                    return void (await track(guild, user, config));
-                } else if (entry.action === AuditLogEvent.MemberRoleUpdate) {
-                    const roles = entry.changes
-                        .filter((x) => x.key === "$add")
-                        .flatMap((x) =>
-                            (x.new as APIRole[])
-                                .map((k) => k.id)
-                                .filter((x) =>
-                                    config.restrictRolesByDefault
-                                        ? !config.restrictRolesAllowedRoles.includes(x)
-                                        : config.restrictRolesBlockedRoles.includes(x),
-                                ),
-                        );
-
-                    if (roles.length === 0) return;
-
-                    const names = englishList(roles.map((x) => guild.roles.cache.get(x)?.name ?? "(unknown role)"));
-
-                    try {
-                        const member = await guild.members.fetch(entry.targetId!);
-                        await member.roles.remove(roles);
-                    } catch {}
-
-                    if (config.restrictRolesLenient) {
-                        const now = Date.now();
-
-                        if (!watchlist.has(user.id) || now - watchlist.get(user.id)! > 360000) {
-                            watchlist.set(user.id, now);
-
-                            return void (await user
-                                .send({
-                                    embeds: [
-                                        {
-                                            title: "Nukeguard Warning",
-                                            description: `You assigned ${roles.length === 1 ? "a role that is" : "roles that are"} forbidden by the nukeguard configuration (${names}). Violating this rule again within 1 hour will result in further actions. Speak to a server administrator of the server owner if you believe this is a mistake.`,
-                                            color: Colors.Gold,
-                                        },
-                                    ],
-                                })
-                                .catch(() => {}));
-                        }
+                        return void (await user
+                            .send({
+                                embeds: [
+                                    {
+                                        title: "Nukeguard Warning",
+                                        description: `You assigned ${roles.length === 1 ? "a role that is" : "roles that are"} forbidden by the nukeguard configuration (${names}). Violating this rule again within 1 hour will result in further actions. Speak to a server administrator of the server owner if you believe this is a mistake.`,
+                                        color: Colors.Gold,
+                                    },
+                                ],
+                            })
+                            .catch(() => {}));
                     }
-
-                    description = `assigned ${roles.length === 1 ? "a role that is" : "roles that are"} forbidden by the nukeguard configuration (${names}).`;
-                    alert = `${expand(user)} assigned ${roles.length === 1 ? "a blocked role" : "blocked roles"}: ${englishList(roles.map((x) => expand(guild.roles.cache.get(x), "(unknown role)")))}`;
                 }
 
-                if (type) description ??= `deleted a protected ${type} (\`${entry.targetId}\`)`;
-                alert ??= `${expand(user)} ${description!}`;
+                description = `assigned ${roles.length === 1 ? "a role that is" : "roles that are"} forbidden by the nukeguard configuration (${names}).`;
+                alert = `${expand(user)} assigned ${roles.length === 1 ? "a blocked role" : "blocked roles"}: ${englishList(roles.map((x) => expand(guild.roles.cache.get(x), "(unknown role)")))}`;
+            }
 
-                await quarantine(guild, user, config, `You ${description!}`, alert!);
-            })
-            .on(Events.ChannelDelete, async (channel) => {
-                if (channel.isDMBased()) return;
+            if (type) description ??= `deleted a protected ${type} (\`${entry.targetId}\`)`;
+            alert ??= `${expand(user)} ${description!}`;
 
-                if (await isWrongClient(client, channel.guild)) return;
-                if (await isModuleDisabled(channel.guild, "nukeguard")) return;
+            await quarantine(guild, user, config, `You ${description!}`, alert!);
+        })
+        .on(Events.ChannelDelete, async (channel) => {
+            if (channel.isDMBased()) return;
 
-                const user = await audit(channel.guild, AuditLogEvent.ChannelDelete, channel);
-                if (!user) return;
+            if (await isWrongClient(client, channel.guild)) return;
+            if (await isModuleDisabled(channel.guild, "nukeguard")) return;
 
-                const config = await trpc.getNukeguardConfig.query(channel.guild.id);
+            const user = await audit(channel.guild, AuditLogEvent.ChannelDelete, channel);
+            if (!user) return;
 
-                let current: GuildChannel | null = channel;
+            const config = await trpc.getNukeguardConfig.query(channel.guild.id);
 
-                do {
-                    if (config.watchedChannels.includes(current.id)) break;
-                    if (config.ignoredChannels.includes(current.id)) return;
-                } while ((current = current.parent));
+            let current: GuildChannel | null = channel;
 
-                if (!current && !config.watchChannelsByDefault) return;
+            do {
+                if (config.watchedChannels.includes(current.id)) break;
+                if (config.ignoredChannels.includes(current.id)) return;
+            } while ((current = current.parent));
 
-                await quarantine(
-                    channel.guild,
-                    user,
-                    config,
-                    `You deleted a protected channel (\`${channel.id}\`)`,
-                    `${expand(user)} deleted a protected channel (\`${channel.id}\`)`,
-                );
-            }),
-});
+            if (!current && !config.watchChannelsByDefault) return;
+
+            await quarantine(
+                channel.guild,
+                user,
+                config,
+                `You deleted a protected channel (\`${channel.id}\`)`,
+                `${expand(user)} deleted a protected channel (\`${channel.id}\`)`,
+            );
+        });
 
 const bans = new Map<string, number[]>();
 const watchlist = new Map<string, number>();
