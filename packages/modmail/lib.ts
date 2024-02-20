@@ -2,6 +2,7 @@ import { trpc } from "@daedalus/api";
 import { SpoilerLevel, copyMedia, embed, expand, getColor, isModuleDisabled, isWrongClient, mdash, obtainLimit, template } from "@daedalus/bot-utils";
 import { secrets } from "@daedalus/config";
 import { formatCustomMessageString } from "@daedalus/custom-messages";
+import { modmailLoading } from "@daedalus/interactions/lib/modmail.ts";
 import { logError } from "@daedalus/log-interface";
 import {
     Attachment,
@@ -40,7 +41,7 @@ export async function modmailReply(
         const data = await message;
         if (data) await source.reply(data);
     } else {
-        if (!source.deferred && !source.replied) await source.deferUpdate();
+        if (!source.deferred && !source.replied) await source.update(modmailLoading);
         const data = await message;
         if (data) await source.editReply(data);
         else
@@ -396,9 +397,6 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
         const limit = (await obtainLimit(guild.id, "multiModmail")) ? ((await obtainLimit(guild.id, "modmailTargetCountLimit")) as number) : 1;
         const target = targets.slice(0, limit).find((target) => target.id === targetId);
 
-        if (!target)
-            throw `That modmail target no longer exists (**${escapeMarkdown(guild.name)}**'s configuration changed after your message). Please send your message again to try again.`;
-
         const existingThread = await trpc.getExistingThread.query({ guild: guildId, target: targetId, user: message.author.id });
 
         let channel: GuildTextBasedChannel | null =
@@ -407,6 +405,11 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
         let created = false;
 
         if (!channel) {
+            if (!target) {
+                await trpc.markThreadAsClosed.mutate({ guild: guildId, target: targetId, user: message.author.id });
+                throw `That modmail target no longer exists and your thread's channel is gone. Please send your message again to try again.`;
+            }
+
             created = true;
 
             if (target.useThreads) {
@@ -537,23 +540,26 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
             }
         }
 
-        if (existingThread?.closed)
+        if (existingThread?.closed) {
+            if (!target)
+                throw `That modmail target no longer exists (**${escapeMarkdown(guild.name)}**'s configuration changed after your message). Please send your message again to try again.`;
+
             await trpc.reviveModmailThread.mutate({ uuid: existingThread.uuid, channel: channel.id, user: message.author.id, targetName: target.name });
-        else if (created)
+        } else if (created)
             await trpc.createModmailThread.mutate({
                 guild: guild.id,
                 user: message.author.id,
-                targetId: target.id,
-                targetName: target.name,
+                targetId: target!.id,
+                targetName: target!.name,
                 channel: channel.id,
             });
 
         if (existingThread?.closed ?? true)
             await channel
                 .send({
-                    content: `${target.pingHere ? "@here" : ""} ${target.pingRoles.map((x) => `<@&${x}>`).join(" ")}`,
+                    content: `${target!.pingHere ? "@here" : ""} ${target!.pingRoles.map((x) => `<@&${x}>`).join(" ")}`,
                     embeds: [{ title: "Modmail Thread Opened", description: `This modmail thread was just opened by ${message.author}.`, color }],
-                    allowedMentions: { parse: target.pingHere ? ["everyone"] : [], roles: target.pingRoles },
+                    allowedMentions: { parse: target!.pingHere ? ["everyone"] : [], roles: target!.pingRoles },
                 })
                 .catch(() =>
                     logError(
@@ -608,7 +614,7 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
                     title: `Message sent to **${escapeMarkdown(guild.name)}**`,
                     description:
                         existingThread?.closed ?? true
-                            ? (await formatCustomMessageString(target.openParsed, { guild, user: message.author }).catch((error) =>
+                            ? (await formatCustomMessageString(target?.openParsed ?? [], { guild, user: message.author }).catch((error) =>
                                   logError(
                                       guild.id,
                                       "Formatting modmail on-open message",

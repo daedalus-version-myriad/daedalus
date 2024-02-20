@@ -1,9 +1,20 @@
 import { isModuleDisabled, isWrongClient, template } from "@daedalus/bot-utils";
 import { modmailReply, modmailTargetSelector } from "@daedalus/modmail";
-import { escapeMarkdown, type MessageComponentInteraction, type ModalMessageModalSubmitInteraction } from "discord.js";
+import { escapeMarkdown, type BaseMessageOptions, type MessageComponentInteraction, type ModalMessageModalSubmitInteraction } from "discord.js";
+
+export const modmailLoading: BaseMessageOptions = {
+    embeds: [
+        {
+            title: "Loading...",
+            description: "This operation is loading and may take several seconds. Please be patient and contact support if it does not resolve.",
+            color: 0x009688,
+        },
+    ],
+    components: [],
+};
 
 export async function handleServerSelection(interaction: MessageComponentInteraction | ModalMessageModalSubmitInteraction, id: string) {
-    await interaction.deferUpdate();
+    await interaction.update(modmailLoading);
 
     try {
         if (!id.match(/^[1-9][0-9]{16,19}$/)) throw "Invalid server ID; a 17-20 digit number was expected.";

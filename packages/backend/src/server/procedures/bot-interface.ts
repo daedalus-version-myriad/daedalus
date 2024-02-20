@@ -670,6 +670,14 @@ export default {
                 ).at(0) ?? null
             );
         }),
+    markThreadAsClosed: proc
+        .input(z.object({ guild: snowflake, user: snowflake, target: z.number().int() }))
+        .mutation(async ({ input: { guild, user, target } }) => {
+            await db
+                .update(tables.modmailThreads)
+                .set({ closed: true })
+                .where(and(eq(tables.modmailThreads.guild, guild), eq(tables.modmailThreads.user, user), eq(tables.modmailThreads.targetId, target)));
+        }),
     createModmailThread: proc
         .input(z.object({ guild: snowflake, user: snowflake, targetId: z.number().int(), targetName: z.string().max(100), channel: snowflake }))
         .mutation(async ({ input: { targetName, ...data } }) => {
