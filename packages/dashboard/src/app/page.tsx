@@ -11,15 +11,12 @@ import TopButton from "./top-button";
 export default async function Home() {
     const online = await trpc.checkStatus.query().catch(() => false);
     const { news } = await trpc.newsList.query().catch(() => ({ news: [] }));
-    const count = await trpc.getGuildCount.query().catch(() => null);
 
     return (
         <div className="center-col gap-8">
             <div className="center-col gap-2 md:gap-4 py-16">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl">Welcome to Daedalus</h1>
-                <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">
-                    the future of server management &middot; proudly serving {count ?? "ERROR"} guild{count === 1 ? "" : "s"}
-                </h2>
+                <h2 className="text-md sm:text-lg md:text-xl lg:text-2xl text-muted-foreground">the future of server management</h2>
                 <TopButton></TopButton>
             </div>
             <Container>
