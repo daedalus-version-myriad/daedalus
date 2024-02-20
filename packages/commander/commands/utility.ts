@@ -203,8 +203,8 @@ export default (app: Argentium) =>
                                                           name: "Ban Status",
                                                           value: await (async () => {
                                                               try {
-                                                                  await _.guild!.bans.fetch(user);
-                                                                  return "This user is banned from this server.";
+                                                                  const ban = await _.guild!.bans.fetch(user);
+                                                                  return `This user is banned from this server${ban.reason ? ` with reason:\n\n${ban.reason}` : "."}`;
                                                               } catch {
                                                                   return "This user is not banned from this server.";
                                                               }
