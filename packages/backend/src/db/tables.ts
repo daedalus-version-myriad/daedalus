@@ -28,6 +28,26 @@ export const auditLogs = mysqlTable(
     }),
 );
 
+export const commandTracker = mysqlTable(
+    "command_tracker",
+    {
+        command: varchar("command", { length: 256 }).notNull(),
+        guild: varchar("guild", { length: 20 }),
+        channel: varchar("channel", { length: 20 }),
+        user: varchar("user", { length: 20 }).notNull(),
+        blocked: boolean("blocked").notNull(),
+        time: timestamp("time").notNull().defaultNow(),
+        data: json("data"),
+    },
+    (t) => ({
+        idx_command: index("idx_command").on(t.command),
+        idx_guild: index("idx_guild").on(t.guild),
+        idx_channel: index("idx_channel").on(t.channel),
+        idx_user: index("idx_user").on(t.user),
+        idx_time: index("idx_time").on(t.time),
+    }),
+);
+
 export const guildSettings = mysqlTable("guild_settings", {
     guild: varchar("guild", { length: 20 }).notNull().primaryKey(),
     dashboardPermission: mysqlEnum("dashboard_permission", ["owner", "admin", "manager"]).notNull().default("manager"),

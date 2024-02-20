@@ -11,7 +11,7 @@ export async function trpcSave<T>(fn: () => Awaitable<T | void>, errorMap: (erro
 
         try {
             return errorMap(error.meta.responseJSON.flatMap((e: any) => JSON.parse(e.error.message).map((m: any) => m.message)).join(" "));
-        } catch {
+        } catch (error) {
             console.log(Date.now(), error);
             return errorMap("An unexpected error occurred. Please contact support if this issue persists.");
         }

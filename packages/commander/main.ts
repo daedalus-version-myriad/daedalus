@@ -1,3 +1,4 @@
+import { trpc } from "@daedalus/api";
 import { checkPermissions, isWrongClient, reply, template } from "@daedalus/bot-utils";
 import { ClientManager } from "@daedalus/clients";
 import Argentium from "argentium";
@@ -63,7 +64,7 @@ import { setManager } from "./lib/clients";
 const argentium = new Argentium()
     .commands((x) =>
         x
-            .beforeAll(async ({ _ }, escape) => {
+            .beforeAll(async ({ _, ...data }, escape) => {
                 const quit = (message: string) =>
                     escape(
                         _.isAutocomplete()
@@ -86,9 +87,16 @@ const argentium = new Argentium()
                 }
 
                 if (!_.isAutocomplete())
-                    console.log(
-                        `${_.isChatInputCommand() ? `/${[_.commandName, _.options.getSubcommandGroup(false), _.options.getSubcommand(false)].filter((x) => x).join(" ")}` : _.commandName} (${_.user.tag} (${_.user.id}) in ${_.guild ? `${_.guild.name} (${_.guild.id})` : "DMs"}) ${denied ? "(permission denied)" : ""}`,
-                    );
+                    await trpc.recordCommandUse.mutate({
+                        command: _.isChatInputCommand()
+                            ? `/${[_.commandName, _.options.getSubcommandGroup(false), _.options.getSubcommand(false)].filter((x) => x).join(" ")}`
+                            : _.commandName,
+                        guild: _.guild?.id ?? null,
+                        channel: _.channel?.id ?? null,
+                        user: _.user.id,
+                        blocked: denied,
+                        data,
+                    });
             })
             .use(ban)
             .use(clearHistory)

@@ -47,6 +47,20 @@ async function getHighlightPhrases(guild: string, user: string) {
 }
 
 export default {
+    recordCommandUse: proc
+        .input(
+            z.object({
+                command: z.string().max(256),
+                guild: snowflake.nullable(),
+                channel: snowflake.nullable(),
+                user: snowflake,
+                blocked: z.boolean(),
+                data: z.any(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            await db.insert(tables.commandTracker).values(input);
+        }),
     getColor: proc.input(snowflake).query(async ({ input: guild }) => {
         const [entry] = await db.select({ color: tables.guildSettings.embedColor }).from(tables.guildSettings).where(eq(tables.guildSettings.guild, guild));
         return entry?.color ?? 0x009688;
