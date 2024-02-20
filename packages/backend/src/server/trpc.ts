@@ -9,8 +9,7 @@ export const proc = publicProcedure.use(async (opts) => {
     const start = Date.now();
     const result = await opts.next();
     const duration = Date.now() - start;
-    const meta = { path: opts.path, type: opts.type, duration, ok: result.ok };
-    console.log(meta);
+    if (!result.ok) console.log({ path: opts.path, type: opts.type, duration, ok: result.ok });
 
     return result;
 });
