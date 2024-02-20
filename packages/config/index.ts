@@ -35,6 +35,7 @@ export type Secrets = {
         MONGO_URI: string;
         MONGO_NAME: string;
     };
+    TCN_HMAC_KEY: string;
 };
 
 export * from "./secrets";
