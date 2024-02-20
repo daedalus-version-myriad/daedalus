@@ -765,24 +765,30 @@ export const modmailThreads = mysqlTable(
     }),
 );
 
-export const modmailMessages = mysqlTable("modmail_messages", {
-    uuid: varchar("uuid", { length: 36 }).notNull(),
-    time: timestamp("time")
-        .default(sql`CURRENT_TIMESTAMP`)
-        .notNull(),
-    type: mysqlEnum("type", ["open", "incoming", "internal", "outgoing", "close"]),
-    id: varchar("id", { length: 20 }).notNull(),
-    source: varchar("source", { length: 36 }).notNull(),
-    target: varchar("target", { length: 20 }).notNull(),
-    author: varchar("author", { length: 20 }).notNull(),
-    anon: boolean("anon").notNull(),
-    targetName: varchar("target_name", { length: 100 }).notNull(),
-    content: varchar("content", { length: 4096 }).notNull(),
-    edits: json("edits").notNull(),
-    attachments: json("attachments").notNull(),
-    deleted: boolean("deleted").notNull(),
-    sent: boolean("sent").notNull(),
-});
+export const modmailMessages = mysqlTable(
+    "modmail_messages",
+    {
+        uuid: varchar("uuid", { length: 36 }).notNull(),
+        time: timestamp("time")
+            .default(sql`CURRENT_TIMESTAMP`)
+            .notNull(),
+        type: mysqlEnum("type", ["open", "incoming", "internal", "outgoing", "close"]),
+        id: varchar("id", { length: 20 }).notNull(),
+        source: varchar("source", { length: 36 }).notNull(),
+        target: varchar("target", { length: 20 }).notNull(),
+        author: varchar("author", { length: 20 }).notNull(),
+        anon: boolean("anon").notNull(),
+        targetName: varchar("target_name", { length: 100 }).notNull(),
+        content: varchar("content", { length: 4096 }).notNull(),
+        edits: json("edits").notNull(),
+        attachments: json("attachments").notNull(),
+        deleted: boolean("deleted").notNull(),
+        sent: boolean("sent").notNull(),
+    },
+    (t) => ({
+        idx_id: index("idx_id").on(t.id),
+    }),
+);
 
 export const modmailNotifications = mysqlTable(
     "modmail_notifications",
@@ -846,6 +852,7 @@ export const ticketMessages = mysqlTable(
     },
     (t) => ({
         idx_uuid: index("idx_uuid").on(t.uuid),
+        idx_id: index("idx_id").on(t.id),
     }),
 );
 
