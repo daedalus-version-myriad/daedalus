@@ -594,9 +594,17 @@ await migrate("xp-amounts", async () => {
             ],
         })
         .toArray();
-    while (entries.length > 0)
+    entries.sort((x, y) => y.total.text - x.total.text || y.total.voice - x.total.voice);
+    const filtered: typeof entries = [];
+    const seen = new Set<string>();
+    for (const entry of entries) {
+        if (seen.has(`${entry.guild}-${entry.user}`)) continue;
+        seen.add(`${entry.guild}-${entry.user}`);
+        filtered.push(entry);
+    }
+    while (filtered.length > 0)
         await db.insert(tables.xp).values(
-            entries.splice(0, 5000).map((x) => ({
+            filtered.splice(0, 5000).map((x) => ({
                 guild: x.guild,
                 user: x.user,
                 textDaily: x.daily?.text ?? 0,
