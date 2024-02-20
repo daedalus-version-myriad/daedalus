@@ -43,7 +43,7 @@ export default function Premium() {
                     </Panel>
                     <Panel>
                         <h1 className="text-2xl">Custom Client</h1>
-                        <h2 className="text-md text-muted-foreground">$4/mo &middot; $40/yr</h2>
+                        <h2 className="text-md text-muted-foreground">$5/mo &middot; $50/yr</h2>
                         <ul className="list-disc pl-4">
                             <li>Custom instance</li>
                             <li>Custom username and bot profile</li>

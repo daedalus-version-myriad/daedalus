@@ -88,7 +88,7 @@ export function AccountPremiumBody({
                                 <Button>Premium &mdash; $50/yr</Button>
                             </a>
                             <a href={links[3]}>
-                                <Button>Custom Client &mdash; $40/yr</Button>
+                                <Button>Custom Client &mdash; $50/yr</Button>
                             </a>
                         </>
                     ) : (
@@ -97,7 +97,7 @@ export function AccountPremiumBody({
                                 <Button>Premium &mdash; $5/mo</Button>
                             </a>
                             <a href={links[2]}>
-                                <Button>Custom Client &mdash; $4/mo</Button>
+                                <Button>Custom Client &mdash; $5/mo</Button>
                             </a>
                         </>
                     )}
