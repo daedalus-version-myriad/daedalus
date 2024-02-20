@@ -977,6 +977,7 @@ export default {
         const sq = db
             .select()
             .from(tables.guildCountItems)
+            .where(eq(tables.guildCountItems.guild, guild))
             .limit((await getLimit(guild, "countCountLimit")) as number)
             .as("subquery");
 

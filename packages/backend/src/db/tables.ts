@@ -549,8 +549,7 @@ export const guildGiveawayItems = mysqlTable(
     (t) => ({
         pk_guild_id: primaryKey({ name: "pk_guild_id", columns: [t.guild, t.id] }),
         idx_message: index("idx_message").on(t.messageId),
-        idx_deadline: index("idx_deadline").on(t.deadline),
-        idx_closed: index("idx_closed").on(t.closed),
+        idx_deadline: index("idx_deadline_closed").on(t.deadline),
     }),
 );
 
@@ -762,6 +761,7 @@ export const modmailThreads = mysqlTable(
     (t) => ({
         unq_uuid: unique("unq_uuid").on(t.uuid),
         unq_guild_user_target: unique("unq_guild_user_target").on(t.guild, t.user, t.targetId),
+        idx_user: index("idx_user").on(t.user),
     }),
 );
 
@@ -786,6 +786,7 @@ export const modmailMessages = mysqlTable(
         sent: boolean("sent").notNull(),
     },
     (t) => ({
+        idx_uuid_source: index("idx_uuid_source").on(t.uuid, t.source),
         idx_id: index("idx_id").on(t.id),
     }),
 );
