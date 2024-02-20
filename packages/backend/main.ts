@@ -1,4 +1,4 @@
-import { and, eq, not, or } from "drizzle-orm";
+import { eq, not, or } from "drizzle-orm";
 import { tables } from "./src/db";
 import { db } from "./src/db/db";
 import "./src/server";

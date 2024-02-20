@@ -19,7 +19,10 @@ export class ClientManager {
     }) {
         this.factory = async (token, guild) => {
             console.log(`[CM] Producing client for guild ${guild} with token ${token.slice(0, 5)}...${token.slice(-5)}`);
-            const client = await loginAndReady(factory(), token);
+            const client = await loginAndReady(factory(), token).catch((error) => {
+                console.error(`[CM] Error creating client for ${guild}:`, error);
+                throw error;
+            });
             postprocess?.(client, guild);
             return client;
         };
