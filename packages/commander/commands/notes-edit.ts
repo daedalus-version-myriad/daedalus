@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { truncate, type Commands } from "@daedalus/bot-utils";
+import { trpc } from "../../api/index.js";
+import { truncate, type Commands } from "../../bot-utils/index.js";
 import { ComponentType, TextInputStyle } from "discord.js";
 
 export default (x: Commands) =>

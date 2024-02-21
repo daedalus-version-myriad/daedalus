@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, isWrongClient, obtainLimit, template } from "@daedalus/bot-utils";
-import { englishList } from "@daedalus/formatting";
 import type { StringSelectMenuInteraction } from "discord.js";
+import { trpc } from "../../../api/index.js";
+import { isModuleDisabled, isWrongClient, obtainLimit, template } from "../../../bot-utils/index.js";
+import { englishList } from "../../../formatting/index.js";
 
 export default async function (menu: StringSelectMenuInteraction) {
     await menu.deferReply({ ephemeral: true });

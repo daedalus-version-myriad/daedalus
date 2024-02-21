@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { SpoilerLevel, copyMedia, getColor, isModuleDisabled, isWrongClient, mdash } from "@daedalus/bot-utils";
-import type { GuildStarboardSettings } from "@daedalus/types";
 import { Client, Events, Message, type APIEmbed, type Channel, type GuildBasedChannel, type PartialMessage } from "discord.js";
+import { trpc } from "../api/index.js";
+import { SpoilerLevel, copyMedia, getColor, isModuleDisabled, isWrongClient, mdash } from "../bot-utils/index.js";
+import type { GuildStarboardSettings } from "../types/index.js";
 
 export const starboardHook = (client: Client) =>
     client

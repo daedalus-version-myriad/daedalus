@@ -1,7 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { wsTRPC } from "@daedalus/api/ws";
-import { secrets } from "@daedalus/config";
 import { Events, type Client } from "discord.js";
+import { trpc } from "../api/index.js";
+import { secrets } from "../config/index.js";
 
 export class ClientManager {
     private factory: (token: string, guild?: string) => Promise<Client<true>>;
@@ -29,14 +28,6 @@ export class ClientManager {
         };
 
         if (sweep > 0) setInterval(() => this.sweepClients(), sweep);
-
-        const self = this;
-
-        wsTRPC.vanityClientHook.subscribe(undefined, {
-            onData(data: any) {
-                self.getBotFromToken(data.guild, data.token);
-            },
-        });
 
         this.getDefaultBot();
 

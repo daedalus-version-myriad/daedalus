@@ -1,6 +1,6 @@
-import type { Commands } from "@daedalus/bot-utils";
-import { parseMessageURL } from "@daedalus/global-utils";
-import { report } from "../lib/reports";
+import type { Commands } from "../../bot-utils/index.js";
+import { parseMessageURL } from "../../global-utils/index.js";
+import { report } from "../lib/reports.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

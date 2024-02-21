@@ -1,4 +1,4 @@
-import { secrets } from "@daedalus/config";
+import { secrets } from "../../../config/index.js";
 import { connect } from "@planetscale/database";
 
 export const connection = connect({

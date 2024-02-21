@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, isWrongClient, obtainLimit } from "@daedalus/bot-utils";
 import { Client, Events, MessageReaction, User, type PartialMessageReaction, type PartialUser } from "discord.js";
+import { trpc } from "../api/index.js";
+import { isModuleDisabled, isWrongClient, obtainLimit } from "../bot-utils/index.js";
 
 export const reactionRolesReactionsHook = (client: Client) =>
     client

@@ -1,5 +1,5 @@
-import { embed } from "@daedalus/bot-utils";
 import { ButtonStyle, Colors, ComponentType, type StringSelectMenuInteraction } from "discord.js";
+import { embed } from "../../../../bot-utils/index.js";
 
 export default async function (menu: StringSelectMenuInteraction) {
     const [mode] = menu.values;

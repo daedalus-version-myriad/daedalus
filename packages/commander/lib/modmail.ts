@@ -1,8 +1,8 @@
-import { trpc } from "@daedalus/api";
-import { fuzzy } from "@daedalus/global-utils";
-import type { GuildModmailSettings } from "@daedalus/types";
-import type { SlashUtil } from "argentium/src/slash-util";
 import type { ChatInputCommandInteraction } from "discord.js";
+import { trpc } from "../../api/index.js";
+import type { SlashUtil } from "../../argentium/src/slash-util.js";
+import { fuzzy } from "../../global-utils/index.js";
+import type { GuildModmailSettings } from "../../types/index.js";
 
 export const addModmailReplyOptions = <T>(x: SlashUtil<T>) =>
     x

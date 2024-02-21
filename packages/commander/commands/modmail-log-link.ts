@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import type { Commands } from "@daedalus/bot-utils";
-import { secrets } from "@daedalus/config";
+import { trpc } from "../../api/index.js";
+import type { Commands } from "../../bot-utils/index.js";
+import { secrets } from "../../config/index.js";
 import { ButtonStyle, ComponentType } from "discord.js";
 
 export default (x: Commands) =>

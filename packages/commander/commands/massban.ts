@@ -1,9 +1,9 @@
-import { trpc } from "@daedalus/api";
-import { checkPunishment, confirm, enforcePermissions, formatIdList, mdash, template, type Commands } from "@daedalus/bot-utils";
-import { DurationStyle, formatDuration, parseDuration } from "@daedalus/global-utils";
-import { stopButton } from "@daedalus/interactions";
-import type { SlashUtil } from "argentium/src/slash-util";
 import { Colors, ComponentType, type ChatInputCommandInteraction } from "discord.js";
+import { trpc } from "../../api/index.js";
+import type { SlashUtil } from "../../argentium/src/slash-util.js";
+import { checkPunishment, confirm, enforcePermissions, formatIdList, mdash, template, type Commands } from "../../bot-utils/index.js";
+import { DurationStyle, formatDuration, parseDuration } from "../../global-utils/index.js";
+import { stopButton } from "../../interactions/index.js";
 
 export default (x: Commands) =>
     x

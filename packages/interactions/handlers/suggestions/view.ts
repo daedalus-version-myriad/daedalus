@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { checkPermissions, expand, template } from "@daedalus/bot-utils";
 import { ButtonInteraction } from "discord.js";
-import { clients } from "../../main";
+import { trpc } from "../../../api/index.js";
+import { checkPermissions, expand, template } from "../../../bot-utils/index.js";
+import { clients } from "../../main.js";
 
 export default async function (button: ButtonInteraction) {
     if (await checkPermissions(button.user, "suggestion", button.channel!)) throw "You do not have permission to view anonymous suggestions' authors.";

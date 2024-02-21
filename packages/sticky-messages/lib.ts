@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
 import { type GuildTextBasedChannel } from "discord.js";
+import { trpc } from "../api/index.js";
 
 const lastUpdate = new Map<string, number>();
 const scheduledUpdate = new Map<string, Timer>();

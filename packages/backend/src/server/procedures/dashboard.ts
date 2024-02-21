@@ -1,4 +1,4 @@
-import { proc } from "../trpc";
+import { proc } from "../trpc.js";
 
 export default {
     checkStatus: proc.query(() => true),

@@ -1,6 +1,6 @@
-import { fetchCaller, type Commands } from "@daedalus/bot-utils";
-import { getModmailContactInfo, handleReply } from "@daedalus/modmail";
-import { addModmailReplyOptions } from "../lib/modmail";
+import { fetchCaller, type Commands } from "../../bot-utils/index.js";
+import { getModmailContactInfo, handleReply } from "../../modmail/index.js";
+import { addModmailReplyOptions } from "../lib/modmail.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

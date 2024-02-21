@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { renderPollFor } from "@daedalus/polls";
 import { ButtonInteraction, StringSelectMenuInteraction } from "discord.js";
+import { trpc } from "../../../api/index.js";
+import { renderPollFor } from "../../../polls/index.js";
 
 export default async function (interaction: ButtonInteraction | StringSelectMenuInteraction, option: string) {
     const poll = await trpc.getPollWithoutVotes.query(interaction.message.id);

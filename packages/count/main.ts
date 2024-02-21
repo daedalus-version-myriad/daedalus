@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
+import { trpc } from "../api/index.js";
+import { isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 import { Client, Events, Message, type PartialMessage } from "discord.js";
 
 export const countHook = (client: Client<true>) =>

@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { isWrongClient } from "@daedalus/bot-utils";
 import { Client, Events, Message, type PartialMessage } from "discord.js";
+import { trpc } from "../api/index.js";
+import { isWrongClient } from "../bot-utils/index.js";
 
 export const ticketsHook = (client: Client) =>
     client

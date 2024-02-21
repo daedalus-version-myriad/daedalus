@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { expand, getColor, template } from "@daedalus/bot-utils";
+import { trpc } from "../../api/index.js";
+import { expand, getColor, template } from "../../bot-utils/index.js";
 import {
     ButtonStyle,
     ChatInputCommandInteraction,

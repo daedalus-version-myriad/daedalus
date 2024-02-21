@@ -1,9 +1,3 @@
-import { trpc } from "@daedalus/api";
-import { SpoilerLevel, copyMedia, embed, expand, getColor, isModuleDisabled, isWrongClient, mdash, obtainLimit, template } from "@daedalus/bot-utils";
-import { secrets } from "@daedalus/config";
-import { formatCustomMessageString } from "@daedalus/custom-messages";
-import { modmailLoading } from "@daedalus/interactions/lib/modmail.ts";
-import { logError } from "@daedalus/log-interface";
 import {
     Attachment,
     ButtonStyle,
@@ -32,6 +26,12 @@ import {
     type StringSelectMenuComponentData,
     type User,
 } from "discord.js";
+import { trpc } from "../api/index.js";
+import { SpoilerLevel, copyMedia, embed, expand, getColor, isModuleDisabled, isWrongClient, mdash, obtainLimit, template } from "../bot-utils/index.js";
+import { secrets } from "../config/index.js";
+import { formatCustomMessageString } from "../custom-messages/index.js";
+import { modmailLoading } from "../interactions/lib/modmail.js";
+import { logError } from "../log-interface/index.js";
 
 export async function modmailReply(
     source: Message | MessageComponentInteraction | ModalMessageModalSubmitInteraction,

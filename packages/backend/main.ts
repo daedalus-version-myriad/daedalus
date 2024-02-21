@@ -1,7 +1,7 @@
 import { eq, not, or } from "drizzle-orm";
-import { tables } from "./src/db";
-import { db } from "./src/db/db";
-import "./src/server";
+import { tables } from "./src/db/index.js";
+import { db } from "./src/db/db.js";
+import "./src/server/index.js";
 
 process.on("uncaughtException", console.error);
 

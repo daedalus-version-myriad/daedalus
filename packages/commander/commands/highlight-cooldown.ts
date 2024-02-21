@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { template, type Commands } from "@daedalus/bot-utils";
-import { formatDuration, parseDuration } from "@daedalus/global-utils";
+import { trpc } from "../../api/index.js";
+import { template, type Commands } from "../../bot-utils/index.js";
+import { formatDuration, parseDuration } from "../../global-utils/index.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

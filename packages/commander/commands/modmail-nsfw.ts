@@ -1,5 +1,5 @@
-import { template, type Commands } from "@daedalus/bot-utils";
-import { getModmailContactInfo } from "@daedalus/modmail";
+import { template, type Commands } from "../../bot-utils/index.js";
+import { getModmailContactInfo } from "../../modmail/index.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

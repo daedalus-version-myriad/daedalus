@@ -1,9 +1,9 @@
-import { trpc } from "@daedalus/api";
-import { fetchAndSendMessage, getColor, to } from "@daedalus/bot-utils";
-import { secrets } from "@daedalus/config";
-import { logError } from "@daedalus/log-interface";
-import type { GuildXpSettings } from "@daedalus/types";
 import { escapeMarkdown, type Channel, type GuildMember } from "discord.js";
+import { trpc } from "../api/index.js";
+import { fetchAndSendMessage, getColor, to } from "../bot-utils/index.js";
+import { secrets } from "../config/index.js";
+import { logError } from "../log-interface/index.js";
+import type { GuildXpSettings } from "../types/index.js";
 
 export function xpToLevel(xp: number, floor: boolean = true) {
     if (xp === 0) return 0;

@@ -1,8 +1,8 @@
-import { trpc } from "@daedalus/api";
-import { template, timeinfo, truncate } from "@daedalus/bot-utils";
-import { parseDuration } from "@daedalus/global-utils";
-import type Argentium from "argentium";
 import { Colors } from "discord.js";
+import { trpc } from "../../api/index.js";
+import type Argentium from "../../argentium/index.js";
+import { template, timeinfo, truncate } from "../../bot-utils/index.js";
+import { parseDuration } from "../../global-utils/index.js";
 
 export default (app: Argentium) =>
     app.allowInDms("reminder").commands((x) =>

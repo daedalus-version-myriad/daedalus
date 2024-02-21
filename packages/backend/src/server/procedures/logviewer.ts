@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { bot, clients } from "../../bot";
-import { tables } from "../../db";
-import { db } from "../../db/db";
-import { snowflake } from "../schemas";
-import { proc } from "../trpc";
-import { getModmailSettings, getTicketsSettings } from "./guild-settings";
+import { bot, clients } from "../../bot/index.js";
+import { tables } from "../../db/index.js";
+import { db } from "../../db/db.js";
+import { snowflake } from "../schemas.js";
+import { proc } from "../trpc.js";
+import { getModmailSettings, getTicketsSettings } from "./guild-settings.js";
 
 export default {
     getModmailThread: proc.input(z.object({ id: snowflake.nullable(), uuid: z.string() })).query(async ({ input: { id, uuid } }) => {

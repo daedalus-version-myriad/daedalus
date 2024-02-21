@@ -1,1 +1,1 @@
-export { xpToLevel, levelToXp } from "./utils";
+export { xpToLevel, levelToXp } from "./utils.js";

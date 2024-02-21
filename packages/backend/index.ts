@@ -1,3 +1,3 @@
-export { db } from "./src/db";
-export * as tables from "./src/db/tables";
-export type { AppRouter } from "./src/server";
+export { db } from "./src/db/index.js";
+export * as tables from "./src/db/tables.js";
+export type { AppRouter } from "./src/server/index.js";

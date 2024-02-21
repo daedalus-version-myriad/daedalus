@@ -1,8 +1,3 @@
-import { trpc } from "@daedalus/api";
-import { getColor, isModuleDisabled, isWrongClient, obtainLimit, template } from "@daedalus/bot-utils";
-import { secrets } from "@daedalus/config";
-import { formatMessage } from "@daedalus/custom-messages";
-import { logError } from "@daedalus/log-interface";
 import {
     ButtonStyle,
     ChannelType,
@@ -12,6 +7,11 @@ import {
     type ButtonInteraction,
     type StringSelectMenuInteraction,
 } from "discord.js";
+import { trpc } from "../../api/index.js";
+import { getColor, isModuleDisabled, isWrongClient, obtainLimit, template } from "../../bot-utils/index.js";
+import { secrets } from "../../config/index.js";
+import { formatMessage } from "../../custom-messages/index.js";
+import { logError } from "../../log-interface/index.js";
 
 export default async function (interaction: ButtonInteraction | StringSelectMenuInteraction, id: string) {
     await interaction.deferReply({ ephemeral: true });

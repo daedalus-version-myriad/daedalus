@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { template } from "@daedalus/bot-utils";
-import { renderPollFor } from "@daedalus/polls";
 import { ButtonInteraction, ComponentType, TextInputStyle } from "discord.js";
+import { trpc } from "../../../api/index.js";
+import { template } from "../../../bot-utils/index.js";
+import { renderPollFor } from "../../../polls/index.js";
 
 export default async function (button: ButtonInteraction) {
     const value = await trpc.getPollQuestion.query(button.message.id);

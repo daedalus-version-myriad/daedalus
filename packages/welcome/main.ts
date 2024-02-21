@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { willAutokick } from "@daedalus/autokick";
-import { fetchAndSendCustom, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
 import { Client, Events } from "discord.js";
+import { trpc } from "../api/index.js";
+import { willAutokick } from "../autokick/index.js";
+import { fetchAndSendCustom, isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 
 export const welcomeHook = (client: Client) =>
     client.on(Events.GuildMemberAdd, async (member) => {

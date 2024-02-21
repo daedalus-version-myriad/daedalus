@@ -1,4 +1,4 @@
-import type { ClientManager } from "@daedalus/clients";
+import type { ClientManager } from "../../clients/index.js";
 
 let manager: ClientManager;
 

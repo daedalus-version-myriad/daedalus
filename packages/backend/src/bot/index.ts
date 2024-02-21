@@ -1,31 +1,31 @@
-import { autokickHook } from "@daedalus/autokick/main";
-import { automodHook } from "@daedalus/automod/main";
-import { autoresponderHook } from "@daedalus/autoresponder/main";
-import { ClientManager } from "@daedalus/clients";
-import { commanderHook } from "@daedalus/commander/main";
-import { secrets } from "@daedalus/config";
-import { countHook } from "@daedalus/count/main";
-import { customRolesHook } from "@daedalus/custom-roles/main";
-import { highlightsHook } from "@daedalus/highlights/main";
-import { interactionsHook } from "@daedalus/interactions/main";
-import { loggingHook } from "@daedalus/logging/main";
-import { modmailHook } from "@daedalus/modmail/main";
-import { nukeguardHook } from "@daedalus/nukeguard/main";
-import { reactionRolesReactionsHook } from "@daedalus/reaction-roles-reactions/main";
-import { redditFeedsHook } from "@daedalus/reddit-feeds/main";
-import { starboardHook } from "@daedalus/starboard/main";
-import { statsChannelsHook } from "@daedalus/stats-channels/main";
-import { stickyAutoRolesHook } from "@daedalus/sticky-auto-roles/main";
-import { stickyMessagesHook } from "@daedalus/sticky-messages/main";
-import { supporterAnnouncementsHook } from "@daedalus/supporter-announcements/main";
-import { taskRunnerHook } from "@daedalus/task-runner/main";
-import { ticketsHook } from "@daedalus/tickets/main";
-import { welcomeHook } from "@daedalus/welcome/main";
-import { xpHook } from "@daedalus/xp/main";
 import { ActivityType, Client, IntentsBitField, Partials } from "discord.js";
 import { eq } from "drizzle-orm";
-import { tables } from "../db";
-import { db } from "../db/db";
+import { autokickHook } from "../../../autokick/main.js";
+import { automodHook } from "../../../automod/main.js";
+import { autoresponderHook } from "../../../autoresponder/main.js";
+import { ClientManager } from "../../../clients/index.js";
+import { commanderHook } from "../../../commander/main.js";
+import { secrets } from "../../../config/index.js";
+import { countHook } from "../../../count/main.js";
+import { customRolesHook } from "../../../custom-roles/main.js";
+import { highlightsHook } from "../../../highlights/main.js";
+import { interactionsHook } from "../../../interactions/main.js";
+import { loggingHook } from "../../../logging/main.js";
+import { modmailHook } from "../../../modmail/main.js";
+import { nukeguardHook } from "../../../nukeguard/main.js";
+import { reactionRolesReactionsHook } from "../../../reaction-roles-reactions/main.js";
+import { redditFeedsHook } from "../../../reddit-feeds/main.js";
+import { starboardHook } from "../../../starboard/main.js";
+import { statsChannelsHook } from "../../../stats-channels/main.js";
+import { stickyAutoRolesHook } from "../../../sticky-auto-roles/main.js";
+import { stickyMessagesHook } from "../../../sticky-messages/main.js";
+import { supporterAnnouncementsHook } from "../../../supporter-announcements/main.js";
+import { taskRunnerHook } from "../../../task-runner/main.js";
+import { ticketsHook } from "../../../tickets/main.js";
+import { welcomeHook } from "../../../welcome/main.js";
+import { xpHook } from "../../../xp/main.js";
+import { db } from "../db/db.js";
+import { tables } from "../db/index.js";
 
 export async function setPresence(client: Client<true>, guild?: string) {
     if (client.token === secrets.DISCORD.TOKEN || !guild)
@@ -77,7 +77,7 @@ export const clients: ClientManager = new ClientManager({
                 Intents.GuildMessageReactions |
                 Intents.GuildVoiceStates,
             partials: [Partials.Channel, Partials.Message, Partials.GuildMember, Partials.Reaction],
-            sweepers: { users: { interval: 3600, filter: () => () => true }, messages: { lifetime: 604800, interval: 3600 } },
+            sweepers: { messages: { lifetime: 604800, interval: 3600 } },
             allowedMentions: { parse: [] },
         }),
     postprocess: (client) =>

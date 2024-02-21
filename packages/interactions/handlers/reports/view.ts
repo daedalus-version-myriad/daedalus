@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { expand, template } from "@daedalus/bot-utils";
 import { ButtonInteraction } from "discord.js";
-import { clients } from "../../main";
+import { trpc } from "../../../api/index.js";
+import { expand, template } from "../../../bot-utils/index.js";
+import { clients } from "../../main.js";
 
 export default async function (button: ButtonInteraction) {
     const caller = await button.guild!.members.fetch(button.user);

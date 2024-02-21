@@ -1,9 +1,9 @@
-import { trpc } from "@daedalus/api";
-import { expand, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
-import { englishList } from "@daedalus/formatting";
-import { audit } from "@daedalus/logging";
-import type { GuildNukeguardSettings } from "@daedalus/types";
 import { AuditLogEvent, Client, Colors, Events, GuildChannel, type APIRole, type Guild, type User } from "discord.js";
+import { trpc } from "../api/index.js";
+import { expand, isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
+import { englishList } from "../formatting/index.js";
+import { audit } from "../logging/index.js";
+import type { GuildNukeguardSettings } from "../types/index.js";
 
 export const nukeguardHook = (client: Client) =>
     client

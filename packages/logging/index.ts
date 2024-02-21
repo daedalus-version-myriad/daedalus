@@ -1,2 +1,2 @@
-export type { Router } from "./main";
-export * from "./src/utils";
+export type { Router } from "./main.js";
+export * from "./src/utils.js";

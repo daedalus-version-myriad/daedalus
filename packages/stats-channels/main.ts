@@ -1,8 +1,8 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, obtainLimit } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
-import { formatCustomMessageString } from "@daedalus/custom-messages";
-import { logError } from "@daedalus/log-interface";
+import { trpc } from "../api/index.js";
+import { isModuleDisabled, obtainLimit } from "../bot-utils/index.js";
+import { ClientManager } from "../clients/index.js";
+import { formatCustomMessageString } from "../custom-messages/index.js";
+import { logError } from "../log-interface/index.js";
 
 let manager: ClientManager;
 export const statsChannelsHook = (_: unknown, x: ClientManager) => (manager = x);

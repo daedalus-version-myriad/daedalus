@@ -1,8 +1,12 @@
-import { secrets } from "@daedalus/config";
-import { parseCustomMessageString, parseMessage } from "@daedalus/custom-messages";
-import { triggerCustomRoleSweep } from "@daedalus/custom-roles";
-import { logCategories, logEvents, modules } from "@daedalus/data";
-import { serializeGiveawayBase } from "@daedalus/global-utils";
+import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMessageOptions } from "discord.js";
+import { and, eq, inArray, not, sql } from "drizzle-orm";
+import _ from "lodash";
+import { z } from "zod";
+import { secrets } from "../../../../config/index.js";
+import { parseCustomMessageString, parseMessage } from "../../../../custom-messages/index.js";
+import { triggerCustomRoleSweep } from "../../../../custom-roles/index.js";
+import { logCategories, logEvents, modules } from "../../../../data/index.js";
+import { serializeGiveawayBase } from "../../../../global-utils/index.js";
 import type {
     CustomMessageText,
     GuildAutokickSettings,
@@ -33,19 +37,15 @@ import type {
     GuildXpSettings,
     MessageData,
     ParsedMessage,
-} from "@daedalus/types";
-import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMessageOptions } from "discord.js";
-import { and, eq, inArray, not, sql } from "drizzle-orm";
-import _ from "lodash";
-import { z } from "zod";
-import { clients } from "../../bot";
-import { tables } from "../../db";
-import { db } from "../../db/db";
-import { baseMessageData, giveawayBase, snowflake } from "../schemas";
-import { decodeArray } from "../transformations";
-import { proc } from "../trpc";
-import { getLimit } from "./premium";
-import { isAdmin } from "./users";
+} from "../../../../types/index.js";
+import { clients } from "../../bot/index.js";
+import { db } from "../../db/db.js";
+import { tables } from "../../db/index.js";
+import { baseMessageData, giveawayBase, snowflake } from "../schemas.js";
+import { decodeArray } from "../transformations.js";
+import { proc } from "../trpc.js";
+import { getLimit } from "./premium.js";
+import { isAdmin } from "./users.js";
 
 export const NO_PERMISSION = "You do not have permission to manage settings within this guild.";
 

@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { checkPunishment, confirm, enforcePermissions, sendDM, template, timeinfo, type Commands } from "@daedalus/bot-utils";
-import { DurationStyle, formatDuration, parseDuration } from "@daedalus/global-utils";
 import { Colors } from "discord.js";
+import { trpc } from "../../api/index.js";
+import { checkPunishment, confirm, enforcePermissions, sendDM, template, timeinfo, type Commands } from "../../bot-utils/index.js";
+import { DurationStyle, formatDuration, parseDuration } from "../../global-utils/index.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

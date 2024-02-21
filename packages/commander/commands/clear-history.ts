@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { confirm, enforcePermissions, template, type Commands } from "@daedalus/bot-utils";
 import { Colors } from "discord.js";
+import { trpc } from "../../api/index.js";
+import { confirm, enforcePermissions, template, type Commands } from "../../bot-utils/index.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

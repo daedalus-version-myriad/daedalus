@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { updateStick } from "@daedalus/sticky-messages";
 import { ModalSubmitInteraction, type GuildTextBasedChannel } from "discord.js";
+import { trpc } from "../../api/index.js";
+import { updateStick } from "../../sticky-messages/index.js";
 
 export default async function (modal: ModalSubmitInteraction, seconds_: string) {
     await modal.deferReply({ ephemeral: true });

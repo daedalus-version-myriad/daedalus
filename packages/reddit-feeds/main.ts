@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { getColor, isModuleDisabled, obtainLimit, truncate } from "@daedalus/bot-utils";
-import type { ClientManager } from "@daedalus/clients";
-import he from "he";
+import * as he from "he";
+import { trpc } from "../api/index.js";
+import { getColor, isModuleDisabled, obtainLimit, truncate } from "../bot-utils/index.js";
+import type { ClientManager } from "../clients/index.js";
 
 let manager: ClientManager;
 export const redditFeedsHook = (_: unknown, x: ClientManager) => (manager = x);

@@ -1,3 +1,3 @@
-export * from "./connection";
-export * from "./db";
-export * as tables from "./tables";
+export * from "./connection.js";
+export * from "./db.js";
+export * as tables from "./tables.js";

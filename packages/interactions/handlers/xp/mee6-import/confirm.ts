@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { embed, getColor, template } from "@daedalus/bot-utils";
 import { Colors, type ButtonInteraction } from "discord.js";
+import { trpc } from "../../../../api/index.js";
+import { embed, getColor, template } from "../../../../bot-utils/index.js";
 
 export default async function (button: ButtonInteraction, mode: string) {
     await button.update(embed("Importing XP from MEE6...", "This may take a while; please be patient.", Colors.Gold));

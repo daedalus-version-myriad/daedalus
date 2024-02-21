@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
 import type { Awaitable, Channel, Guild, InviteGuild, MessageCreateOptions } from "discord.js";
-import { getChannelStack, isModuleDisabled, isWrongClient } from "../../bot-utils";
+import { trpc } from "../../api/index.js";
+import { getChannelStack, isModuleDisabled, isWrongClient } from "../../bot-utils/index.js";
 
 type MaybeArray<T> = T | T[];
 

@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { fetchCaller, getColor, mdash, type Commands } from "@daedalus/bot-utils";
+import { trpc } from "../../api/index.js";
+import { fetchCaller, getColor, mdash, type Commands } from "../../bot-utils/index.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

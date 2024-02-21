@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { getModmailContactInfo } from "@daedalus/modmail";
 import { Colors, type Message, type ModalSubmitInteraction } from "discord.js";
+import { trpc } from "../../../api/index.js";
+import { getModmailContactInfo } from "../../../modmail/index.js";
 
 export default async function (modal: ModalSubmitInteraction, source: string) {
     const { member, thread } = await getModmailContactInfo(false)({ _: modal });

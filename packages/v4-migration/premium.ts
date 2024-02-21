@@ -1,4 +1,4 @@
-import type { PremiumBenefits } from "./types";
+import type { PremiumBenefits } from "./types.js";
 
 export enum PremiumTier {
     FREE = 0,

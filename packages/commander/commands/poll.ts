@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { template, type Commands } from "@daedalus/bot-utils";
-import { renderPoll } from "@daedalus/polls";
-import type { Poll } from "@daedalus/types";
+import { trpc } from "../../api/index.js";
+import { template, type Commands } from "../../bot-utils/index.js";
+import { renderPoll } from "../../polls/index.js";
+import type { Poll } from "../../types/index.js";
 import { ComponentType, TextInputStyle, type ChatInputCommandInteraction } from "discord.js";
 
 const defaultPoll = { allowNeutral: false, allowMulti: false, leftOption: "", rightOption: "", options: [] };

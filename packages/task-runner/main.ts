@@ -1,11 +1,11 @@
-import { trpc } from "@daedalus/api";
-import { getColor, getMuteRole } from "@daedalus/bot-utils";
-import { ClientManager } from "@daedalus/clients";
-import { secrets } from "@daedalus/config";
-import { englishList } from "@daedalus/formatting";
-import { draw } from "@daedalus/giveaways";
-import { logError } from "@daedalus/log-interface";
-import { closeModmailThread } from "@daedalus/modmail";
+import { trpc } from "../api/index.js";
+import { getColor, getMuteRole } from "../bot-utils/index.js";
+import { ClientManager } from "../clients/index.js";
+import { CLIENT_ID } from "../config/public.js";
+import { englishList } from "../formatting/index.js";
+import { draw } from "../giveaways/index.js";
+import { logError } from "../log-interface/index.js";
+import { closeModmailThread } from "../modmail/index.js";
 
 let manager: ClientManager;
 export const taskRunnerHook = (_: unknown, x: ClientManager) => (manager = x);
@@ -162,7 +162,7 @@ async function runReminders() {
                 const user = await client.users.fetch(reminder.user);
                 await user.send(formatReminder(reminder, color));
             } catch {
-                (dmReminders[secrets.DISCORD.CLIENT.ID] ??= []).push(reminder);
+                (dmReminders[CLIENT_ID] ??= []).push(reminder);
             }
     }
 

@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { defer, template, type Commands } from "@daedalus/bot-utils";
-import { stem } from "@daedalus/highlights";
+import { trpc } from "../../api/index.js";
+import { defer, template, type Commands } from "../../bot-utils/index.js";
+import { stem } from "../../highlights/index.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { fetchAndSendCustom, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
 import { Client, Events } from "discord.js";
+import { trpc } from "../api/index.js";
+import { fetchAndSendCustom, isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 
 export const supporterAnnouncementsHook = (client: Client) => {
     (async () => {

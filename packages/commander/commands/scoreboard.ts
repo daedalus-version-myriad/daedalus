@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { defer, type Commands, getColor } from "@daedalus/bot-utils";
+import { trpc } from "../../api/index.js";
+import { defer, type Commands, getColor } from "../../bot-utils/index.js";
 import { ChannelType } from "discord.js";
 
 export default (x: Commands) =>

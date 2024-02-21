@@ -1,7 +1,12 @@
-import { reply, template } from "@daedalus/bot-utils";
 import { Client, Events } from "discord.js";
+import { reply, template } from "../bot-utils/index.js";
+import type { ClientManager } from "../clients/index.js";
 
-export const interactionsHook = (client: Client) =>
+export let clients: ClientManager;
+
+export const interactionsHook = (client: Client, x: ClientManager) => {
+    clients = x;
+
     client.on(Events.InteractionCreate, async (interaction) => {
         if (!interaction.isMessageComponent() && !interaction.isModalSubmit()) return;
 
@@ -41,3 +46,4 @@ export const interactionsHook = (client: Client) =>
             ));
         }
     });
+};

@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { confirm, enforcePermissions, template, timeinfo, type Commands } from "@daedalus/bot-utils";
+import { trpc } from "../../api/index.js";
+import { confirm, enforcePermissions, template, timeinfo, type Commands } from "../../bot-utils/index.js";
 import { Colors } from "discord.js";
-import { historyActionStrings } from "../lib/moderation";
+import { historyActionStrings } from "../lib/moderation.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

@@ -1,5 +1,5 @@
-import { enforcePermissions, template, type Commands } from "@daedalus/bot-utils";
-import { DurationStyle, formatDuration, parseDuration } from "@daedalus/global-utils";
+import { enforcePermissions, template, type Commands } from "../../bot-utils/index.js";
+import { DurationStyle, formatDuration, parseDuration } from "../../global-utils/index.js";
 import { ChannelType } from "discord.js";
 
 export default (x: Commands) =>

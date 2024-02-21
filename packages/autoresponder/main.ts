@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, isWrongClient, sendCustomMessage } from "@daedalus/bot-utils";
+import { trpc } from "../api/index.js";
+import { isModuleDisabled, isWrongClient, sendCustomMessage } from "../bot-utils/index.js";
 import { Client, Events, type GuildBasedChannel } from "discord.js";
 
 export const autoresponderHook = (client: Client) =>

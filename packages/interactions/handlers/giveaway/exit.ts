@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
 import { ButtonInteraction, Colors } from "discord.js";
+import { trpc } from "../../../api/index.js";
 
 export default async function (button: ButtonInteraction, _id: string) {
     const id = parseInt(_id);

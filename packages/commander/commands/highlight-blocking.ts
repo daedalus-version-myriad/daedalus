@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { template, type Commands } from "@daedalus/bot-utils";
+import { trpc } from "../../api/index.js";
+import { template, type Commands } from "../../bot-utils/index.js";
 import { ChannelType, Colors } from "discord.js";
 
 export default (x: Commands) =>

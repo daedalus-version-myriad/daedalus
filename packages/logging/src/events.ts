@@ -1,11 +1,11 @@
-import { trpc } from "@daedalus/api";
-import { code, embed, expand, mdash, timeinfo } from "@daedalus/bot-utils";
-import stickerCache from "@daedalus/bot-utils/sticker-cache";
-import { permissions } from "@daedalus/data";
-import { englishList } from "@daedalus/formatting";
-import { DurationStyle, formatDuration } from "@daedalus/global-utils";
 import { AuditLogEvent, ChannelType, Client, Colors, Events, MessageFlags } from "discord.js";
-import { invokeLog } from "./lib";
+import { trpc } from "../../api/index.js";
+import { code, embed, expand, mdash, timeinfo } from "../../bot-utils/index.js";
+import stickerCache from "../../bot-utils/sticker-cache.js";
+import { permissions } from "../../data/index.js";
+import { englishList } from "../../formatting/index.js";
+import { DurationStyle, formatDuration } from "../../global-utils/index.js";
+import { invokeLog } from "./lib.js";
 import {
     channelUpdate,
     emojiUpdate,
@@ -20,8 +20,8 @@ import {
     roleUpdate,
     stickerUpdate,
     threadUpdate,
-} from "./messages";
-import { audit, auditEntry, channelTypes } from "./utils";
+} from "./messages.js";
+import { audit, auditEntry, channelTypes } from "./utils.js";
 
 export function addEventHandlers(client: Client) {
     (async () => {

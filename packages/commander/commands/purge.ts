@@ -1,10 +1,10 @@
-import { trpc } from "@daedalus/api";
-import { confirm, defer, obtainLimit, template, type Commands } from "@daedalus/bot-utils";
-import { secrets } from "@daedalus/config";
-import { PremiumTier, premiumBenefits } from "@daedalus/data";
-import { parseMessageURL } from "@daedalus/global-utils";
-import { stopButton } from "@daedalus/interactions";
-import type { SlashUtil } from "argentium/src/slash-util";
+import { trpc } from "../../api/index.js";
+import { confirm, defer, obtainLimit, template, type Commands } from "../../bot-utils/index.js";
+import { secrets } from "../../config/index.js";
+import { PremiumTier, premiumBenefits } from "../../data/index.js";
+import { parseMessageURL } from "../../global-utils/index.js";
+import { stopButton } from "../../interactions/index.js";
+import type { SlashUtil } from "../../argentium/src/slash-util";
 import { Colors, ComponentType, type ChatInputCommandInteraction, type Message } from "discord.js";
 
 export default (x: Commands) =>

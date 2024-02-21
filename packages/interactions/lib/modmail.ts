@@ -1,6 +1,6 @@
-import { isModuleDisabled, isWrongClient, template } from "@daedalus/bot-utils";
-import { modmailReply, modmailTargetSelector } from "@daedalus/modmail";
 import { escapeMarkdown, type BaseMessageOptions, type MessageComponentInteraction, type ModalMessageModalSubmitInteraction } from "discord.js";
+import { isModuleDisabled, isWrongClient, template } from "../../bot-utils/index.js";
+import { modmailReply, modmailTargetSelector } from "../../modmail/index.js";
 
 export const modmailLoading: BaseMessageOptions = {
     embeds: [

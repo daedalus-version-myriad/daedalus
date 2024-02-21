@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { countEntries } from "@daedalus/giveaways";
 import { ButtonInteraction, ButtonStyle, Colors, ComponentType } from "discord.js";
+import { trpc } from "../../../api/index.js";
+import { countEntries } from "../../../giveaways/index.js";
 
 const exit = (id: number) => [
     {

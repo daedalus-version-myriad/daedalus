@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { renderPollFor } from "@daedalus/polls";
 import { ButtonInteraction } from "discord.js";
+import { trpc } from "../../../api/index.js";
+import { renderPollFor } from "../../../polls/index.js";
 
 export default async function (button: ButtonInteraction) {
     const noVote = await trpc.pollAbstain.mutate({ message: button.message.id, user: button.user.id });

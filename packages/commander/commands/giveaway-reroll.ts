@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { getColor, type Commands } from "@daedalus/bot-utils";
-import { englishList } from "@daedalus/formatting";
-import { draw } from "@daedalus/giveaways";
+import { trpc } from "../../api/index.js";
+import { getColor, type Commands } from "../../bot-utils/index.js";
+import { englishList } from "../../formatting/index.js";
+import { draw } from "../../giveaways/index.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

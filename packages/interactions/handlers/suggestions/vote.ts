@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
 import { type APIButtonComponent, type ButtonInteraction } from "discord.js";
+import { trpc } from "../../../api/index.js";
 
 export default async function (button: ButtonInteraction, vote: string) {
     await button.deferUpdate();

@@ -1,10 +1,10 @@
-import { secrets } from "@daedalus/config";
+import { secrets } from "../../../../config/index.js";
 import type { TextChannel } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { bot } from "../../bot";
-import { db, tables } from "../../db";
-import { proc } from "../trpc";
+import { bot } from "../../bot/index.js";
+import { db, tables } from "../../db/index.js";
+import { proc } from "../trpc.js";
 
 let channel: TextChannel;
 

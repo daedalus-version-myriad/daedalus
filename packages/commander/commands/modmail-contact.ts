@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { checkPermissions, defer, embed, getColor, template, type Commands } from "@daedalus/bot-utils";
-import { logError } from "@daedalus/log-interface";
-import type { GuildModmailSettings } from "@daedalus/types";
+import { trpc } from "../../api/index.js";
+import { checkPermissions, defer, embed, getColor, template, type Commands } from "../../bot-utils/index.js";
+import { logError } from "../../log-interface/index.js";
+import type { GuildModmailSettings } from "../../types/index.js";
 import { ChannelType, Colors, ComponentType, ThreadAutoArchiveDuration, ThreadChannel, type TextBasedChannel } from "discord.js";
 
 export default (x: Commands) =>

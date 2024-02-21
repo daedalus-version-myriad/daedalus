@@ -1,4 +1,4 @@
-import { ModuleData } from "./types.js";
+import { type ModuleData } from "./types.js";
 
 export const modules: ModuleData = {
     logging: {

@@ -1,6 +1,6 @@
-import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
 import { Client, Events, type GuildTextBasedChannel } from "discord.js";
-import { updateStick } from "./lib";
+import { isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
+import { updateStick } from "./lib.js";
 
 export const stickyMessagesHook = (client: Client) =>
     client.on(Events.MessageCreate, async (message) => {

@@ -1,14 +1,14 @@
-import { secrets } from "@daedalus/config";
-import { DISCORD_API } from "@daedalus/config/public";
-import type { DashboardGuild } from "@daedalus/types";
 import { PermissionFlagsBits } from "discord.js";
 import { eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
-import { bot, clients } from "../../bot";
-import { tables } from "../../db";
-import { db } from "../../db/db";
-import { snowflake } from "../schemas";
-import { proc } from "../trpc";
+import { secrets } from "../../../../config/index.js";
+import { DISCORD_API } from "../../../../config/public.js";
+import type { DashboardGuild } from "../../../../types/index.js";
+import { bot, clients } from "../../bot/index.js";
+import { db } from "../../db/db.js";
+import { tables } from "../../db/index.js";
+import { snowflake } from "../schemas.js";
+import { proc } from "../trpc.js";
 
 export async function isAdmin(id: string) {
     return (

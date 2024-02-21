@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, isWrongClient, obtainLimit, template } from "@daedalus/bot-utils";
 import type { ButtonInteraction } from "discord.js";
+import { trpc } from "../../../api/index.js";
+import { isModuleDisabled, isWrongClient, obtainLimit, template } from "../../../bot-utils/index.js";
 
 export default async function (button: ButtonInteraction, _row: string, _col: string) {
     await button.deferReply({ ephemeral: true });

@@ -1,8 +1,8 @@
-import { code } from "@daedalus/bot-utils";
-import { englishList } from "@daedalus/formatting";
-import type { GuildAutomodSettings } from "@daedalus/types";
 import { GuildMember, Invite, Message, PermissionFlagsBits, escapeMarkdown, type GuildBasedChannel, type PartialMessage } from "discord.js";
-import { escapeRegExp } from "lodash";
+import _ from "lodash";
+import { code } from "../bot-utils/index.js";
+import { englishList } from "../formatting/index.js";
+import type { GuildAutomodSettings } from "../types/index.js";
 
 export type Rule = GuildAutomodSettings["rules"][number] & { id: number };
 
@@ -50,7 +50,7 @@ export async function match(rule: Rule, message: Message, multiDeleteTargets: Me
             if (term.endsWith("*")) term = term.slice(0, -1);
             else post = "\\b";
 
-            const match = message.content.match(pre + escapeRegExp(term) + post);
+            const match = message.content.match(pre + _.escapeRegExp(term) + post);
             if (match) matches.push(match[0]);
         }
 
@@ -263,7 +263,7 @@ export async function match(rule: Rule, message: Message, multiDeleteTargets: Me
         const blocked = new Set<string>();
 
         for (const pattern of rule.linkBlocklistData.websites)
-            if (message.content.match(new RegExp(`\\bhttps?:\/\/[^/\\s]*${escapeRegExp(pattern)}(${pattern.endsWith("/") ? "" : "/"}\\S*)*?`)))
+            if (message.content.match(new RegExp(`\\bhttps?:\/\/[^/\\s]*${_.escapeRegExp(pattern)}(${pattern.endsWith("/") ? "" : "/"}\\S*)*?`)))
                 blocked.add(pattern);
 
         if (blocked.size === 0) return;

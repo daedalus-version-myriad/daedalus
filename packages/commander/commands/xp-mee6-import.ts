@@ -1,4 +1,4 @@
-import { getColor, type Commands } from "@daedalus/bot-utils";
+import { getColor, type Commands } from "../../bot-utils/index.js";
 import { ComponentType, type BaseMessageOptions } from "discord.js";
 
 export default (x: Commands) =>

@@ -1,4 +1,4 @@
-import { commandMap, logEvents, modules, type PremiumBenefits } from "@daedalus/data";
+import { commandMap, logEvents, modules, type PremiumBenefits } from "../../../../data/index.js";
 import type {
     CustomMessageText,
     GuildAutorolesSettings,
@@ -7,15 +7,15 @@ import type {
     GuildReactionRolesSettings,
     GuildStickyRolesSettings,
     ParsedMessage,
-} from "@daedalus/types";
+} from "../../../../types/index.js";
 import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import { z } from "zod";
-import { tables } from "../../db";
-import { db } from "../../db/db";
-import { snowflake } from "../schemas";
-import { decodeArray } from "../transformations";
-import { proc } from "../trpc";
-import { mapFiles } from "./file-service";
+import { tables } from "../../db/index.js";
+import { db } from "../../db/db.js";
+import { snowflake } from "../schemas.js";
+import { decodeArray } from "../transformations.js";
+import { proc } from "../trpc.js";
+import { mapFiles } from "./file-service.js";
 import {
     getAutokickSettings,
     getAutomodSettings,
@@ -32,8 +32,8 @@ import {
     getXpSettings,
     transformGiveawayBase,
     transformXpSettings,
-} from "./guild-settings";
-import { getLimit } from "./premium";
+} from "./guild-settings.js";
+import { getLimit } from "./premium.js";
 
 const haltedActions = new Set<string>();
 

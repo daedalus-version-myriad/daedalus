@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { defer, getColor, mdash, template, type Commands } from "@daedalus/bot-utils";
+import { trpc } from "../../api/index.js";
+import { defer, getColor, mdash, template, type Commands } from "../../bot-utils/index.js";
 import { ButtonStyle, ComponentType, type ButtonComponentData } from "discord.js";
 
 export default (x: Commands) =>

@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { template, type Commands } from "@daedalus/bot-utils";
-import { updateStick } from "@daedalus/sticky-messages";
+import { trpc } from "../../api/index.js";
+import { template, type Commands } from "../../bot-utils/index.js";
+import { updateStick } from "../../sticky-messages/index.js";
 import type { GuildTextBasedChannel } from "discord.js";
 
 export default (x: Commands) =>

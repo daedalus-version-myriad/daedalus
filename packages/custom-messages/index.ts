@@ -1,4 +1,4 @@
-import { getColor } from "@daedalus/bot-utils";
+import { getColor } from "../bot-utils/index.js";
 import type {
     CustomMessageComponent,
     CustomMessageContext,
@@ -7,9 +7,9 @@ import type {
     CustomMessageValue,
     MessageData,
     ParsedMessage,
-} from "@daedalus/types";
+} from "../types/index.js";
 import type { MessageCreateOptions } from "discord.js";
-import functions, { flatFMap } from "./functions";
+import functions, { flatFMap } from "./functions.js";
 const escapeMap: Record<string, string> = { r: "\r", t: "\t", f: "\f", n: "\n", "\\": "\\", "'": "'", '"': '"' };
 
 class CharArray {

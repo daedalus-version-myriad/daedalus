@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import type { GuildGiveawaySettings } from "@daedalus/types";
+import { trpc } from "../api/index.js";
+import type { GuildGiveawaySettings } from "../types/index.js";
 import type { Guild, GuildMember } from "discord.js";
 
 export async function countEntries(giveaway: GuildGiveawaySettings["giveaways"][number], member: GuildMember) {

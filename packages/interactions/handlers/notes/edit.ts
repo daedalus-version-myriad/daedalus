@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { enforcePermissions, template } from "@daedalus/bot-utils";
 import { ModalSubmitInteraction } from "discord.js";
+import { trpc } from "../../../api/index.js";
+import { enforcePermissions, template } from "../../../bot-utils/index.js";
 
 export default async function (cmd: ModalSubmitInteraction, user: string) {
     await enforcePermissions(cmd.user, "notes", cmd.channel!);

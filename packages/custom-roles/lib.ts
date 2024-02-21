@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import type { GuildCustomRolesSettings } from "@daedalus/types";
+import { trpc } from "../api/index.js";
+import type { GuildCustomRolesSettings } from "../types/index.js";
 import { ChatInputCommandInteraction, GuildMember } from "discord.js";
 
 export async function isSupporter(member: GuildMember, config?: GuildCustomRolesSettings) {

@@ -1,10 +1,10 @@
-import type { AccountSettings } from "@daedalus/types";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { tables } from "../../db";
-import { db } from "../../db/db";
-import { snowflake } from "../schemas";
-import { proc } from "../trpc";
+import type { AccountSettings } from "../../../../types/index.js";
+import { db } from "../../db/db.js";
+import { tables } from "../../db/index.js";
+import { snowflake } from "../schemas.js";
+import { proc } from "../trpc.js";
 
 export default {
     getAccountSettings: proc.input(z.string()).query(async ({ input: id }): Promise<AccountSettings> => {

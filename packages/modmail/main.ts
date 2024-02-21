@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, isWrongClient, template } from "@daedalus/bot-utils";
 import { Client, Events, MessageType, type Guild, type Message } from "discord.js";
-import { modmailGuildSelector, modmailMultiResendConfirmation, modmailReply, modmailResendConfirmation, modmailTargetSelector } from "./lib";
+import { trpc } from "../api/index.js";
+import { isModuleDisabled, isWrongClient, template } from "../bot-utils/index.js";
+import { modmailGuildSelector, modmailMultiResendConfirmation, modmailReply, modmailResendConfirmation, modmailTargetSelector } from "./lib.js";
 
 export const modmailHook = (client: Client) =>
     client

@@ -1,4 +1,4 @@
-import { secrets } from "@daedalus/config";
+import { secrets } from "../config/index.js";
 import type { Config } from "drizzle-kit";
 
 export default {

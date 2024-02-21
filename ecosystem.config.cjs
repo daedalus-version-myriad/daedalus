@@ -2,8 +2,7 @@ module.exports = {
     apps: [
         {
             name: "backend",
-            cwd: `./packages/backend`,
-            script: "bun start",
+            script: "npm start",
         },
         {
             name: "dashboard",

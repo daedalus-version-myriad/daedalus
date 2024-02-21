@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { defer, getColor, timeinfo, type Commands } from "@daedalus/bot-utils";
-import { parseDuration } from "@daedalus/global-utils";
-import { closeModmailThread, getModmailContactInfo } from "@daedalus/modmail";
+import { trpc } from "../../api/index.js";
+import { defer, getColor, timeinfo, type Commands } from "../../bot-utils/index.js";
+import { parseDuration } from "../../global-utils/index.js";
+import { closeModmailThread, getModmailContactInfo } from "../../modmail/index.js";
 import { escapeMarkdown } from "discord.js";
 
 export default (x: Commands) =>

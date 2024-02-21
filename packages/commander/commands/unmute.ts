@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import { confirm, enforcePermissions, getColor, getMuteRole, isModuleDisabled, sendDM, type Commands } from "@daedalus/bot-utils";
+import { trpc } from "../../api/index.js";
+import { confirm, enforcePermissions, getColor, getMuteRole, isModuleDisabled, sendDM, type Commands } from "../../bot-utils/index.js";
 import { Colors, type GuildMember } from "discord.js";
 
 export default (x: Commands) =>

@@ -1,12 +1,12 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
-import type { ClientManager } from "@daedalus/clients";
-import { secrets } from "@daedalus/config";
+import { trpc } from "../api/index.js";
+import { isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
+import type { ClientManager } from "../clients/index.js";
+import { secrets } from "../config/index.js";
 import { initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { Client, Events, GuildMember, type PartialGuildMember } from "discord.js";
 import { z } from "zod";
-import { isSupporter } from "./lib";
+import { isSupporter } from "./lib.js";
 
 let manager: ClientManager;
 

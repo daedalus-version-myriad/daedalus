@@ -1,5 +1,5 @@
-import { enforcePermissions } from "@daedalus/bot-utils";
 import { ButtonInteraction } from "discord.js";
+import { enforcePermissions } from "../../../bot-utils/index.js";
 
 export default async function (button: ButtonInteraction) {
     await enforcePermissions(button.user, "poll", button.channel!);

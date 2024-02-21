@@ -1,8 +1,8 @@
-import { fetchCaller, getColor, template, type Commands } from "@daedalus/bot-utils";
-import { formatCustomMessageString } from "@daedalus/custom-messages";
-import { getModmailContactInfo, handleReply } from "@daedalus/modmail";
+import { fetchCaller, getColor, template, type Commands } from "../../bot-utils/index.js";
+import { formatCustomMessageString } from "../../custom-messages/index.js";
+import { getModmailContactInfo, handleReply } from "../../modmail/index.js";
 import { ButtonInteraction, ButtonStyle, Colors, ComponentType, escapeMarkdown } from "discord.js";
-import { addModmailSnippetOption, addModmailSnippetSendOption, loadSnippet } from "../lib/modmail";
+import { addModmailSnippetOption, addModmailSnippetSendOption, loadSnippet } from "../lib/modmail.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

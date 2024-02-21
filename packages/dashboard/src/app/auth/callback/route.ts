@@ -1,5 +1,3 @@
-import { secrets } from "@daedalus/config";
-import { CLIENT_ID, DISCORD_API } from "@daedalus/config/public";
 import { cookies } from "next/headers";
 
 const fail = (path = "/") => new Response(null, { headers: { Location: path }, status: 302 });
@@ -12,13 +10,13 @@ export async function GET(req: Request) {
     const state = url.searchParams.get("state");
     if (!state || state.substring(0, 32) !== cookies().get("state")?.value) return fail("/state-mismatch");
 
-    const request = await fetch(`${DISCORD_API}/oauth2/token`, {
+    const request = await fetch(`${process.env.DISCORD_API}/oauth2/token`, {
         method: "post",
         body: new URLSearchParams({
-            client_id: CLIENT_ID,
-            client_secret: secrets.DISCORD.CLIENT.SECRET,
+            client_id: process.env.CLIENT_ID!,
+            client_secret: process.env.SECRET!,
             grant_type: "authorization_code",
-            redirect_uri: `${secrets.DOMAIN}/auth/callback`,
+            redirect_uri: `${process.env.DOMAIN}/auth/callback`,
             code,
             scope: "identify guilds",
         }),

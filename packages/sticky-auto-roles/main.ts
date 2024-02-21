@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { willAutokick } from "@daedalus/autokick";
-import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
 import { Client, Events, GuildMember, type PartialGuildMember } from "discord.js";
+import { trpc } from "../api/index.js";
+import { willAutokick } from "../autokick/index.js";
+import { isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 
 export const stickyAutoRolesHook = (client: Client) =>
     client

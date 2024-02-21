@@ -1,5 +1,5 @@
-import { trpc } from "@daedalus/api";
-import type { GuildAutokickSettings } from "@daedalus/types";
+import { trpc } from "../api/index.js";
+import type { GuildAutokickSettings } from "../types/index.js";
 import type { GuildMember } from "discord.js";
 
 export async function willAutokick(member: GuildMember, config?: GuildAutokickSettings) {

@@ -1,7 +1,7 @@
 import type { APIGuild, Guild } from "discord.js";
 import { Db, MongoClient } from "mongodb";
-import { commandMap, modules } from "./modules";
-import { PremiumTier, premiumBenefits } from "./premium";
+import { commandMap, modules } from "./modules.js";
+import { PremiumTier, premiumBenefits } from "./premium.js";
 import type {
     DBAccountSettings,
     DBPoll,

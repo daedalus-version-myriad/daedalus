@@ -1,11 +1,3 @@
-import { trpc } from "@daedalus/api";
-import { secrets } from "@daedalus/config";
-import { formatMessage } from "@daedalus/custom-messages";
-import type { PremiumBenefits } from "@daedalus/data";
-import { commandMap, modules, permissions } from "@daedalus/data";
-import { logError } from "@daedalus/log-interface";
-import type { CustomMessageContext, ParsedMessage } from "@daedalus/types";
-import type Argentium from "argentium";
 import {
     Attachment,
     ButtonInteraction,
@@ -36,7 +28,15 @@ import {
     type RepliableInteraction,
     type TextBasedChannel,
 } from "discord.js";
-import stickerCache from "./sticker-cache";
+import { trpc } from "../api/index.js";
+import type Argentium from "../argentium/index.js";
+import { secrets } from "../config/index.js";
+import { formatMessage } from "../custom-messages/index.js";
+import type { PremiumBenefits } from "../data/index.js";
+import { commandMap, modules, permissions } from "../data/index.js";
+import { logError } from "../log-interface/index.js";
+import type { CustomMessageContext, ParsedMessage } from "../types/index.js";
+import stickerCache from "./sticker-cache.js";
 export const mdash = "—";
 export const to = "→";
 

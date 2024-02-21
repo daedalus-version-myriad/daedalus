@@ -1,5 +1,5 @@
-import { getColor } from "@daedalus/bot-utils";
-import Argentium from "argentium";
+import Argentium from "../../argentium/index.js";
+import { getColor } from "../../bot-utils/index.js";
 
 export default (app: Argentium) =>
     app.allowInDms("random").commands((x) =>

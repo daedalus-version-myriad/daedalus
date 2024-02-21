@@ -1,12 +1,12 @@
-import { template } from "@daedalus/bot-utils";
-import type { ClientManager } from "@daedalus/clients";
-import { secrets } from "@daedalus/config";
 import { initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import type { Client } from "discord.js";
 import { z } from "zod";
-import { addEventHandlers } from "./src/events";
-import { invokeLog } from "./src/lib";
+import { template } from "../bot-utils/index.js";
+import type { ClientManager } from "../clients/index.js";
+import { secrets } from "../config/index.js";
+import { addEventHandlers } from "./src/events.js";
+import { invokeLog } from "./src/lib.js";
 
 let manager: ClientManager;
 

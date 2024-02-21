@@ -1,10 +1,10 @@
-import { trpc } from "@daedalus/api";
-import { expand, getMuteRole, isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
-import { englishList } from "@daedalus/formatting";
-import { formatDuration } from "@daedalus/global-utils";
-import { logError } from "@daedalus/log-interface";
 import { Client, Events, type Message, type PartialMessage, type TextBasedChannel } from "discord.js";
-import { match, skip, type Rule } from "./lib";
+import { trpc } from "../api/index.js";
+import { expand, getMuteRole, isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
+import { englishList } from "../formatting/index.js";
+import { formatDuration } from "../global-utils/index.js";
+import { logError } from "../log-interface/index.js";
+import { match, skip, type Rule } from "./lib.js";
 
 export const automodHook = (client: Client) => client.on(Events.MessageCreate, check).on(Events.MessageUpdate, async (_, message) => await check(message));
 

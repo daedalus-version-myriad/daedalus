@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { getColor, template } from "@daedalus/bot-utils";
-import type { Poll } from "@daedalus/types";
 import { ButtonStyle, ComponentType, Guild, type BaseMessageOptions, type ButtonComponentData } from "discord.js";
+import { trpc } from "../api/index.js";
+import { getColor, template } from "../bot-utils/index.js";
+import type { Poll } from "../types/index.js";
 
 export async function renderPollFor(message: string, guild: Guild): Promise<BaseMessageOptions> {
     const poll = await trpc.getPoll.query(message);

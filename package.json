@@ -1,62 +1,63 @@
 {
-  "name": "daedalus",
-  "module": "index.ts",
-  "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "start": "bun index.ts",
-    "format": "prettier --write ."
-  },
-  "devDependencies": {
-    "@tailwindcss/typography": "^0.5.10",
-    "@types/bun": "latest",
-    "@types/he": "^1.2.3",
-    "@types/lodash": "^4.14.202",
-    "@types/node": "^20.11.5",
-    "@types/react": "^18.2.48",
-    "@types/react-dom": "^18.2.18",
-    "@types/wcag-contrast": "^3.0.3",
-    "autoprefixer": "^10.4.17",
-    "drizzle-kit": "^0.20.13",
-    "eslint": "^8.56.0",
-    "eslint-config-next": "^14.1.0",
-    "postcss": "^8.4.33",
-    "prettier": "^3.2.4",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.3.3"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@emoji-mart/data": "^1.1.2",
-    "@emoji-mart/react": "^1.1.1",
-    "@hookform/resolvers": "^3.3.4",
-    "@planetscale/database": "^1.14.0",
-    "@trpc/client": "next",
-    "@trpc/server": "next",
-    "argentium": "0.0.15",
-    "discord.js": "latest",
-    "drizzle-orm": "^0.29.3",
-    "emoji-mart": "^5.5.2",
-    "he": "^1.2.0",
-    "lodash": "^4.17.21",
-    "mongodb": "^6.3.0",
-    "natural": "^6.10.4",
-    "next": "^14.1.0",
-    "next-themes": "^0.2.1",
-    "nopt": "^7.2.0",
-    "react": "^18.2.0",
-    "react-colorful": "^5.6.1",
-    "react-dom": "^18.2.0",
-    "react-icons": "^5.0.1",
-    "sharp": "^0.33.2",
-    "stripe": "^14.14.0",
-    "usehooks-ts": "^2.9.5",
-    "wcag-contrast": "^3.0.0",
-    "zod": "^3.22.4",
-    "zx": "^7.2.3"
-  }
+    "name": "daedalus",
+    "module": "index.ts",
+    "type": "module",
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/main.js",
+        "format": "prettier --write ."
+    },
+    "devDependencies": {
+        "@tailwindcss/typography": "^0.5.10",
+        "@types/bun": "latest",
+        "@types/he": "^1.2.3",
+        "@types/lodash": "^4.14.202",
+        "@types/node": "^20.11.5",
+        "@types/react": "^18.2.48",
+        "@types/react-dom": "^18.2.18",
+        "@types/wcag-contrast": "^3.0.3",
+        "autoprefixer": "^10.4.17",
+        "drizzle-kit": "^0.20.13",
+        "eslint": "^8.56.0",
+        "eslint-config-next": "^14.1.0",
+        "postcss": "^8.4.33",
+        "prettier": "^3.2.4",
+        "tailwindcss": "^3.4.1",
+        "typescript": "^5.3.3"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@emoji-mart/data": "^1.1.2",
+        "@emoji-mart/react": "^1.1.1",
+        "@hookform/resolvers": "^3.3.4",
+        "@planetscale/database": "^1.14.0",
+        "@trpc/client": "next",
+        "@trpc/server": "next",
+        "discord.js": "latest",
+        "dotenv": "^16.4.5",
+        "drizzle-orm": "^0.29.3",
+        "emoji-mart": "^5.5.2",
+        "he": "^1.2.0",
+        "lodash": "^4.17.21",
+        "mongodb": "^6.3.0",
+        "natural": "^6.10.4",
+        "next": "^14.1.0",
+        "next-themes": "^0.2.1",
+        "nopt": "^7.2.0",
+        "react": "^18.2.0",
+        "react-colorful": "^5.6.1",
+        "react-dom": "^18.2.0",
+        "react-icons": "^5.0.1",
+        "sharp": "^0.33.2",
+        "stripe": "^14.14.0",
+        "usehooks-ts": "^2.9.5",
+        "wcag-contrast": "^3.0.0",
+        "zod": "^3.22.4",
+        "zx": "^7.2.3"
+    }
 }

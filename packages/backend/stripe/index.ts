@@ -1,9 +1,9 @@
-import { secrets } from "@daedalus/config";
-import type { PremiumStripeSession } from "@daedalus/types";
+import { secrets } from "../../config/index.js";
+import type { PremiumStripeSession } from "../../types/index.js";
 import { eq, sql } from "drizzle-orm";
-import { db } from "../src/db/db";
-import { tables } from "../src/db";
-import stripe from "./stripe";
+import { db } from "../src/db/db.js";
+import { tables } from "../src/db/index.js";
+import stripe from "./stripe.js";
 
 const { PRICES } = secrets.STRIPE;
 

@@ -1,4 +1,3 @@
-import { expand, timestamp } from "@daedalus/bot-utils";
 import {
     ChannelType,
     GuildScheduledEventStatus,
@@ -9,6 +8,7 @@ import {
     type GuildAuditLogsResolvable,
     type PartialMessage,
 } from "discord.js";
+import { expand, timestamp } from "../../bot-utils/index.js";
 
 export async function auditEntry(guild: Guild, type: GuildAuditLogsResolvable, target?: any, key: string = "id"): Promise<GuildAuditLogsEntry | null> {
     const time = Date.now();

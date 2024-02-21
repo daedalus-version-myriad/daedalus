@@ -1,7 +1,7 @@
-import { fetchCaller, type Commands } from "@daedalus/bot-utils";
-import { formatCustomMessageString } from "@daedalus/custom-messages";
-import { getModmailContactInfo, startModal } from "@daedalus/modmail";
-import { addModmailSnippetOption, addModmailSnippetSendOption, loadSnippet } from "../lib/modmail";
+import { fetchCaller, type Commands } from "../../bot-utils/index.js";
+import { formatCustomMessageString } from "../../custom-messages/index.js";
+import { getModmailContactInfo, startModal } from "../../modmail/index.js";
+import { addModmailSnippetOption, addModmailSnippetSendOption, loadSnippet } from "../lib/modmail.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

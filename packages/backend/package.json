@@ -1,7 +1,9 @@
 {
     "name": "@daedalus/backend",
+    "type": "module",
     "scripts": {
-        "start": "bun main.ts",
+        "build": "tsc",
+        "start": "node dist/backend/main.js",
         "generate": "drizzle-kit generate:mysql",
         "migrate": "bun src/db/migrate.ts"
     },

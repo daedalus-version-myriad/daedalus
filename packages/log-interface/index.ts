@@ -1,6 +1,6 @@
-import { secrets } from "@daedalus/config";
-import type { Router } from "@daedalus/logging";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import { secrets } from "../config/index.js";
+import type { Router } from "../logging/index.js";
 
 const trpc = createTRPCClient<Router>({ links: [httpBatchLink({ url: `http://localhost:${secrets.PORTS.LOG}` })] });
 

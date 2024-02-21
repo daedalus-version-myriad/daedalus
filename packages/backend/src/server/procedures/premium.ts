@@ -1,17 +1,16 @@
-import { secrets } from "@daedalus/config";
-import { PremiumTier, premiumBenefits, type PremiumBenefits } from "@daedalus/data";
 import { Collection, GuildMember, PermissionFlagsBits, escapeMarkdown, type User } from "discord.js";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
-import { getPaymentLinks, getPortalSessions } from "../../../stripe";
-import { clients, setPresence } from "../../bot";
-import { tables } from "../../db";
-import { db } from "../../db/db";
-import { snowflake } from "../schemas";
-import { proc } from "../trpc";
-import { NO_PERMISSION, hasPermission, isOwner } from "./guild-settings";
-import { isAdmin } from "./users";
-import { clientUpdateEmitter } from "./vanity-clients";
+import { secrets } from "../../../../config/index.js";
+import { PremiumTier, premiumBenefits, type PremiumBenefits } from "../../../../data/index.js";
+import { getPaymentLinks, getPortalSessions } from "../../../stripe/index.js";
+import { clients, setPresence } from "../../bot/index.js";
+import { db } from "../../db/db.js";
+import { tables } from "../../db/index.js";
+import { snowflake } from "../schemas.js";
+import { proc } from "../trpc.js";
+import { NO_PERMISSION, hasPermission, isOwner } from "./guild-settings.js";
+import { isAdmin } from "./users.js";
 
 export async function getLimit(guild: string, key: keyof PremiumBenefits) {
     const [entry] = await db.select({ value: tables.limitOverrides[key] }).from(tables.limitOverrides).where(eq(tables.limitOverrides.guild, guild));
@@ -148,7 +147,7 @@ async function recalculateGuild(guild: string, dm: boolean = true) {
         } finally {
             if (old.hasCustom && !hasCustom) {
                 await db.delete(tables.tokens).where(eq(tables.tokens.guild, guild));
-                clientUpdateEmitter.emit("update", { guild, token: null });
+                clients.getBotFromToken(guild, null);
             }
         }
     })();
@@ -315,7 +314,7 @@ export default {
                 await db.delete(tables.tokens).where(eq(tables.tokens.guild, guild));
             }
 
-            clientUpdateEmitter.emit("update", { guild, token });
+            clients.getBotFromToken(guild, token);
         }),
     setStatus: proc
         .input(

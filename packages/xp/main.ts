@@ -1,8 +1,8 @@
-import { trpc } from "@daedalus/api";
-import { isModuleDisabled, isWrongClient } from "@daedalus/bot-utils";
-import type { ClientManager } from "@daedalus/clients";
 import { Client, Events, GuildChannel, MessageType, OAuth2Guild, type Channel } from "discord.js";
-import { addXp } from "./utils";
+import { trpc } from "../api/index.js";
+import { isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
+import type { ClientManager } from "../clients/index.js";
+import { addXp } from "./utils.js";
 
 let manager: ClientManager;
 
@@ -92,7 +92,7 @@ async function cycle() {
     }
 }
 
-await cycle();
+cycle();
 setInterval(cycle, 60000);
 
 setInterval(() => {

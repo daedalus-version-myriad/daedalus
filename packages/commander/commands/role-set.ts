@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { defer, template, type Commands } from "@daedalus/bot-utils";
-import { getCustomRoleData } from "@daedalus/custom-roles";
-import { logError } from "@daedalus/log-interface";
+import { trpc } from "../../api/index.js";
+import { defer, template, type Commands } from "../../bot-utils/index.js";
+import { getCustomRoleData } from "../../custom-roles/index.js";
+import { logError } from "../../log-interface/index.js";
 import { Colors } from "discord.js";
 
 const colorMap = Object.fromEntries(Object.entries(Colors).map(([key, color]) => [key.toLowerCase(), color]));

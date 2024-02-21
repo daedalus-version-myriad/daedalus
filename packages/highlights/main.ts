@@ -1,7 +1,7 @@
-import { trpc } from "@daedalus/api";
-import { checkPermissions, getColor, isModuleDisabled, isWrongClient, timestamp, truncate } from "@daedalus/bot-utils";
+import { trpc } from "../api/index.js";
+import { checkPermissions, getColor, isModuleDisabled, isWrongClient, timestamp, truncate } from "../bot-utils/index.js";
 import { ChannelType, Client, Events, GuildMember, MessageType, PermissionFlagsBits, type GuildTextBasedChannel } from "discord.js";
-import { stem } from "./lib";
+import { stem } from "./lib.js";
 
 const lastSeen = new Map<string, number>();
 const lastHighlighted = new Map<string, number>();

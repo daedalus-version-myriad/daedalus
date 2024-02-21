@@ -1,6 +1,6 @@
-import { trpc } from "@daedalus/api";
-import { defer, type Commands } from "@daedalus/bot-utils";
-import { formatDuration } from "@daedalus/global-utils";
+import { trpc } from "../../api/index.js";
+import { defer, type Commands } from "../../bot-utils/index.js";
+import { formatDuration } from "../../global-utils/index.js";
 import { Colors } from "discord.js";
 
 export default (x: Commands) =>

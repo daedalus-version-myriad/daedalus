@@ -1,4 +1,4 @@
-import * as natural from "natural";
+import natural from "natural";
 
 const tokenizer = new natural.WordTokenizer();
 
