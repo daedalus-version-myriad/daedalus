@@ -19,7 +19,7 @@ export const interactionsHook = (client: Client, x: ClientManager) => {
         let fn: any;
 
         try {
-            fn = require(`./handlers/${path}.js`).default;
+            fn = (await import(`./handlers/${path}.js`)).default;
         } catch (error) {
             console.error(path, error);
             return void (await interaction
