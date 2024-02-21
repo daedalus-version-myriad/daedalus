@@ -80,9 +80,9 @@ export const clients: ClientManager = new ClientManager({
             sweepers: { messages: { lifetime: 604800, interval: 3600 } },
             allowedMentions: { parse: [] },
         }),
-    postprocess: (client) =>
+    postprocess: (client, guild) =>
         [
-            (x: Client<true>) => setPresence(x),
+            (x: Client<true>, _: unknown, guild?: string) => setPresence(x, guild),
             autokickHook,
             automodHook,
             autoresponderHook,
@@ -105,7 +105,7 @@ export const clients: ClientManager = new ClientManager({
             ticketsHook,
             welcomeHook,
             xpHook,
-        ].forEach((f) => f(client, clients)),
+        ].forEach((f) => f(client, clients, guild)),
     sweep: 3600000,
 });
 
