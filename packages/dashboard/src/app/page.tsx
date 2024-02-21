@@ -9,7 +9,11 @@ import { FaArrowRight } from "react-icons/fa6";
 import TopButton from "./top-button";
 
 export default async function Home() {
-    const online = await trpc.checkStatus.query().catch(() => false);
+    const online = await trpc.checkStatus.query().catch((error) => {
+        console.error(error);
+        return false;
+    });
+
     const { news } = await trpc.newsList.query().catch(() => ({ news: [] }));
 
     return (
