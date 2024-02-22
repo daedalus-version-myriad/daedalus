@@ -23,7 +23,7 @@ export const metadata: Metadata = {
         title: "Daedalus Dashboard",
         description,
         url: "https://daedalusbot.xyz",
-        images: { url: "https://daedalusbot.xyz/favicon.png" },
+        images: { url: "https://daedalusbot.xyz/favicon.ico" },
     },
 };
 
