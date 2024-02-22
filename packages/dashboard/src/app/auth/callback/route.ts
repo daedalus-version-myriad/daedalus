@@ -22,7 +22,11 @@ export async function GET(req: Request) {
         }),
     });
 
-    if (!request.ok) return fail();
+    if (!request.ok) {
+        console.log(await request.text());
+        return fail();
+    }
+
     const response = await request.json();
 
     const access_token_exp = new Date(Date.now() + response.expires_in - 10000);
