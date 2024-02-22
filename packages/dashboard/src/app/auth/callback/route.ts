@@ -23,7 +23,10 @@ export async function GET(req: Request) {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
 
-    if (!request.ok) return fail();
+    if (!request.ok) {
+        console.error(await request.text());
+        return fail();
+    }
 
     const response = await request.json();
 
