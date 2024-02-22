@@ -25,6 +25,7 @@ export const metadata: Metadata = {
         url: "https://daedalusbot.xyz",
         images: { url: "https://daedalusbot.xyz/favicon.ico" },
     },
+    twitter: { card: "summary" },
 };
 
 export const viewport: Viewport = {
