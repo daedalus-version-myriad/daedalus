@@ -1,5 +1,3 @@
-import { secrets } from "@daedalus/config";
-import { CLIENT_ID, DISCORD_API } from "@daedalus/config/public";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
@@ -12,9 +10,9 @@ export async function middleware(request: NextRequest) {
     let setTokens = false;
 
     if (refresh_token && !access_token) {
-        const oauth2Request = await fetch(`${DISCORD_API}/oauth2/token`, {
+        const oauth2Request = await fetch(`${process.env.DISCORD_API}/oauth2/token`, {
             method: "post",
-            body: new URLSearchParams({ client_id: CLIENT_ID, client_secret: secrets.DISCORD.CLIENT.SECRET, grant_type: "refresh_token", refresh_token }),
+            body: new URLSearchParams({ client_id: process.env.CLIENT_ID!, client_secret: process.env.SECRET!, grant_type: "refresh_token", refresh_token }),
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         });
 
