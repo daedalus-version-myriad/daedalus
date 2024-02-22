@@ -23,6 +23,7 @@ export async function GET(req: Request) {
     });
 
     if (!request.ok) {
+        console.log(process.env.CLIENT_ID);
         console.log(await request.text());
         return fail();
     }
