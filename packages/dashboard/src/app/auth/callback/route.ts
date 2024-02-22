@@ -20,13 +20,10 @@ export async function GET(req: Request) {
             code,
             scope: "identify guilds",
         }),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
 
-    if (!request.ok) {
-        console.log(process.env.CLIENT_ID);
-        console.log(await request.text());
-        return fail();
-    }
+    if (!request.ok) return fail();
 
     const response = await request.json();
 
