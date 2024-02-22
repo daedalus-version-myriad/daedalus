@@ -19,7 +19,6 @@ import {
     type AnyThreadChannel,
     type GuildChannel,
     type MessageCreateOptions,
-    type PartialGuildMember,
     type PartialGuildScheduledEvent,
     type PartialMessage,
     type PartialUser,
@@ -149,7 +148,7 @@ export async function emojiUpdate(before: GuildEmoji, after: GuildEmoji): Promis
     };
 }
 
-export async function handleMemberUpdate(before: PartialGuildMember | GuildMember, after: GuildMember) {
+export async function handleMemberUpdate(before: GuildMember, after: GuildMember) {
     const entry = await auditEntry(after.guild, AuditLogEvent.MemberUpdate, after);
 
     const user = entry?.executor;

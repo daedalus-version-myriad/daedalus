@@ -143,6 +143,7 @@ export function addEventHandlers(client: Client) {
                 );
         })
         .on(Events.GuildMemberUpdate, async (before, after) => {
+            if (before.partial) return;
             await handleMemberUpdate(before, after);
         })
         .on(Events.GuildScheduledEventCreate, (event) => {

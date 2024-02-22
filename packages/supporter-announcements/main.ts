@@ -9,6 +9,7 @@ export const supporterAnnouncementsHook = (client: Client) => {
     })();
 
     client.on(Events.GuildMemberUpdate, async (before, after) => {
+        if (before.partial) return;
         if (after.user.bot) return;
 
         if (await isWrongClient(client, after.guild)) return;
