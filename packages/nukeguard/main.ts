@@ -162,7 +162,17 @@ export const nukeguardHook = (client: Client) =>
             const user = await audit(channel.guild, AuditLogEvent.ChannelDelete, channel);
             if (!user) return;
 
+            if (user.id === channel.guild.ownerId) return;
+            if (user.id === channel.client.user.id) return;
+
             const config = await trpc.getNukeguardConfig.query(channel.guild.id);
+
+            try {
+                const member = await channel.guild.members.fetch(user);
+                if (member.roles.cache.hasAny(...config.exemptedRoles)) return;
+            } catch {
+                return;
+            }
 
             let current: GuildChannel | null = channel;
 

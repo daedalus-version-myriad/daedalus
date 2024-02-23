@@ -1,3 +1,4 @@
+import type { MessageCreateOptions } from "discord.js";
 import { getColor } from "../bot-utils/index.js";
 import type {
     CustomMessageComponent,
@@ -8,7 +9,6 @@ import type {
     MessageData,
     ParsedMessage,
 } from "../types/index.js";
-import type { MessageCreateOptions } from "discord.js";
 import functions, { flatFMap } from "./functions.js";
 const escapeMap: Record<string, string> = { r: "\r", t: "\t", f: "\f", n: "\n", "\\": "\\", "'": "'", '"': '"' };
 
@@ -190,10 +190,10 @@ export async function formatMessage(input: ParsedMessage, ctx: CustomMessageCont
     ctx.user ??= ctx.member?.user;
     ctx.guild ??= ctx.member?.guild ?? ctx.role?.guild;
 
-    await ctx.member?.fetch();
-    await ctx.user?.fetch();
-    await ctx.guild?.fetch();
-    await ctx.guild?.members.fetch();
+    await ctx.member?.fetch().catch(() => null);
+    await ctx.user?.fetch().catch(() => null);
+    await ctx.guild?.fetch().catch(() => null);
+    await ctx.guild?.members.fetch().catch(() => null);
 
     const u = (x: CustomMessageText) => formatCustomMessageString(x, ctx);
 
