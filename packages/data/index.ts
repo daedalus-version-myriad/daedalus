@@ -195,8 +195,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/top [type] [range] [page]",
-                        `Fetch the top users in the server by XP.
-                        <ul class="list-disc list-inside">
+                        `<p>Fetch the top users in the server by XP.</p>
+                        <ul class="list-disc ml-4">
                             <li>Set <b>type</b> to only view the text or voice leaderboard (by default, both are shown).</li>
                             <li>Set <b>range</b> to view the daily, weekly, or monthly leaderboard (by default, shows the all-time leaderboard).</li>
                             <li>Set <b>page</b> to view other pages in the leaderboard.</li>
@@ -208,15 +208,15 @@ export const modules: ModuleData = {
                 name: "Rank",
                 description: "Get a user's XP and rank.",
                 ghost: true,
-                syntaxes: [["/rank [user]", `Show a user's rank card, including their text and voice XP, level, and rank.`]],
+                syntaxes: [["/rank [user]", `<p>Show a user's rank card, including their text and voice XP, level, and rank.</p>`]],
             },
             xp: {
                 name: "Manage XP",
                 description: "Manage the server's XP, including importing or fully resetting XP.",
                 permissions: ["ManageGuild"],
                 syntaxes: [
-                    ["/xp mee6-import", `Start the process for importing XP from MEE6.`],
-                    ["/xp reset <user>", `Reset a user's XP to 0.`],
+                    ["/xp mee6-import", `<p>Start the process for importing XP from MEE6.</p>`],
+                    ["/xp reset <user>", `<p>Reset a user's XP to 0.</p>`],
                 ],
             },
         },
@@ -239,8 +239,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/ban <user> [reason] [duration] [purge] [silent] [force]",
-                        `Ban a user.
-                        <ul class="list-disc list-inside">
+                        `<p>Ban a user.</p>
+                        <ul class="list-disc ml-4">
                             <li>The <b>reason</b> will be logged in Daedalus logs, audit logged, and sent to the user (unless silent).</li>
                             <li>Set <b>duration</b> to automatically unban the user after the specified amount of time elapses.</li>
                             <li>Set <b>purge</b> to automatically purge recent messages from the user within the specified amount of time.</li>
@@ -258,8 +258,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/kick <user> [reason] [silent]",
-                        `Kick a member.
-                        <ul class="list-disc list-inside">
+                        `<p>Kick a member.</p>
+                        <ul class="list-disc ml-4">
                             <li>The <b>reason</b> will be logged in Daedalus logs, audit logged, and sent to the user (unless silent).</li>
                             <li>Set <b>silent</b> to not notify the user that they were kicked.</li>
                         </ul>`,
@@ -274,8 +274,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/mute <user> [reason] [duration] [silent]",
-                        `Mute a user.
-                        <ul class="list-disc list-inside">
+                        `<p>Mute a user.</p>
+                        <ul class="list-disc ml-4">
                             <li>The <b>reason</b> will be logged in Daedalus logs, audit logged, and sent to the user (unless silent).</li>
                             <li>Set <b>duration</b> to automatically unmute the user after the specified amount of time elapses.</li>
                             <li>Set <b>silent</b> to not notify the user that they were muted.</li>
@@ -291,8 +291,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/timeout <user> [reason] [duration] [silent]",
-                        `Timeout a user.
-                        <ul class="list-disc list-inside">
+                        `<p>Timeout a user.</p>
+                        <ul class="list-disc ml-4">
                             <li>The <b>reason</b> will be logged in Daedalus logs, audit logged, and sent to the user (unless silent).</li>
                             <li>The <b>duration</b> determines for how long the user will be timed out. If excluded or set to zero, the user will have their timeout removed instead.</li>
                             <li>Set <b>silent</b> to not notify the user that they were timed out / their timeout was removed.</li>
@@ -307,8 +307,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/warn <user> <reason> [informal] [silent]",
-                        `Warn a user.
-                        <ul class="list-disc list-inside">
+                        `<p>Warn a user.</p>
+                        <ul class="list-disc ml-4">
                             <li>The <b>reason</b> will be logged in Daedalus logs and sent to the user (unless silent).</li>
                             <li>Set <b>informal</b> to modify the notification to state that it is informal and log it as informal.</li>
                             <li>Set <b>silent</b> to not notify the user of the warning. This is useful for retroactively logging direct warnings.</li>
@@ -324,8 +324,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/unban <user> [reason]",
-                        `Unban a user.
-                        <ul class="list-disc list-inside">
+                        `<p>Unban a user.</p>
+                        <ul class="list-disc ml-4">
                             <li>The <b>reason</b> is audit logged but not stored in Daedalus logs nor sent to the user.</li>
                         </ul>`,
                     ],
@@ -339,8 +339,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/unmute <user> [reason] [silent]",
-                        `Unmute a user.
-                        <ul class="list-disc list-inside">
+                        `<p>Unmute a user.</p>
+                        <ul class="list-disc ml-4">
                             <li>The <b>reason</b> is audit logged but not stored in Daedalus logs. It is also sent to the user (unless silent).</li>
                             <li>Set <b>silent</b> to not notify the user that they were unmuted.</li>
                         </ul>`,
@@ -354,9 +354,9 @@ export const modules: ModuleData = {
                 permissions: ["ManageGuild"],
                 selfPermissions: ["BanMembers"],
                 syntaxes: [
-                    ["/massban file <file> [reason] [purge]", `Massban a list of users from a file containing a list of IDs.`],
-                    ["/massban list <users> [reason] [purge]", `Massban a list of users by providing a list of IDs directly.`],
-                    ["/massban url <url> [reason] [purge]", `Massban a list of users via a URL pointing to a raw file containing a list of IDs.`],
+                    ["/massban file <file> [reason] [purge]", `<p>Massban a list of users from a file containing a list of IDs.</p>`],
+                    ["/massban list <users> [reason] [purge]", `<p>Massban a list of users by providing a list of IDs directly.</p>`],
+                    ["/massban url <url> [reason] [purge]", `<p>Massban a list of users via a URL pointing to a raw file containing a list of IDs.</p>`],
                 ],
             },
             history: {
@@ -364,7 +364,7 @@ export const modules: ModuleData = {
                 description: "View a user's history.",
                 ghost: true,
                 permissions: ["ModerateMembers"],
-                syntaxes: [["/history <user>", `View a user's Daedalus history.`]],
+                syntaxes: [["/history <user>", `<p>View a user's Daedalus history.</p>`]],
             },
             "delete-history": {
                 name: "Delete History Entry",
@@ -373,7 +373,7 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/delete-history <id>",
-                        `Delete a user history entry by ID. The IDs are shown when you take the moderation action and in <b>/history</b>.`,
+                        `<p>Delete a user history entry by ID. The IDs are shown when you take the moderation action and in <b>/history</b>.</p>`,
                     ],
                 ],
             },
@@ -381,7 +381,7 @@ export const modules: ModuleData = {
                 name: "Clear History",
                 description: "Clear a user's history.",
                 permissions: ["ManageGuild"],
-                syntaxes: [["/clear-history <user>", `Delete all history entriers for a user.`]],
+                syntaxes: [["/clear-history <user>", `<p>Delete all history entriers for a user.</p>`]],
             },
             slowmode: {
                 name: "Slowmode",
@@ -389,7 +389,7 @@ export const modules: ModuleData = {
                 bypass: true,
                 permissions: ["ManageChannels"],
                 selfPermissions: ["ManageChannels"],
-                syntaxes: [["/slowmode [channel] [delay]", `Set <b>channel</b>'s slowmode to the specified delay (default: this channel, 0 seconds).`]],
+                syntaxes: [["/slowmode [channel] [delay]", `<p>Set <b>channel</b>'s slowmode to the specified delay (default: this channel, 0 seconds).</p>`]],
             },
             purge: {
                 name: "Purge",
@@ -398,10 +398,10 @@ export const modules: ModuleData = {
                 permissions: ["ManageGuild"],
                 selfPermissions: ["ManageMessages"],
                 syntaxes: [
-                    ["/purge last <count> [types] [match] [case-sensitive]", `Select the last N messages and delete those that pass the filter.`],
+                    ["/purge last <count> [types] [match] [case-sensitive]", `<p>Select the last N messages and delete those that pass the filter.</p>`],
                     [
                         "/purge between <start> [end] [types] [match] [case-sensitive]",
-                        `Select messages inclusively between <b>start</b> and <b>end</b> (default: end of the channel) and delete those that pass the filter.`,
+                        `<p>Select messages inclusively between <b>start</b> and <b>end</b> (default: end of the channel) and delete those that pass the filter.</p>`,
                     ],
                 ],
             },
@@ -410,8 +410,8 @@ export const modules: ModuleData = {
                 description: "Record mod notes for a user.",
                 permissions: ["ModerateMembers"],
                 syntaxes: [
-                    ["/notes edit <user>", `Open a pop-up modal to edit a user's mod notes.`],
-                    ["/notes view <user>", `View a user's notes.`],
+                    ["/notes edit <user>", `<p>Open a pop-up modal to edit a user's mod notes.</p>`],
+                    ["/notes view <user>", `<p>View a user's notes.</p>`],
                 ],
             },
         },
@@ -452,8 +452,8 @@ export const modules: ModuleData = {
                 ghost: true,
                 selfPermissions: ["ManageRoles"],
                 syntaxes: [
-                    ["/role set [name] [color]", `Modify your custom role.`],
-                    ["/role delete", `Delete your custom role.`],
+                    ["/role set [name] [color]", `<p>Modify your custom role.</p>`],
+                    ["/role delete", `<p>Delete your custom role.</p>`],
                 ],
             },
         },
@@ -480,28 +480,28 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/modmail reply [content] [anon] [files...]",
-                        `Reply to a modmail thread. By default, the outgoing message shows your name, icon, and highest role, which can be disabled by setting <b>anon</b>.`,
+                        `<p>Reply to a modmail thread. By default, the outgoing message shows your name, icon, and highest role, which can be disabled by setting <b>anon</b>.</p>`,
                     ],
                     [
                         "/modmail reply-modal [anon] [files...]",
-                        `Reply to a modmail thread just like with <b>/modmail reply</b>, but you will be prompted to set the content in a pop-up modal, allowing for multi-line messages.`,
+                        `<p>Reply to a modmail thread just like with <b>/modmail reply</b>, but you will be prompted to set the content in a pop-up modal, allowing for multi-line messages.</p>`,
                     ],
                     [
                         "/modmail close [notify] [content] [delay]",
-                        `Close a modmail thread.
-                        <ul class="list-disc list-inside">
+                        `<p>Close a modmail thread.</p>
+                        <ul class="list-disc ml-4">
                             <li>Set <b>notify</b> to inform the user that the thread has been closed.</li>
                             <li>Set <b>content</b> to override the server-default close message (by default, no content is included).</li>
                             <li>Set <b>delay</b> to schedule the thread to be closed. The user will be notified immediately, and if neither party sends a message before the time window elapses, the user will be notified with the <b>content</b> if <b>notify</b> is set.
                         </ul>`,
                     ],
-                    ["/modmail contact <user>", `Open a modmail thread with a user from the server side.`],
-                    ["/modmail log-link", `Get the link to the log viewer on the dashboard for the current modmail thread.`],
-                    ["/modmail snippet send <snippet> [anon]", `Send a modmail snippet.`],
-                    ["/modmail snippet view <snippet>", `View the content of a snippet.`],
-                    ["/modmail snippet use-as-template <snippet> [anon]", `Use a snippet as a template and edit its content before sending.`],
-                    ["/modmail notify <mode>", `Enable or disable notifications for the current thread for the next message or all messages.`],
-                    ["/modmail nsfw <nsfw>", `Set the channel's NSFW status.`],
+                    ["/modmail contact <user>", `<p>Open a modmail thread with a user from the server side.</p>`],
+                    ["/modmail log-link", `<p>Get the link to the log viewer on the dashboard for the current modmail thread.</p>`],
+                    ["/modmail snippet send <snippet> [anon]", `<p>Send a modmail snippet.</p>`],
+                    ["/modmail snippet view <snippet>", `<p>View the content of a snippet.</p>`],
+                    ["/modmail snippet use-as-template <snippet> [anon]", `<p>Use a snippet as a template and edit its content before sending.</p>`],
+                    ["/modmail notify <mode>", `<p>Enable or disable notifications for the current thread for the next message or all messages.</p>`],
+                    ["/modmail nsfw <nsfw>", `<p>Set the channel's NSFW status.</p>`],
                 ],
             },
         },
@@ -515,7 +515,7 @@ export const modules: ModuleData = {
             ticket: {
                 name: "Ticket",
                 description: "Manage tickets.",
-                syntaxes: [["/ticket close", `Close a ticket channel.`]],
+                syntaxes: [["/ticket close", `<p>Close a ticket channel.</p>`]],
             },
         },
         selfPermissions: ["ManageChannels"],
@@ -534,7 +534,7 @@ export const modules: ModuleData = {
                 name: "Suggest",
                 description: "Make a suggestion.",
                 ghost: true,
-                syntaxes: [["/suggest <suggestion>", `Submit a server suggestion.`]],
+                syntaxes: [["/suggest <suggestion>", `<p>Submit a server suggestion.</p>`]],
             },
             suggestion: {
                 name: "Manage Suggestions",
@@ -543,8 +543,8 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/suggestion update <status> <id> [explanation] [dm] [anon]",
-                        `Update the status of a suggestion.
-                        <ul class="list-disc list-inside">
+                        `<p>Update the status of a suggestion.</p>
+                        <ul class="list-disc ml-4">
                             <li>Set <b>explanation</b> to add context or details.</li>
                             <li>Set <b>dm</b> to notify the suggestion author of the update.</li>
                             <li>Set <b>anon</b> to hide your identity from the suggestion post and the DM notification.</li>
@@ -566,7 +566,7 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/co-op [query] [world-level] [region]",
-                        `Request co-op help. Set <b>query</b> to include details about your request. You can exclude the world level and region if and only if you have exactly one of the configured world level and region roles respectively. Setting these values will override the inferred values.`,
+                        `<p>Request co-op help. Set <b>query</b> to include details about your request. You can exclude the world level and region if and only if you have exactly one of the configured world level and region roles respectively. Setting these values will override the inferred values.</p>`,
                     ],
                 ],
             },
@@ -584,7 +584,7 @@ export const modules: ModuleData = {
                 name: "Scoreboard",
                 description: "View the counting leaderboard.",
                 ghost: true,
-                syntaxes: [["/scoreboard [channel]", `View the count scoreboard for a specific channel or the whole server.`]],
+                syntaxes: [["/scoreboard [channel]", `<p>View the count scoreboard for a specific channel or the whole server.</p>`]],
             },
         },
         selfPermissions: ["ManageMessages"],
@@ -600,7 +600,7 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/giveaway reroll <id> [winners]",
-                        `Reroll a giveaway by ID, recalculating its winners. You can specify a different amount of winners than the giveaway's own value. Note that previous winners may be rerolled.`,
+                        `<p>Reroll a giveaway by ID, recalculating its winners. You can specify a different amount of winners than the giveaway's own value. Note that previous winners may be rerolled.</p>`,
                     ],
                 ],
             },
@@ -618,11 +618,11 @@ export const modules: ModuleData = {
                     ["/reminder set <duration> [query]", `Set a DM reminder. You will be linked back to where you created the reminder.`],
                     [
                         "/reminder list [all]",
-                        `List your reminders. Set <b>all</b> to list reminders from all servers (default: true if in DMs, false otherwise).`,
+                        `<p>List your reminders. Set <b>all</b> to list reminders from all servers (default: true if in DMs, false otherwise).</p>`,
                     ],
                     [
                         "/reminder cancel <id>",
-                        `Cancel a reminder. The ID is global and unique to you rather than the server, so you can cancel a DM anywhere regardless of where you set it.`,
+                        `<p>Cancel a reminder. The ID is global and unique to you rather than the server, so you can cancel a DM anywhere regardless of where you set it.</p>`,
                     ],
                 ],
             },
@@ -636,25 +636,27 @@ export const modules: ModuleData = {
                 name: "Report User",
                 description: "Report a user (user context menu command).",
                 ghost: true,
-                syntaxes: [["Report User", `Right-click a user and select <b>Apps &rightarrow; Report User</b>. You must specify a reason.`]],
+                syntaxes: [["Report User", `<p>Right-click a user and select <b>Apps &rightarrow; Report User</b>. You must specify a reason.</p>`]],
             },
             "Flag Message": {
                 name: "Flag Message",
                 description: "Flag a message (message context menu command).",
                 ghost: true,
-                syntaxes: [["Flag Message", `Right-click a message and select <b>Apps &rightarrow; Flag Message</b>. You may optionally specify a reason.`]],
+                syntaxes: [
+                    ["Flag Message", `<p>Right-click a message and select <b>Apps &rightarrow; Flag Message</b>. You may optionally specify a reason.</p>`],
+                ],
             },
             report: {
                 name: "Report User",
                 description: "Report a user (slash command).",
                 ghost: true,
-                syntaxes: [["/report <user>", `Report a user. You must specify a reason in the pop-up modal.`]],
+                syntaxes: [["/report <user>", `<p>Report a user. You must specify a reason in the pop-up modal.</p>`]],
             },
             flag: {
                 name: "Flag Message",
                 description: "Flag a message (slash command).",
                 ghost: true,
-                syntaxes: [["/flag <message>", `Flag a message by URL. You may optionally specify a reason in the pop-up modal.`]],
+                syntaxes: [["/flag <message>", `<p>Flag a message by URL. You may optionally specify a reason in the pop-up modal.</p>`]],
             },
         },
         default: false,
@@ -669,14 +671,14 @@ export const modules: ModuleData = {
                 description: "Create a poll.",
                 permissions: ["ManageGuild"],
                 syntaxes: [
-                    ["/poll yes-no [allow-neutral]", `Create a yes/no poll. Set <b>allow-neutral</b> to allow users to vote for a neutral option.`],
+                    ["/poll yes-no [allow-neutral]", `<p>Create a yes/no poll. Set <b>allow-neutral</b> to allow users to vote for a neutral option.</p>`],
                     [
                         "/poll binary <left-option> <right-option> [allow-neutral]",
-                        `Create a binary poll allowing users to vote for one of two options via buttons. Set <b>allow-neutral</b> to allow users to vote for a neutral option.`,
+                        `<p>Create a binary poll allowing users to vote for one of two options via buttons. Set <b>allow-neutral</b> to allow users to vote for a neutral option.</p>`,
                     ],
                     [
                         "/poll multi <option-1> <option-2> [options...] [allow-multi]",
-                        `Create a multiple-choice poll. Set <b>allow-multi</b> to allow users to vote for multiple options.`,
+                        `<p>Create a multiple-choice poll. Set <b>allow-multi</b> to allow users to vote for multiple options.</p>`,
                     ],
                 ],
             },
@@ -692,21 +694,21 @@ export const modules: ModuleData = {
                     "Manage your highlights. Users must have permission to use this command in a channel to receive highlights there (all uses of this command are only visible to the user).",
                 ghost: true,
                 syntaxes: [
-                    ["/highlight list", `List your highlighted words/phrases and show your highlight configuration.`],
-                    ["/highlight clear", `Remove all of your highlighted terms and notification conditions.`],
-                    ["/highlight add <word-or-phrase>", `Highlight a word or phrase and receive DM notifications when it is seen.`],
-                    ["/highlight remove <word-or-phrase>", `Remove a highlighted word or phrase.`],
-                    ["/highlight replies <highlight>", `Enable/disable highlights for replies to your messages that did not ping you.`],
-                    ["/highlight [un]block channel|user <channel / user>", `Block/unblock highlights from a channel/user.`],
-                    ["/highlight block list", `List your blocked channels and users.`],
-                    ["/highlight unblock all", `Clear your block list and allow highlights from all channels and users in this server.`],
+                    ["/highlight list", `<p>List your highlighted words/phrases and show your highlight configuration.</p>`],
+                    ["/highlight clear", `<p>Remove all of your highlighted terms and notification conditions.</p>`],
+                    ["/highlight add <word-or-phrase>", `<p>Highlight a word or phrase and receive DM notifications when it is seen.</p>`],
+                    ["/highlight remove <word-or-phrase>", `<p>Remove a highlighted word or phrase.</p>`],
+                    ["/highlight replies <highlight>", `<p>Enable/disable highlights for replies to your messages that did not ping you.</p>`],
+                    ["/highlight [un]block channel|user <channel / user>", `<p>Block/unblock highlights from a channel/user.</p>`],
+                    ["/highlight block list", `<p>List your blocked channels and users.</p>`],
+                    ["/highlight unblock all", `<p>Clear your block list and allow highlights from all channels and users in this server.</p>`],
                     [
                         "/highlight delay <duration>",
-                        `Set the minimum amount of time to wait after your last message before highlighting you in that channel (default: 5 minutes).`,
+                        `<p>Set the minimum amount of time to wait after your last message before highlighting you in that channel (default: 5 minutes).</p>`,
                     ],
                     [
                         "/highlight cooldown <duration>",
-                        `Set the minimum amount of time to wait between consecutive highlights from the same channel (default: 5 minutes).`,
+                        `<p>Set the minimum amount of time to wait between consecutive highlights from the same channel (default: 5 minutes).</p>`,
                     ],
                 ],
             },
@@ -720,7 +722,7 @@ export const modules: ModuleData = {
                 name: "Help",
                 description: "Get help for the bot.",
                 ghost: true,
-                syntaxes: [["/help", `View info on the bot and get a list of important links.`]],
+                syntaxes: [["/help", `<p>View info on the bot and get a list of important links.</p>`]],
             },
             info: {
                 name: "Info",
@@ -729,14 +731,14 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/info user <user>",
-                        `View user info, including their creation and join date and permissions in the server. If you have the appropriate permisisons, you can also see whether or not they are banned.`,
+                        `<p>View user info, including their creation and join date and permissions in the server. If you have the appropriate permisisons, you can also see whether or not they are banned.</p>`,
                     ],
-                    ["/info role <role>", `View role info, including its permissions, display settings, and position.`],
-                    ["/info channel <channel>", `View channel info.`],
-                    ["/info server [id]", `View server info, showing the current server by default. You and the bot must both be in the server.`],
+                    ["/info role <role>", `<p>View role info, including its permissions, display settings, and position.</p>`],
+                    ["/info channel <channel>", `<p>View channel info.</p>`],
+                    ["/info server [id]", `<p>View server info, showing the current server by default. You and the bot must both be in the server.</p>`],
                     [
                         "/info invite <invite>",
-                        `View invite info, including who created it, the server to which it points, and its expiration. If you are the bot are both in the server, it will also show server info.`,
+                        `<p>View invite info, including who created it, the server to which it points, and its expiration. If you are the bot are both in the server, it will also show server info.</p>`,
                     ],
                 ],
             },
@@ -744,7 +746,7 @@ export const modules: ModuleData = {
                 name: "Avatar",
                 description: "View a user's avatar.",
                 ghost: true,
-                syntaxes: [["/avatar <user>", `View a user's avatar, showing their server-specific avatar as well if possible.`]],
+                syntaxes: [["/avatar <user>", `<p>View a user's avatar, showing their server-specific avatar as well if possible.</p>`]],
             },
             roles: {
                 name: "Roles",
@@ -752,8 +754,8 @@ export const modules: ModuleData = {
                 permissions: ["ManageRoles"],
                 selfPermissions: ["ManageRoles"],
                 syntaxes: [
-                    ["/roles add <user> <role>", `Add a role to a user.`],
-                    ["/roles remove <user> <role>", `Remove a role from a user.`],
+                    ["/roles add <user> <role>", `<p>Add a role to a user.</p>`],
+                    ["/roles remove <user> <role>", `<p>Remove a role from a user.</p>`],
                 ],
             },
             code: {
@@ -763,7 +765,7 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/code <code>",
-                        `Post a Genshin Impact gift code in plain-text (for easier copy-pasting on mobile) and display a link to the Genshin Impact gifting center with the code pre-filled.`,
+                        `<p>Post a Genshin Impact gift code in plain-text (for easier copy-pasting on mobile) and display a link to the Genshin Impact gifting center with the code pre-filled.</p>`,
                     ],
                 ],
             },
@@ -771,7 +773,7 @@ export const modules: ModuleData = {
                 name: "QR",
                 description: "Convert any text into a QR code.",
                 ghost: true,
-                syntaxes: [["/qr <text>", `Encode any text as a QR code. This is usually used for links but can be used for any text in theory.`]],
+                syntaxes: [["/qr <text>", `<p>Encode any text as a QR code. This is usually used for links but can be used for any text in theory.</p>`]],
             },
             convert: {
                 name: "Convert Units",
@@ -780,7 +782,7 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/convert <amount> <source> <target>",
-                        `Convert between units or currencies. Currency values are updated daily, so they are not guaranteed to be accurate. Do not rely on this command for critical applications; Daedalus does not accept responsibility for any damage or injury caused by inaccurate conversions.`,
+                        `<p>Convert between units or currencies. Currency values are updated daily, so they are not guaranteed to be accurate. Do not rely on this command for critical applications; Daedalus does not accept responsibility for any damage or injury caused by inaccurate conversions.</p>`,
                     ],
                 ],
             },
@@ -791,7 +793,7 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/snowflake <snowflake>",
-                        `Deconstruct a snowflake (Discord's ID format). If you have an ID but don't know what type of object it is (channel, role, user, etc.), you can get its creation date using this command.`,
+                        `<p>Deconstruct a snowflake (Discord's ID format). If you have an ID but don't know what type of object it is (channel, role, user, etc.), you can get its creation date using this command.</p>`,
                     ],
                 ],
             },
@@ -802,7 +804,7 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/role-accessibility [threshold]",
-                        `Check all roles in the server for whether their color meets contrast standards with both the light-mode and dark-mode background colors. This uses WCAG 2.0 and reports roles whose contrast does not meet the provided threshold (default: 3.0).`,
+                        `<p>Check all roles in the server for whether their color meets contrast standards with both the light-mode and dark-mode background colors. This uses WCAG 2.0 and reports roles whose contrast does not meet the provided threshold (default: 3.0).</p>`,
                     ],
                 ],
             },
@@ -810,7 +812,9 @@ export const modules: ModuleData = {
                 name: "Extract IDs",
                 description: "Extract all IDs from a message for easier copying.",
                 ghost: true,
-                syntaxes: [["Extract IDs", `Right-click a message and select <b>Apps &rightarrow; Extract IDs</b> to obtain an easily copyable list of IDs.`]],
+                syntaxes: [
+                    ["Extract IDs", `<p>Right-click a message and select <b>Apps &rightarrow; Extract IDs</b> to obtain an easily copyable list of IDs.</p>`],
+                ],
             },
         },
     },
@@ -825,7 +829,7 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/stick [seconds]",
-                        `Set the channel's sticky message via a pop-up modal. The message is reposted at most once every <b>seconds</b> (default: 4) seconds.`,
+                        `<p>Set the channel's sticky message via a pop-up modal. The message is reposted at most once every <b>seconds</b> (default: 4) seconds.</p>`,
                     ],
                 ],
             },
@@ -833,13 +837,13 @@ export const modules: ModuleData = {
                 name: "Unstick",
                 description: "Remove the channel's sticky message.",
                 permissions: ["ManageChannels"],
-                syntaxes: [["/unstick", `Remove the channel's sticky message.`]],
+                syntaxes: [["/unstick", `<p>Remove the channel's sticky message.</p>`]],
             },
             sticklist: {
                 name: "List Sticky Messages",
                 description: "List the server's sticky messages.",
                 permissions: ["ManageChannels"],
-                syntaxes: [["/sticklist", `List the server's sticky messages.`]],
+                syntaxes: [["/sticklist", `<p>List the server's sticky messages.</p>`]],
             },
         },
     },
@@ -854,12 +858,12 @@ export const modules: ModuleData = {
                 syntaxes: [
                     [
                         "/random choose <options...>",
-                        `Randomly choose one of the listed options with evenly distributed probability. You can do <b>/random choose 1 1 1 2</b> for a 75% chance to choose <b>1</b>.`,
+                        `<p>Randomly choose one of the listed options with evenly distributed probability. You can do <b>/random choose 1 1 1 2</b> for a 75% chance to choose <b>1</b>.</p>`,
                     ],
                     ["/random flip [heads-chance]", `Flip a coin. You may optionally bias the coin.`],
                     [
                         "/random roll [config]",
-                        `Roll dice. You may optionally configure the dice using D&amp;D format; for example, <code class="code">1d6 + 2d10 - 2</code> will roll a 6-sided die and two 10-sided dice and return the sum of their result minus 2. By default, rolls a <b>1d6</b>.`,
+                        `<p>Roll dice. You may optionally configure the dice using D&amp;D format; for example, <code class="code">1d6 + 2d10 - 2</code> will roll a 6-sided die and two 10-sided dice and return the sum of their result minus 2. By default, rolls a <b>1d6</b>.</p>`,
                     ],
                 ],
             },
@@ -878,7 +882,7 @@ export const permissions: Record<keyof typeof PermissionFlagsBits, { name: strin
         name: "Create Invite",
         description:
             "Allows users to create invite links to the server, which other users can use to join the server. Users do not need this permission to share existing invite links, including the vanity URL, only to create new invites.",
-        callouts: [{ style: "info", content: "This does not allow users to add bots; that requires [[ManageGuild]]." }],
+        callouts: [{ style: "info", content: "This does not allow users to add bots; that requires Manage Guild." }],
     },
     KickMembers: {
         name: "Kick Members",
@@ -909,7 +913,7 @@ export const permissions: Record<keyof typeof PermissionFlagsBits, { name: strin
         callouts: [
             {
                 style: "info",
-                content: "This permission does not allow users to edit channel overrides; that is part of [[ManageRoles]].",
+                content: "This permission does not allow users to edit channel overrides; that is part of Manage Roles.",
             },
         ],
     },
@@ -958,7 +962,7 @@ export const permissions: Record<keyof typeof PermissionFlagsBits, { name: strin
             {
                 style: "info",
                 content:
-                    "The ability to see messages that were sent when the user was offline or the channel was unfocused is controlled by [[ReadMessageHistory]].",
+                    "The ability to see messages that were sent when the user was offline or the channel was unfocused is controlled by Read Message History.",
             },
         ],
     },
@@ -969,7 +973,7 @@ export const permissions: Record<keyof typeof PermissionFlagsBits, { name: strin
         callouts: [
             {
                 style: "info",
-                content: "To talk in threads and forum posts, users need [[SendMessagesInThreads]] instead.",
+                content: "To talk in threads and forum posts, users need Send Messages In Threads instead.",
             },
         ],
     },
@@ -1040,7 +1044,7 @@ export const permissions: Record<keyof typeof PermissionFlagsBits, { name: strin
     MoveMembers: {
         name: "Move Members",
         description:
-            "Allows users to move members who are already in a voice channel in this server into another voice channel. The user performing this action must have [[Connect]] in the target channel, but the target user does not need to be able to see or join it on their own. Users cannot be connected by another user and can never be moved between servers even if the user has this permission in both servers. This is not subject to role hierarchy.",
+            "Allows users to move members who are already in a voice channel in this server into another voice channel. The user performing this action must have Connect in the target channel, but the target user does not need to be able to see or join it on their own. Users cannot be connected by another user and can never be moved between servers even if the user has this permission in both servers. This is not subject to role hierarchy.",
     },
     UseVAD: {
         name: "Use Voice Activity Detection",
@@ -1110,7 +1114,7 @@ export const permissions: Record<keyof typeof PermissionFlagsBits, { name: strin
         callouts: [
             {
                 style: "info",
-                content: "To create forum posts and talk in text and text-in-voice channels, users need [[SendMessages]].",
+                content: "To create forum posts and talk in text and text-in-voice channels, users need Send Messages.",
             },
         ],
     },
@@ -1121,12 +1125,12 @@ export const permissions: Record<keyof typeof PermissionFlagsBits, { name: strin
     ModerateMembers: {
         name: "Timeout Members",
         description:
-            "Allows users to timeout other members, disabling all permissions except [[ViewChannel]] and [[ReadMessageHistory]]. Some other features like adding to existing reactions or using message components (buttons and dropdowns) are also disabled.",
+            "Allows users to timeout other members, disabling all permissions except View Channel and Read Message History. Some other features like adding to existing reactions or using message components (buttons and dropdowns) are also disabled.",
         callouts: [
             {
                 style: "info",
                 content:
-                    "Users with [[Administrator]] cannot be timed out. If a user is timed out and gains the permission, their timeout will be canceled. Even if an administrator could be timed out, it would take no effect.",
+                    "Users with Administrator cannot be timed out. If a user is timed out and gains the permission, their timeout will be canceled. Even if an administrator could be timed out, it would take no effect.",
             },
         ],
     },
@@ -1146,10 +1150,9 @@ export const permissions: Record<keyof typeof PermissionFlagsBits, { name: strin
         name: "Send Voice Messages",
         description: "Allows users to send voice messages in text channels.",
     },
-
     ManageEmojisAndStickers: {
         name: "Manage Emoji and Stickers",
         description: "Deprecated.",
-        callouts: [{ style: "error", content: "This permission is deprecated. See [[ManageGuildExpressions]]." }],
+        callouts: [{ style: "error", content: "This permission is deprecated. See Manage Guild Expressions." }],
     },
 };
