@@ -6,7 +6,8 @@ import { Switch } from "@/components/ui/switch";
 import { useUserContext } from "@/context/user";
 import { PremiumStripeSession } from "@daedalus/types";
 import React, { useState } from "react";
-import { deleteKey, provisionNewKey } from "./actions";
+import { FaPencil } from "react-icons/fa6";
+import { deleteKey, provisionNewKey, renameKey } from "./actions";
 
 export function AccountPremiumBody({
     sessions,
@@ -16,7 +17,7 @@ export function AccountPremiumBody({
 }: {
     sessions: PremiumStripeSession[];
     links: [string, string, string, string];
-    keys: { key: string; disabled: boolean }[];
+    keys: { key: string; disabled: boolean; name: string | null }[];
     activations: Record<string, string>;
 }) {
     const [keys, setKeys] = useState(initial);
@@ -118,7 +119,7 @@ export function AccountPremiumBody({
                     [
                         [premiumKeysRemaining, "premium", "Premium", premiumKeys],
                         [customKeysRemaining, "custom", "Custom", customKeys],
-                    ] as [number, "premium" | "custom", string, { key: string; disabled: boolean }[]][]
+                    ] as [number, "premium" | "custom", string, { key: string; disabled: boolean; name: string | null }[]][]
                 ).map(([remaining, type, typename, list]) => (
                     <React.Fragment key={type}>
                         <div>
@@ -126,7 +127,7 @@ export function AccountPremiumBody({
                                 disabled={remaining <= 0}
                                 onClick={async () => {
                                     const key = await provisionNewKey(type).catch(() => alert("An error occurred; please try again."));
-                                    if (key) setKeys((keys) => [...keys, { key, disabled: false }]);
+                                    if (key) setKeys((keys) => [...keys, { key, disabled: false, name: null }]);
                                 }}
                             >
                                 <span>
@@ -142,7 +143,7 @@ export function AccountPremiumBody({
                             </p>
                         ) : null}
                         <div className="flex flex-col gap-1">
-                            {list.map(({ key }, i) => (
+                            {list.map(({ key, name }, i) => (
                                 <div key={key} className="center-row gap-2">
                                     {/* We use this calculation instead of the disabled property to dynamically update the data without needing to re-fetch. */}
                                     <code>{i - list.length >= remaining ? <s>{key}</s> : <b>{key}</b>}</code>
@@ -164,6 +165,25 @@ export function AccountPremiumBody({
                                             in use by <code>{activations[key]}</code>
                                         </span>
                                     ) : null}
+                                    {name ? <span>&quot;{name}&quot;</span> : <span className="text-muted-foreground">(unnamed)</span>}
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            let name = prompt("Enter a new name (max: 64 characters).");
+                                            if (typeof name !== "string") return;
+
+                                            while (name.length > 64) {
+                                                name = prompt("Please enter a name that is no longer than 64 characters.");
+                                                if (typeof name !== "string") return;
+                                            }
+
+                                            renameKey(key, name)
+                                                .then(() => setKeys((keys) => keys.map((k) => (k.key === key ? { ...k, name } : k))))
+                                                .catch(() => alert("An error occurred; please try again later."));
+                                        }}
+                                    >
+                                        <FaPencil></FaPencil>
+                                    </Button>
                                 </div>
                             ))}
                         </div>

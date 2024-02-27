@@ -1,7 +1,7 @@
 import { trpc } from "../api/index.js";
 import { getColor, getMuteRole } from "../bot-utils/index.js";
 import { ClientManager } from "../clients/index.js";
-import { CLIENT_ID } from "../config/public.js";
+import { secrets } from "../config/index.js";
 import { englishList } from "../formatting/index.js";
 import { draw } from "../giveaways/index.js";
 import { logError } from "../log-interface/index.js";
@@ -162,7 +162,7 @@ async function runReminders() {
                 const user = await client.users.fetch(reminder.user);
                 await user.send(formatReminder(reminder, color));
             } catch {
-                (dmReminders[CLIENT_ID] ??= []).push(reminder);
+                (dmReminders[secrets.DISCORD.CLIENT.ID] ??= []).push(reminder);
             }
     }
 

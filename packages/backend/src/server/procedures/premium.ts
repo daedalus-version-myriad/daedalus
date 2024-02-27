@@ -208,7 +208,7 @@ async function recalculateKeysForUser(user: string) {
 export default {
     premiumPageDataGet: proc.input(z.string()).query(async ({ input: id }) => {
         const keys = await db
-            .select({ key: tables.premiumKeys.key, disabled: tables.premiumKeys.disabled })
+            .select({ key: tables.premiumKeys.key, disabled: tables.premiumKeys.disabled, name: tables.premiumKeys.name })
             .from(tables.premiumKeys)
             .where(eq(tables.premiumKeys.user, id));
 
@@ -264,6 +264,14 @@ export default {
         await db.delete(tables.premiumKeyBindings).where(eq(tables.premiumKeyBindings.key, key));
         await recalculateGuild(entry.guild);
     }),
+    renameKey: proc
+        .input(z.object({ owner: snowflake, key: z.string().max(32), name: z.string().max(64) }))
+        .mutation(async ({ input: { owner, key, name } }) => {
+            await db
+                .update(tables.premiumKeys)
+                .set({ name })
+                .where(and(eq(tables.premiumKeys.user, owner), eq(tables.premiumKeys.key, key)));
+        }),
     bindKey: proc.input(z.object({ id: snowflake.nullable(), guild: snowflake, key: z.string().max(32) })).mutation(async ({ input: { id, guild, key } }) => {
         if (!(await hasPermission(id, guild))) return NO_PERMISSION;
 

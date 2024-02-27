@@ -1,10 +1,9 @@
 import { secrets } from "@daedalus/config";
-import { CLIENT_ID, DISCORD_API } from "@daedalus/config/public";
 import { cookies } from "next/headers";
 
 const DISCORD_ENDPOINT = (path: string, state: string) =>
-    `${DISCORD_API}/oauth2/authorize?${new URLSearchParams({
-        client_id: CLIENT_ID,
+    `${secrets.DISCORD.API}/oauth2/authorize?${new URLSearchParams({
+        client_id: secrets.DISCORD.CLIENT.ID,
         redirect_uri: `${secrets.DOMAIN}/auth/callback`,
         response_type: "code",
         scope: "identify guilds",

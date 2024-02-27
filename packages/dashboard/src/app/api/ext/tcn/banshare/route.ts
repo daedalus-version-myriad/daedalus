@@ -17,7 +17,7 @@ export async function POST({ url: raw }: Request) {
     if (
         !crypto.timingSafeEqual(
             Buffer.from(hmac, "base64url"),
-            crypto.createHmac("sha256", secrets.TCN_HMAC_KEY).update(`${server} ${userid} ${reason} ${origin} ${tcnbot}`).digest(),
+            crypto.createHmac("sha256", secrets.TCN.HMAC).update(`${server} ${userid} ${reason} ${origin} ${tcnbot}`).digest(),
         )
     )
         return new Response("", { status: 403 });

@@ -3,7 +3,6 @@ import { trpc } from "../api/index.js";
 import { db, tables } from "../backend/index.js";
 import { truncate } from "../bot-utils/index.js";
 import { secrets } from "../config/index.js";
-import { CLIENT_ID } from "../config/public.js";
 import { serializeGiveawayBase } from "../global-utils/index.js";
 import { splitMessage } from "./lib.js";
 import { connect, db as src } from "./mongo.js";
@@ -801,7 +800,7 @@ await migrate("reminders", async () => {
         const max = new Map<string, number>();
         for (const entry of entries) if (entry.action === "remind") max.set(entry.user, Math.max(max.get(entry.user) ?? 0, entry.id));
         await db.insert(tables.reminderIds).values([...max].map(([user, id]) => ({ user, id: id + 1 })));
-        await db.insert(tables.reminders).values(entries.flatMap((x) => (x.action === "remind" ? [{ ...x, client: CLIENT_ID }] : [])));
+        await db.insert(tables.reminders).values(entries.flatMap((x) => (x.action === "remind" ? [{ ...x, client: secrets.DISCORD.CLIENT.ID }] : [])));
     }
 });
 

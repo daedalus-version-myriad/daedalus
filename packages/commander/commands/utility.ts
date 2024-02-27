@@ -4,7 +4,6 @@ import { trpc } from "../../api/index.js";
 import Argentium from "../../argentium/index.js";
 import { checkPermissions, defer, expand, fetchCaller, getColor, template, timeinfo, timestamp } from "../../bot-utils/index.js";
 import { secrets } from "../../config/index.js";
-import { CLIENT_ID } from "../../config/public.js";
 import { archiveDurations, permissions } from "../../data/index.js";
 import { formatDuration } from "../../global-utils/index.js";
 import { getManager } from "../lib/clients.js";
@@ -94,7 +93,7 @@ export default (app: Argentium) =>
                                     secrets.DOMAIN
                                 })\n${
                                     _.guild ? `[Dashboard for this server](${secrets.DOMAIN}/manage/${_.guild.id})\n` : ""
-                                }[Invite Link (regular)](https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&permissions=1428010036470&scope=applications.commands+bot)\n[Invite Link (admin)](https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&permissions=8&scope=applications.commands+bot)\n[Support Server](https://discord.gg/7TRKfSK7EU)`,
+                                }[Invite Link (regular)](https://discord.com/api/oauth2/authorize?client_id=${secrets.DISCORD.CLIENT.ID}&permissions=1428010036470&scope=applications.commands+bot)\n[Invite Link (admin)](https://discord.com/api/oauth2/authorize?client_id=${secrets.DISCORD.CLIENT.ID}&permissions=8&scope=applications.commands+bot)\n[Support Server](https://discord.gg/7TRKfSK7EU)`,
                                 color: _.guild ? await getColor(_.guild) : 0x009688,
                             },
                         ],

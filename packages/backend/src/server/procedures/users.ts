@@ -2,7 +2,6 @@ import { PermissionFlagsBits } from "discord.js";
 import { eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { secrets } from "../../../../config/index.js";
-import { DISCORD_API } from "../../../../config/public.js";
 import type { DashboardGuild } from "../../../../types/index.js";
 import { bot, clients } from "../../bot/index.js";
 import { db } from "../../db/db.js";
@@ -57,7 +56,7 @@ export default {
         };
     }),
     userGuilds: proc.input(z.object({ id: snowflake, token: z.string() })).query(async ({ input: { id, token } }) => {
-        const request = await fetch(`${DISCORD_API}/users/@me/guilds`, { headers: { Authorization: `Bearer ${token}` } });
+        const request = await fetch(`${secrets.DISCORD.API}/users/@me/guilds`, { headers: { Authorization: `Bearer ${token}` } });
         const guilds = ((await request.json()) as { id: string; name: string; icon?: string; owner: boolean; permissions: string; features: string[] }[]).map(
             (guild) => ({
                 id: guild.id,

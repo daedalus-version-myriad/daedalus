@@ -16,3 +16,10 @@ export async function deleteKey(key: string) {
 
     await trpc.deleteKey.mutate({ owner: id, key });
 }
+
+export async function renameKey(key: string, name: string) {
+    const id = await getId();
+    if (!id) return null;
+
+    await trpc.renameKey.mutate({ owner: id, key, name });
+}

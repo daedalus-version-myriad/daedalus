@@ -1,0 +1,1 @@
+ALTER TABLE `premium_keys` ADD `name` varchar(64);

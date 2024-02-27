@@ -1,7 +1,7 @@
 "use server";
 
 import { trpc } from "@daedalus/api";
-import { DISCORD_API } from "@daedalus/config/public";
+import { secrets } from "@daedalus/config";
 import { cookies } from "next/headers";
 import { User } from "./types";
 
@@ -16,7 +16,7 @@ export async function getId(token?: string): Promise<string | null> {
     let id: string | undefined;
 
     if (token) {
-        const userReq = await fetch(`${DISCORD_API}/users/@me`, { headers: { Authorization: `Bearer ${token}` } });
+        const userReq = await fetch(`${secrets.DISCORD.API}/users/@me`, { headers: { Authorization: `Bearer ${token}` } });
         const userRes = await userReq.json();
 
         if (userRes.id) id = userRes.id;

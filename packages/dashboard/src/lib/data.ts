@@ -1,5 +1,5 @@
 import { moduleIcons } from "@/app/manage/[id]/modules-permissions/icons";
-import { CLIENT_ID } from "@daedalus/config/public";
+import { secrets } from "@daedalus/config";
 import data from "@emoji-mart/data";
 import {
     FaBullhorn,
@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa6";
 import { IconType } from "react-icons/lib";
 
-export const INVITE_LINK = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&permissions=1428010036470&scope=applications.commands+bot`;
+export const INVITE_LINK = `https://discord.com/api/oauth2/authorize?client_id=${secrets.DISCORD.CLIENT.ID}&permissions=1428010036470&scope=applications.commands+bot`;
 
 export const textTypes = [0, 2, 5, 13, 15, 16];
 

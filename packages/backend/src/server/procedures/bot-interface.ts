@@ -1,3 +1,5 @@
+import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
+import { z } from "zod";
 import { commandMap, logEvents, modules, type PremiumBenefits } from "../../../../data/index.js";
 import type {
     CustomMessageText,
@@ -8,10 +10,8 @@ import type {
     GuildStickyRolesSettings,
     ParsedMessage,
 } from "../../../../types/index.js";
-import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
-import { z } from "zod";
-import { tables } from "../../db/index.js";
 import { db } from "../../db/db.js";
+import { tables } from "../../db/index.js";
 import { snowflake } from "../schemas.js";
 import { decodeArray } from "../transformations.js";
 import { proc } from "../trpc.js";
@@ -365,6 +365,7 @@ export default {
         ).map(({ guild }) => guild);
     }),
     getAllXpConfigs: proc.input(snowflake.array()).query(async ({ input: guilds }) => {
+        if (guilds.length === 0) return [];
         return (await db.select().from(tables.guildXpSettings).where(inArray(tables.guildXpSettings.guild, guilds))).map(transformXpSettings);
     }),
     getReactionRoleEntries: proc.input(snowflake).query(async ({ input: guild }) => {

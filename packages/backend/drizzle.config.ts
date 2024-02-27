@@ -1,4 +1,4 @@
-import { secrets } from "../config/index.js";
+import { secrets } from "../config/index";
 import type { Config } from "drizzle-kit";
 
 export default {

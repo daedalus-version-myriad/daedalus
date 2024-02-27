@@ -611,6 +611,7 @@ export const premiumKeys = mysqlTable(
         time: timestamp("time")
             .default(sql`CURRENT_TIMESTAMP`)
             .notNull(),
+        name: varchar("name", { length: 64 }),
     },
     (t) => ({
         pk_user_key: primaryKey({ name: "pk_user_key", columns: [t.user, t.key] }),

@@ -5,7 +5,7 @@ import { automodHook } from "../../../automod/main.js";
 import { autoresponderHook } from "../../../autoresponder/main.js";
 import { ClientManager } from "../../../clients/index.js";
 import { commanderHook } from "../../../commander/main.js";
-import { CLIENT_ID } from "../../../config/public.js";
+import { secrets } from "../../../config/index.js";
 import { countHook } from "../../../count/main.js";
 import { customRolesHook } from "../../../custom-roles/main.js";
 import { highlightsHook } from "../../../highlights/main.js";
@@ -28,7 +28,7 @@ import { db } from "../db/db.js";
 import { tables } from "../db/index.js";
 
 export async function setPresence(client: Client<true>, guild?: string) {
-    if (client.user.id === CLIENT_ID || !guild)
+    if (client.user.id === secrets.DISCORD.CLIENT.ID || !guild)
         return client.user.setPresence({ status: "online", activities: [{ type: ActivityType.Watching, name: "for /help" }] });
 
     const { status, activityType, activity } = (
