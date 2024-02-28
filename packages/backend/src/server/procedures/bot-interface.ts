@@ -1457,6 +1457,11 @@ export default {
                 .values({ guild, channel, ...data })
                 .onDuplicateKeyUpdate({ set: data });
         }),
+    recordRedditRequestStatus: proc
+        .input(z.object({ guild: snowflake, channel: snowflake, subreddit: z.string().max(32), success: z.boolean() }))
+        .mutation(async ({ input }) => {
+            await db.insert(tables.redditRequestLog).values(input);
+        }),
 } as const;
 
 const defaultModmailMessage = {

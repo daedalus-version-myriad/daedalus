@@ -1,0 +1,1 @@
+ALTER TABLE `reddit_request_log` ADD `subreddit` varchar(32) NOT NULL;

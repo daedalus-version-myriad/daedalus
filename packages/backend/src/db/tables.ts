@@ -1028,3 +1028,17 @@ export const stickyMessages = mysqlTable(
         idx_guild: index("idx_guild").on(t.guild),
     }),
 );
+
+export const redditRequestLog = mysqlTable(
+    "reddit_request_log",
+    {
+        time: timestamp("time").notNull().defaultNow(),
+        guild: varchar("guild", { length: 20 }).notNull(),
+        channel: varchar("channel", { length: 20 }).notNull(),
+        subreddit: varchar("subreddit", { length: 32 }).notNull(),
+        success: boolean("success").notNull(),
+    },
+    (t) => ({
+        idx_time: index("idx_time").on(t.time),
+    }),
+);

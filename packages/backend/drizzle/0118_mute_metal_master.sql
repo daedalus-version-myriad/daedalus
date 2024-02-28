@@ -1,0 +1,1 @@
+ALTER TABLE `reddit_request_log` ADD `channel` varchar(20) NOT NULL;

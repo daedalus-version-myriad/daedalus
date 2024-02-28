@@ -30,10 +30,9 @@ async function run() {
                 headers: { "User-Agent": "daedalus (daedalusbot.xyz)" },
             });
 
-            if (!request.ok) {
-                console.error(request.status, await request.text());
-                continue;
-            }
+            await trpc.recordRedditRequestStatus.mutate({ guild: guildId, channel: channel.id, subreddit, success: request.ok });
+
+            if (!request.ok) continue;
 
             const response = (await request.json()) as any;
 
