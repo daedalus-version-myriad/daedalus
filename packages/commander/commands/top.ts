@@ -1,7 +1,7 @@
+import type { APIEmbedField } from "discord.js";
 import { trpc } from "../../api/index.js";
 import { defer, getColor, mdash, type Commands } from "../../bot-utils/index.js";
 import { xpToLevel } from "../../xp/index.js";
-import type { APIEmbedField } from "discord.js";
 
 export default (x: Commands) =>
     x.slash((x) =>
@@ -24,11 +24,23 @@ export default (x: Commands) =>
 
                 const fields: APIEmbedField[] = [];
 
+                let self: { text: number; voice: number; textRank: number; voiceRank: number } | null = null;
+
                 for (const key of type === "both" ? (["text", "voice"] as const) : [type]) {
-                    const entries = await trpc.getXpTop.query({ guild: _.guild!.id, key: `${key}${range}`, page, limit });
+                    const entries = (await trpc.getXpTop.query({ guild: _.guild!.id, key: `${key}${range}`, page, limit })).map(
+                        (x, i) => [offset + i, x] as [number, typeof x],
+                    );
+
+                    if (!entries.some(([, x]) => x.user === _.user.id)) {
+                        self ??= await trpc.getXpRank.query({ guild: _.guild!.id, user: _.user.id });
+                        const value = self[`${key}Rank`];
+
+                        if (value < offset) entries.unshift([value, { user: _.user.id, amount: self[key] }]);
+                        else entries.push([value, { user: _.user.id, amount: self[key] }]);
+                    }
+
                     const list = entries.map(
-                        (x, i) =>
-                            `\`#${offset + i}.\` <@${x.user}> ${mdash}${range === "Total" ? ` lvl. ${xpToLevel(x.amount)}` : ""} (${Math.floor(x.amount)})`,
+                        ([r, x]) => `\`#${r}.\` <@${x.user}> ${mdash}${range === "Total" ? ` lvl. ${xpToLevel(x.amount)}` : ""} (${Math.floor(x.amount)})`,
                     );
 
                     fields.push({
