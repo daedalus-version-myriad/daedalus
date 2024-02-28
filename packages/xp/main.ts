@@ -2,14 +2,21 @@ import { Client, Events, GuildChannel, MessageType, OAuth2Guild, type Channel } 
 import { trpc } from "../api/index.js";
 import { isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 import type { ClientManager } from "../clients/index.js";
+import { GuildXpSettings } from "../types/index.js";
 import { addXp } from "./utils.js";
 
 let manager: ClientManager;
+let started = false;
 
 const lastMessage = new Map<string, number>();
 
 export const xpHook = (client: Client, x: ClientManager) => {
-    manager = x;
+    if (!started) {
+        started = true;
+        manager = x;
+        cycle();
+        setInterval(cycle, 60000);
+    }
 
     client.on(Events.MessageCreate, async (message) => {
         if (!message.guild) return;
@@ -40,8 +47,6 @@ export const xpHook = (client: Client, x: ClientManager) => {
 const tracking = new Map<string, Set<string>>();
 
 async function cycle() {
-    if (!manager) return;
-
     try {
         const clients = await manager.getBots();
         const guilds: OAuth2Guild[] = [];
@@ -55,8 +60,21 @@ async function cycle() {
         const configs = Object.fromEntries((await trpc.getAllXpConfigs.query(filtered.map((guild) => guild.id))).map((data) => [data.guild, data]));
 
         for (const guild of filtered) {
-            const settings = configs[guild.id];
-            if (!settings) return;
+            const settings =
+                configs[guild.id] ??
+                ({
+                    guild: guild.id,
+                    blockedChannels: [],
+                    blockedRoles: [],
+                    bonusChannels: [],
+                    bonusRoles: [],
+                    rankCardBackground: "",
+                    announceLevelUp: false,
+                    announceInChannel: false,
+                    announceChannel: null,
+                    announcementBackground: "",
+                    rewards: [],
+                } satisfies GuildXpSettings);
 
             if (!tracking.has(guild.client.user.id)) tracking.set(guild.client.user.id, new Set());
             const tracker = tracking.get(guild.client.user.id)!;
@@ -91,9 +109,6 @@ async function cycle() {
         console.error(error);
     }
 }
-
-cycle();
-setInterval(cycle, 60000);
 
 setInterval(() => {
     const now = Date.now();
