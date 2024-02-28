@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React from "react";
-import { FaBars, FaBook, FaCrown, FaDiscord, FaMoon, FaPlus, FaScrewdriverWrench, FaSun } from "react-icons/fa6";
+import { FaBars, FaBook, FaCrown, FaDiscord, FaHandshake, FaMoon, FaPlus, FaScrewdriverWrench, FaSun } from "react-icons/fa6";
 import { IconType } from "react-icons/lib";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -23,6 +23,7 @@ export default function Navbar() {
         [INVITE_LINK, FaPlus, "Invite"],
         ["https://discord.gg/7TRKfSK7EU", FaDiscord, "Support"],
         ["/premium", FaCrown, "Premium"],
+        ["/partners", FaHandshake, "Partners"],
         ...(user?.admin ? [["/admin", FaScrewdriverWrench, "Admin"] as [string, IconType, string]] : []),
     ];
 
@@ -36,11 +37,11 @@ export default function Navbar() {
                     </a>
                     {links.map(([href, icon, label], index) => (
                         <React.Fragment key={`${index}`}>
-                            <Separator className="hidden lg:block h-8" orientation="vertical"></Separator>
+                            <Separator className="hidden xl:block h-8" orientation="vertical"></Separator>
                             <a
                                 href={href}
                                 target={href.startsWith("/") ? "_self" : "_blank"}
-                                className="hidden lg:flex items-center gap-4 px-4 py-5 hover:bg-foreground/5"
+                                className="hidden xl:flex items-center gap-4 px-4 py-5 hover:bg-foreground/5"
                             >
                                 {icon({})}
                                 <span>{label}</span>
@@ -81,7 +82,7 @@ export default function Navbar() {
                         <FaMoon></FaMoon>
                     </button>
                     <Sheet>
-                        <SheetTrigger className="lg:hidden h-16 w-16 center-col justify-center hover:bg-foreground/5">
+                        <SheetTrigger className="xl:hidden h-16 w-16 center-col justify-center hover:bg-foreground/5">
                             <FaBars></FaBars>
                         </SheetTrigger>
                         <SheetContent>
