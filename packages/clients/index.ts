@@ -64,10 +64,12 @@ export class ClientManager {
             return await (this.bot ??= this.factory(secrets.DISCORD.TOKEN));
         }
 
-        const client = await this.cache.get(guildId);
-        if (client?.token === token) return client;
-
-        if (client) this.cleanup(guildId, client);
+        if (this.cache.has(guildId)) {
+            const client = await this.cache.get(guildId);
+            if (client?.token === token) return client;
+            if (client) this.cleanup(guildId, client);
+            return null;
+        }
 
         const promise = this.factory(token, guildId).catch(() => null);
         this.cache.set(guildId, promise);
