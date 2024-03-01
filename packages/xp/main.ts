@@ -76,8 +76,8 @@ async function cycle() {
                     rewards: [],
                 } satisfies GuildXpSettings);
 
-            if (!tracking.has(guild.client.user.id)) tracking.set(guild.client.user.id, new Set());
-            const tracker = tracking.get(guild.client.user.id)!;
+            if (!tracking.has(guild.id)) tracking.set(guild.id, new Set());
+            const tracker = tracking.get(guild.id)!;
 
             const seen = new Set<string>();
 
