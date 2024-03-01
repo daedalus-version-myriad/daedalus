@@ -1462,6 +1462,25 @@ export default {
         .mutation(async ({ input }) => {
             await db.insert(tables.redditRequestLog).values(input);
         }),
+    addAutokickExemption: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
+        await db
+            .insert(tables.autokickBypass)
+            .values({ guild, user })
+            .onDuplicateKeyUpdate({ set: { guild: sql`guild` } });
+    }),
+    removeAutokickExemption: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
+        await db.delete(tables.autokickBypass).where(and(eq(tables.autokickBypass.guild, guild), eq(tables.autokickBypass.user, user)));
+    }),
+    hasAutokickExemption: proc.input(z.object({ guild: snowflake, user: snowflake })).query(async ({ input: { guild, user } }) => {
+        return (
+            (
+                await db
+                    .select({ count: count() })
+                    .from(tables.autokickBypass)
+                    .where(and(eq(tables.autokickBypass.guild, guild), eq(tables.autokickBypass.user, user)))
+            )[0].count > 0
+        );
+    }),
 } as const;
 
 const defaultModmailMessage = {

@@ -1042,3 +1042,14 @@ export const redditRequestLog = mysqlTable(
         idx_time: index("idx_time").on(t.time),
     }),
 );
+
+export const autokickBypass = mysqlTable(
+    "autokick_bypass",
+    {
+        guild: varchar("guild", { length: 20 }).notNull(),
+        user: varchar("user", { length: 20 }).notNull(),
+    },
+    (t) => ({
+        pk_guild_user: primaryKey({ name: "pk_guild_user", columns: [t.guild, t.user] }),
+    }),
+);

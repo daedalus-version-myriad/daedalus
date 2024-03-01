@@ -1,13 +1,15 @@
+import { Client, Events } from "discord.js";
 import { trpc } from "../api/index.js";
 import { isModuleDisabled, isWrongClient, sendCustomMessage } from "../bot-utils/index.js";
 import { formatDuration } from "../global-utils/index.js";
-import { Client, Events } from "discord.js";
 import { willAutokick } from "./lib.js";
 
 export const autokickHook = (client: Client) =>
     client.on(Events.GuildMemberAdd, async (member) => {
         if (await isWrongClient(client, member.guild)) return;
         if (await isModuleDisabled(member.guild, "autokick")) return;
+
+        if (await trpc.hasAutokickExemption.query({ guild: member.guild.id, user: member.id })) return;
 
         const config = await trpc.getAutokickConfig.query(member.guild.id);
         if (!(await willAutokick(member, config))) return;

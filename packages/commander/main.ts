@@ -3,6 +3,7 @@ import { trpc } from "../api/index.js";
 import Argentium from "../argentium/index.js";
 import { checkPermissions, isWrongClient, reply, template } from "../bot-utils/index.js";
 import { ClientManager } from "../clients/index.js";
+import autokick from "./commands/autokick.js";
 import ban from "./commands/ban.js";
 import clearHistory from "./commands/clear-history.js";
 import coOp from "./commands/co-op.js";
@@ -98,6 +99,7 @@ const argentium = new Argentium()
                         data,
                     });
             })
+            .use(autokick)
             .use(ban)
             .use(clearHistory)
             .use(coOp)

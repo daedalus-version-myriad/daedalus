@@ -428,7 +428,21 @@ export const modules: ModuleData = {
     autokick: {
         name: "Autokick",
         description: "Filter users by account age.",
-        selfPermissions: ["ModerateMembers", "KickMembers", "BanMembers"],
+        commands: {
+            autokick: {
+                name: "Manage Autokick",
+                description: "Manage autokick (allow/disallow a user)",
+                permissions: ["BanMembers"],
+                syntaxes: [
+                    ["/autokick allow <user>", `<p>Allow a user into the server, ignoring autokick settings when they join</p>`],
+                    [
+                        "/autokick clear <user>",
+                        `<p>Clear the autokick allowance ono a user. They will be kicked if their account was created too recently, but otherwise, they will be allowed to join as usual.</p>`,
+                    ],
+                ],
+            },
+        },
+        selfPermissions: ["KickMembers"],
         default: false,
     },
     "sticky-roles": {
