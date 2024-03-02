@@ -7,7 +7,7 @@ import type { GuildAutomodSettings } from "../types/index.js";
 export type Rule = GuildAutomodSettings["rules"][number] & { id: number };
 
 const invitePattern = new RegExp(Invite.InvitesPattern, "g");
-const cache = new Map<string, Message[]>();
+const cache = new Map<string, { message: Message; time: number }[]>();
 
 export function skip(message: Message | PartialMessage, rule: Rule, config: GuildAutomodSettings) {
     if (!message.webhookId && message.member && skipMember(message.member, rule, config)) return true;
@@ -33,7 +33,8 @@ export function skipMember(member: GuildMember, rule: Rule, config: GuildAutomod
     return rule.onlyWatchEnabledRoles;
 }
 
-export async function match(rule: Rule, message: Message, multiDeleteTargets: Message[]): Promise<[string, string] | undefined> {
+export async function match(rule: Rule, message: Message, multiDeleteTargets: Message[], isEdit: boolean): Promise<[string, string] | undefined> {
+    console.log(`scanning ${message.id} with content ${message.content}`);
     const { type } = rule;
 
     if (type === "blocked-terms") {
@@ -144,38 +145,48 @@ export async function match(rule: Rule, message: Message, multiDeleteTargets: Me
                 .join(" and ")}).`,
         ];
     } else if (type === "ratelimit" || type === "attachment-spam" || type === "sticker-spam" || type === "link-spam" || type === "mention-spam") {
+        if (isEdit && type !== "link-spam") return;
+
         const key = `${message.guild!.id}/${message.webhookId ? `wh/${message.webhookId}` : `user/${message.author.id}`}/${rule.id}/${
             message.webhookId ? message.author.username : ""
         }`;
 
         if (!cache.has(key)) cache.set(key, []);
+        else if (isEdit)
+            cache.set(
+                key,
+                cache.get(key)!.filter((m) => m.message.id !== message.id),
+            );
+
         const array = cache.get(key)!;
 
         const mentions =
             type === "mention-spam" ? message.mentions.users.size + message.mentions.roles.size - (message.mentions.users.has(message.author.id) ? 1 : 0) : 0;
 
+        const object = { message, time: Date.now() };
+
         let links: RegExpMatchArray | null;
 
         switch (type) {
             case "ratelimit":
-                array.push(message);
+                array.push(object);
                 break;
             case "attachment-spam":
                 if (message.attachments.size === 0) return;
-                for (let x = 0; x < message.attachments.size; x++) array.push(message);
+                for (let x = 0; x < message.attachments.size; x++) array.push(object);
                 break;
             case "sticker-spam":
                 if (message.stickers.size === 0) return;
-                for (let x = 0; x < message.stickers.size; x++) array.push(message);
+                for (let x = 0; x < message.stickers.size; x++) array.push(object);
                 break;
             case "link-spam":
                 links = message.content.match(/\bhttps?:\/{2,}/g);
                 if (!links?.length) return;
-                for (let x = 0; x < links.length; x++) array.push(message);
+                for (let x = 0; x < links.length; x++) array.push(object);
                 break;
             case "mention-spam":
                 if (mentions === 0) return;
-                array.push(message);
+                for (let x = 0; x < mentions; x++) array.push(object);
                 break;
         }
 
@@ -188,7 +199,7 @@ export async function match(rule: Rule, message: Message, multiDeleteTargets: Me
         }[type];
 
         const threshold = "totalLimit" in data ? data.totalLimit : data.threshold;
-        const ratelimited = array.length >= threshold && Date.now() - array[array.length - threshold].createdTimestamp <= data.timeInSeconds * 1000;
+        const ratelimited = array.length >= threshold && Date.now() - array[array.length - threshold].time <= data.timeInSeconds * 1000;
         const limited = type === "mention-spam" && mentions > rule.mentionSpamData.perMessageLimit;
 
         const blockedEveryone =
@@ -202,10 +213,10 @@ export async function match(rule: Rule, message: Message, multiDeleteTargets: Me
         const deleted = new Set<string>();
 
         if (rule.deleteMessage)
-            for (const item of array.slice(-threshold)) {
-                if (deleted.has(item.id)) break;
-                multiDeleteTargets.push(item);
-                deleted.add(item.id);
+            for (const { message } of array.slice(-threshold)) {
+                if (deleted.has(message.id)) break;
+                multiDeleteTargets.push(message);
+                deleted.add(message.id);
             }
 
         const messageParts: string[] = [];

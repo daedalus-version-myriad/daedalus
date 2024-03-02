@@ -1,4 +1,4 @@
-import { Client, Events, type Message, type PartialMessage, type TextBasedChannel } from "discord.js";
+import { Client, Events, PermissionFlagsBits, type Message, type PartialMessage, type TextBasedChannel } from "discord.js";
 import { trpc } from "../api/index.js";
 import { expand, getMuteRole, isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 import { englishList } from "../formatting/index.js";
@@ -6,18 +6,21 @@ import { formatDuration } from "../global-utils/index.js";
 import { logError } from "../log-interface/index.js";
 import { match, skip, type Rule } from "./lib.js";
 
-export const automodHook = (client: Client) => client.on(Events.MessageCreate, check).on(Events.MessageUpdate, async (_, message) => await check(message));
+export const automodHook = (client: Client) =>
+    client.on(Events.MessageCreate, async (message) => await check(message, false)).on(Events.MessageUpdate, async (_, message) => await check(message, true));
 
-async function check(message: Message | PartialMessage) {
+async function check(message: Message | PartialMessage, isEdit: boolean) {
     if (!message.guild) return;
     if (message.author?.id === message.client.user.id) return;
-    // TODO: if (message.member?.permissions.has(PermissionFlagsBits.Administrator)) return;
+    if (message.member?.permissions.has(PermissionFlagsBits.Administrator)) return;
     if (await isWrongClient(message.client, message.guild)) return;
     if (await isModuleDisabled(message.guild, "automod")) return;
 
     if (message.webhookId && (await message.fetchWebhook().catch(() => null))?.isChannelFollower()) return;
 
     const config = await trpc.getAutomodConfig.query(message.guild.id);
+
+    if (message.webhookId && !config.interactWithWebhooks) return;
 
     const actionDurations: Partial<Record<Rule["additionalAction"], number>> = {};
     const reports = new Map<string, { rule: Rule; report: string; notified: boolean }[]>();
@@ -37,7 +40,7 @@ async function check(message: Message | PartialMessage) {
         if (skip(message, rule, config)) continue;
         fetched ??= await message.fetch();
 
-        const result = await match(rule, fetched, multiDeleteTargets);
+        const result = await match(rule, fetched, multiDeleteTargets, isEdit);
         if (!result) continue;
 
         const [notif, report] = result;
@@ -88,23 +91,25 @@ async function check(message: Message | PartialMessage) {
 
     const actions: Exclude<Rule["additionalAction"], "nothing">[] = [];
 
-    if (actionDurations.timeout !== undefined)
-        if (actionDurations.mute !== undefined) actions.push(actionDurations.mute > actionDurations.timeout ? "mute" : "timeout");
-        else actions.push("timeout");
-    else if (actionDurations.mute !== undefined) actions.push("mute");
+    if (!message.webhookId) {
+        if (actionDurations.timeout !== undefined)
+            if (actionDurations.mute !== undefined) actions.push(actionDurations.mute > actionDurations.timeout ? "mute" : "timeout");
+            else actions.push("timeout");
+        else if (actionDurations.mute !== undefined) actions.push("mute");
 
-    if (actionDurations.ban !== undefined) {
-        actions.push("ban");
+        if (actionDurations.ban !== undefined) {
+            actions.push("ban");
 
-        for (const key of ["mute", "timeout"] as const)
-            if (
-                actionDurations.ban === Infinity ||
-                (actions.includes(key) && actionDurations[key] !== Infinity && actionDurations.ban >= actionDurations[key]!)
-            )
-                actions.splice(actions.indexOf(key), 1);
-    } else if (actionDurations.kick !== undefined) actions.push("kick");
+            for (const key of ["mute", "timeout"] as const)
+                if (
+                    actionDurations.ban === Infinity ||
+                    (actions.includes(key) && actionDurations[key] !== Infinity && actionDurations.ban >= actionDurations[key]!)
+                )
+                    actions.splice(actions.indexOf(key), 1);
+        } else if (actionDurations.kick !== undefined) actions.push("kick");
 
-    if (actions.length === 0 && actionDurations.warn !== undefined) actions.push("warn");
+        if (actions.length === 0 && actionDurations.warn !== undefined) actions.push("warn");
+    }
 
     const actionString = englishList(
         actions.map((x) => `${past[x]}${["mute", "timeout", "ban"].includes(x) ? ` ${formatDuration(actionDurations[x]!)}` : ""}`),
