@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { INVITE_LINK } from "@/lib/data";
 import { PartialGuild } from "@/lib/types";
 import { fuzzy } from "@daedalus/global-utils";
 import Image from "next/image";
@@ -49,11 +48,7 @@ export default function ManageHomePage() {
                     <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4">
                         {data
                             ? data.servers.map((guild) => (
-                                  <a
-                                      key={guild.id}
-                                      href={guild.hasBot ? `/manage/${guild.id}` : `${INVITE_LINK}&guild_id=${guild.id}`}
-                                      className={fuzzy(guild.name, query) ? "" : "hidden"}
-                                  >
+                                  <a key={guild.id} href={`/manage/${guild.id}`} className={fuzzy(guild.name, query) ? "" : "hidden"}>
                                       <div
                                           className={`p-4 grid grid-cols-[max-content_1fr] items-center gap-x-4 gap-y-2 h-24 border border-2 rounded ${guild.hasBot ? "bg-secondary dark:bg-secondary/60" : "text-muted-foreground"}`}
                                       >
