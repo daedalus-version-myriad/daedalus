@@ -98,7 +98,7 @@ export default {
         for (const [bot, guild] of bots) {
             if (guild) {
                 if (await bot.guilds.fetch(guild).catch(() => null)) guildsWithBot.add(guild);
-            } else for (const { id } of (await bot.guilds.fetch()).values()) guildsWithBot.add(id);
+            } else for (const { id } of bot.guilds.cache.values()) guildsWithBot.add(id);
         }
 
         for (const guild of filtered) guild.hasBot = guildsWithBot.has(guild.id);
