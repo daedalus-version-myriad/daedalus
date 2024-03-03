@@ -52,8 +52,10 @@ export const nukeguardHook = (client: Client) =>
                 if (config.ignoredRoles.includes(entry.targetId!) || (!config.watchRolesByDefault && !config.watchedRoles.includes(entry.targetId!))) return;
                 type = "role";
             } else if (entry.action === AuditLogEvent.EmojiDelete) {
+                if (!config.watchEmoji) return;
                 type = "emoji";
             } else if (entry.action === AuditLogEvent.StickerDelete) {
+                if (!config.watchStickers) return;
                 type = "sticker";
             } else if (entry.action === AuditLogEvent.WebhookCreate) {
                 if (!config.preventWebhookCreation) return;
