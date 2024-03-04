@@ -48,6 +48,9 @@ export default async function (interaction: ButtonInteraction | StringSelectMenu
 
     if (!target) throw "Could not find the referenced ticket target. Please contact Daedalus support (not the server's staff) if this issue persists.";
 
+    if (!target.channel || !target.category)
+        throw "This ticket target does not have a log channel and category configured. Please contact the server's staff (not Daedalus support) and inform them of this error (this issue can be fixed on the dashboard in the Tickets module).";
+
     const log = await interaction.guild!.channels.fetch(target.channel!).catch(() => {
         throw "Could not fetch the ticket log channel. Please contact server staff if this issue persists.";
     });

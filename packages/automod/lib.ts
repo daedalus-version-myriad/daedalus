@@ -34,7 +34,6 @@ export function skipMember(member: GuildMember, rule: Rule, config: GuildAutomod
 }
 
 export async function match(rule: Rule, message: Message, multiDeleteTargets: Message[], isEdit: boolean): Promise<[string, string] | undefined> {
-    console.log(`scanning ${message.id} with content ${message.content}`);
     const { type } = rule;
 
     if (type === "blocked-terms") {
