@@ -1,10 +1,21 @@
+"use client";
+
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { FaChevronLeft, FaDiscord, FaEarthAmericas } from "react-icons/fa6";
 
-export default function TCNBody({ guilds }: { guilds: { name: string; mascot: string; invite: string }[] }) {
+export default function TCNBody({ tcnURL }: { tcnURL: string }) {
+    const [guilds, setGuilds] = useState<{ name: string; mascot: string; invite: string }[]>([]);
+
+    useEffect(() => {
+        fetch(`${tcnURL}/guilds`)
+            .then((req) => req.json())
+            .then(setGuilds);
+    }, [tcnURL]);
+
     return (
         <div className="center-col gap-8 py-16">
             <div className="center-col gap-2 md:gap-4">
