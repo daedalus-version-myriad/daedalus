@@ -34,7 +34,7 @@ export default (x: Commands) =>
                         embeds: [
                             {
                                 title: `Confirm ${informal ? "in" : ""}formally warning ${user.tag}`,
-                                description: silent ? "The user will not be notifieds." : "The user will be DM'd your warning.",
+                                description: silent ? "The user will not be notified." : "The user will be DM'd your warning.",
                                 color: Colors.DarkVividPink,
                                 fields: [{ name: "Reason", value: reason }],
                                 footer: { text: user.id },
