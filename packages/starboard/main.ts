@@ -23,6 +23,7 @@ async function checkStars(input: Message | PartialMessage) {
         const message = (await input.fetch()) as Message<true>;
         const config = await trpc.getStarboardConfig.query(message.guild.id);
         if (!config.reaction) return;
+        if (input.channel.id === config.channel || config.overrides.some((override) => input.channel.id === override.channel)) return;
 
         const starboard = await getStarboard(config, message.channel);
         if (!starboard) return;
