@@ -1,0 +1,6 @@
+{
+    "name": "@daedalus/planetscale-migration",
+    "scripts": {
+        "start": "bun main.ts"
+    }
+}
