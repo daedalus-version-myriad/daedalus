@@ -113,7 +113,7 @@ export async function modmailGuildSelector(user: User): Promise<MessageCreateOpt
                   ]
                 : [0, 25, 50, 75]
                       .flatMap<ActionRowData<MessageActionRowComponentData>>((x) =>
-                          guilds.length >= x
+                          guilds.length > x
                               ? [
                                     {
                                         type: ComponentType.ActionRow,
