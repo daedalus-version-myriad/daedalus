@@ -1,8 +1,9 @@
+import mysql from "mysql2";
 import { secrets } from "../../../config/index.js";
-import { connect } from "@planetscale/database";
 
-export const connection = connect({
+export const connection = mysql.createConnection({
     host: secrets.DATABASE.HOST,
-    username: secrets.DATABASE.USERNAME,
+    user: secrets.DATABASE.USERNAME,
+    database: secrets.DATABASE.NAME,
     password: secrets.DATABASE.PASSWORD,
 });

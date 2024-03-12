@@ -1674,12 +1674,12 @@ export default {
 
                     if (id === -1) await tx.insert(tables.guildModmailItems).values(data);
                     else {
-                        const { rowsAffected } = await tx
+                        const [{ affectedRows }] = await tx
                             .update(tables.guildModmailItems)
                             .set(data)
                             .where(and(eq(tables.guildModmailItems.id, id), eq(tables.guildModmailItems.guild, guild)));
 
-                        if (rowsAffected === 0) await tx.insert(tables.guildModmailItems).values(data);
+                        if (affectedRows === 0) await tx.insert(tables.guildModmailItems).values(data);
                     }
                 }
 

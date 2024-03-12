@@ -58,11 +58,11 @@ export default {
             }),
         )
         .mutation(async ({ input }) => {
-            const { rowsAffected } = await db
+            const [{ affectedRows }] = await db
                 .update(tables.news)
                 .set({ code: input.code, title: input.title, subtitle: input.subtitle, summary: input.summary, body: input.body })
                 .where(eq(tables.news.code, input.code));
 
-            if (rowsAffected === 0) return "No article found with that code.";
+            if (affectedRows === 0) return "No article found with that code.";
         }),
 } as const;
