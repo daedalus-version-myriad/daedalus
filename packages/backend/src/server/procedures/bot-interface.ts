@@ -1076,11 +1076,11 @@ export default {
     removeGiveawayEntry: proc
         .input(z.object({ guild: snowflake, id: z.number().int().min(1), user: snowflake }))
         .mutation(async ({ input: { guild, id, user } }) => {
-            const { rowsAffected } = await db
+            const [{ affectedRows }] = await db
                 .delete(tables.giveawayEntries)
                 .where(and(eq(tables.giveawayEntries.guild, guild), eq(tables.giveawayEntries.id, id), eq(tables.giveawayEntries.user, user)));
 
-            return rowsAffected === 0;
+            return affectedRows === 0;
         }),
     getGiveawayEntries: proc.input(z.object({ guild: snowflake, id: z.number().int().min(1) })).query(async ({ input: { guild, id } }) => {
         return (
@@ -1156,8 +1156,8 @@ export default {
         )[0].count;
     }),
     clearHistory: proc.input(z.object({ guild: snowflake, user: snowflake })).mutation(async ({ input: { guild, user } }) => {
-        const { rowsAffected } = await db.delete(tables.userHistory).where(and(eq(tables.userHistory.guild, guild), eq(tables.userHistory.user, user)));
-        return rowsAffected;
+        const [{ affectedRows }] = await db.delete(tables.userHistory).where(and(eq(tables.userHistory.guild, guild), eq(tables.userHistory.user, user)));
+        return affectedRows;
     }),
     setUserNotes: proc
         .input(z.object({ guild: snowflake, user: snowflake, notes: z.string().max(4096) }))
@@ -1395,8 +1395,8 @@ export default {
             await db.insert(tables.polls).values(data);
         }),
     pollAbstain: proc.input(z.object({ message: snowflake, user: snowflake })).mutation(async ({ input: { message, user } }) => {
-        const { rowsAffected } = await db.delete(tables.pollVotes).where(and(eq(tables.pollVotes.message, message), eq(tables.pollVotes.user, user)));
-        return rowsAffected === 0;
+        const [{ affectedRows }] = await db.delete(tables.pollVotes).where(and(eq(tables.pollVotes.message, message), eq(tables.pollVotes.user, user)));
+        return affectedRows === 0;
     }),
     pollVote: proc.input(z.object({ message: snowflake, user: snowflake, vote: z.string() })).mutation(async ({ input: { message, user, vote } }) => {
         await db.insert(tables.pollVotes).values({ message, user, vote }).onDuplicateKeyUpdate({ set: { vote } });
@@ -1437,8 +1437,8 @@ export default {
         return (await db.select().from(tables.stickyMessages).where(eq(tables.stickyMessages.channel, channel))).at(0);
     }),
     deleteStickyMessage: proc.input(snowflake).mutation(async ({ input: channel }) => {
-        const { rowsAffected } = await db.delete(tables.stickyMessages).where(eq(tables.stickyMessages.channel, channel));
-        return rowsAffected > 0;
+        const [{ affectedRows }] = await db.delete(tables.stickyMessages).where(eq(tables.stickyMessages.channel, channel));
+        return affectedRows > 0;
     }),
     bumpStickyMessage: proc.input(z.object({ channel: snowflake, message: snowflake })).mutation(async ({ input: { channel, message } }) => {
         await db.update(tables.stickyMessages).set({ message }).where(eq(tables.stickyMessages.channel, channel));

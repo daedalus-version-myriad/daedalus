@@ -251,8 +251,8 @@ export default {
         return key;
     }),
     deleteKey: proc.input(z.object({ owner: snowflake, key: z.string().max(32) })).mutation(async ({ input: { owner, key } }) => {
-        const { rowsAffected } = await db.delete(tables.premiumKeys).where(and(eq(tables.premiumKeys.user, owner), eq(tables.premiumKeys.key, key)));
-        if (rowsAffected === 0) return;
+        const [{ affectedRows }] = await db.delete(tables.premiumKeys).where(and(eq(tables.premiumKeys.user, owner), eq(tables.premiumKeys.key, key)));
+        if (affectedRows === 0) return;
 
         const [entry] = await db
             .select({ guild: tables.premiumKeyBindings.guild })
