@@ -91,10 +91,10 @@ async function cycle() {
                         if (!state.channel) continue;
 
                         let channel: GuildChannel | null = state.channel;
-                        do if (settings.blockedChannels.includes(channel.id)) return;
+                        do if (settings.blockedChannels.includes(channel.id)) continue;
                         while ((channel = channel.parent));
 
-                        if (state.member.roles.cache.hasAny(...settings.blockedRoles)) return;
+                        if (state.member.roles.cache.hasAny(...settings.blockedRoles)) continue;
 
                         await addXp(state.channel, state.member, 0, 1, settings);
                     } else tracker.add(state.member.id);
