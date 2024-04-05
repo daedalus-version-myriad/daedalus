@@ -762,6 +762,12 @@ export const modules: ModuleData = {
                 ghost: true,
                 syntaxes: [["/avatar <user>", `<p>View a user's avatar, showing their server-specific avatar as well if possible.</p>`]],
             },
+            banner: {
+                name: "Banner",
+                description: "View a user's banner.",
+                ghost: true,
+                syntaxes: [["/banner <user>", `<p>View a user's banner. This can only show their global banner due to technical limitations.</p>`]],
+            },
             roles: {
                 name: "Roles",
                 description: "Alter a user's roles.",

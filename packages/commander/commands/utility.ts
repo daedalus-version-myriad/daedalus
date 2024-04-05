@@ -10,7 +10,7 @@ import { getManager } from "../lib/clients.js";
 import { channelBreakdown, convert, ensureCanManageRole, guildInfo } from "../lib/utility.js";
 
 export default (app: Argentium) =>
-    app.allowInDms("avatar", "code", "convert", "help", "info", "qr", "snowflake", "Extract IDs").commands((x) =>
+    app.allowInDms("avatar", "banner", "code", "convert", "help", "info", "qr", "snowflake", "Extract IDs").commands((x) =>
         x
             .slash((x) =>
                 x
@@ -44,6 +44,20 @@ export default (app: Argentium) =>
                         }
 
                         return { embeds };
+                    }),
+            )
+            .slash((x) =>
+                x
+                    .key("banner")
+                    .description("get a user's global banner")
+                    .userOption("user", "the user", { required: true })
+                    .fn(async ({ _, user }) => {
+                        await user.fetch();
+                        let url: string | null | undefined;
+
+                        if ((url = user.bannerURL({ size: 4096 })))
+                            return { embeds: [{ title: "Profile Banner", color: user.accentColor ?? 0x009688, url, image: { url } }] };
+                        else return template.error("This user does not have a profile banner.");
                     }),
             )
             .slash((x) =>
