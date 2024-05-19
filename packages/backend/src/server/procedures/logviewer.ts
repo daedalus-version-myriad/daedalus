@@ -38,7 +38,7 @@ export default {
                 (await db.select().from(tables.modmailMessages).where(eq(tables.modmailMessages.uuid, uuid))).map(async (message) => ({
                     ...message,
                     username:
-                        message.type === "internal"
+                        message.type === "incoming"
                             ? cache[thread.user]
                             : (cache[message.author] ??= (await (await bot).users.fetch(message.author).catch(() => null))?.tag ?? "(Unknown User)"),
                 })),
