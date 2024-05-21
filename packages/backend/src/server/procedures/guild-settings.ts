@@ -2070,13 +2070,16 @@ export default {
                 return ["All count channels must be in a unique channel.", { guild, channels }];
 
             await db.transaction(async (tx) => {
-                if (channels.length === 0) await tx.delete(tables.guildCountItems);
+                if (channels.length === 0) await tx.delete(tables.guildCountItems).where(eq(tables.guildCountItems.guild, guild));
                 else
                     await tx.delete(tables.guildCountItems).where(
-                        not(
-                            inArray(
-                                tables.guildCountItems.id,
-                                channels.map(({ id }) => id),
+                        and(
+                            eq(tables.guildCountItems.guild, guild),
+                            not(
+                                inArray(
+                                    tables.guildCountItems.id,
+                                    channels.map(({ id }) => id),
+                                ),
                             ),
                         ),
                     );
