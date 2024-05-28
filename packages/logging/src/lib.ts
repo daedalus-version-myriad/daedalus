@@ -1,4 +1,4 @@
-import type { Awaitable, Channel, Guild, InviteGuild, MessageCreateOptions } from "discord.js";
+import { parseWebhookURL, type Awaitable, type Channel, type Guild, type InviteGuild, type MessageCreateOptions } from "discord.js";
 import { trpc } from "../../api/index.js";
 import { getChannelStack, isModuleDisabled, isWrongClient } from "../../bot-utils/index.js";
 
@@ -21,12 +21,26 @@ export async function invokeLog(event: string, context: Channel | Guild | Invite
 
     const data = await fn();
 
-    for (const entry of Array.isArray(data) ? data : [data])
-        try {
-            if (typeof target === "string")
-                await fetch(target, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(entry) });
-            else await target.send(entry);
-        } catch (error) {
-            console.error(error);
-        }
+    const array = Array.isArray(data) ? data : [data];
+
+    if (typeof target === "string") {
+        const webhookData = parseWebhookURL(target);
+        if (!webhookData) return;
+
+        const webhook = await context.client.fetchWebhook(webhookData.id, webhookData.token).catch(() => null);
+        if (!webhook) return;
+
+        for (const entry of array)
+            try {
+                await webhook.send(entry);
+            } catch (error) {
+                console.error(error);
+            }
+    } else
+        for (const entry of array)
+            try {
+                await target.send(entry);
+            } catch (error) {
+                console.error(error);
+            }
 }
