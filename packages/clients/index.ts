@@ -38,9 +38,10 @@ export class ClientManager {
 
     async cleanup(guild: string, client: Client) {
         try {
-            // TODO: Figure out how to get this to not crash the program
-            // await client.destroy();
-        } catch {}
+            await client.destroy();
+        } catch {
+            console.error(`Failed to obliterate client for guild ${guild}: ${client.user?.tag}`);
+        }
 
         this.cache.delete(guild);
     }

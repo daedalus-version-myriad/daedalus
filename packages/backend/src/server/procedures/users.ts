@@ -34,6 +34,9 @@ function key(server: { hasBot: boolean; owner: boolean; permissions: string; fea
 }
 
 export default {
+    isAdmin: proc.input(snowflake).query(async ({ input: id }) => {
+        return await isAdmin(id);
+    }),
     userGet: proc.input(z.object({ id: snowflake, guild: snowflake.optional() })).query(async ({ input: { id, guild: guildId } }) => {
         const client = (await clients.getBot(guildId).catch(() => null)) ?? (await bot);
 

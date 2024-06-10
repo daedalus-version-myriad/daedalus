@@ -1,5 +1,15 @@
 import { trpc } from "../../api/index.js";
-import { checkPunishment, confirm, enforcePermissions, getColor, getMuteRole, isModuleDisabled, sendDM, timeinfo, type Commands } from "../../bot-utils/index.js";
+import {
+    checkPunishment,
+    confirm,
+    enforcePermissions,
+    getColor,
+    getMuteRole,
+    isModuleDisabled,
+    sendDM,
+    timeinfo,
+    type Commands,
+} from "../../bot-utils/index.js";
 import { formatDuration, parseDuration } from "../../global-utils/index.js";
 import { Colors, type GuildMember } from "discord.js";
 
