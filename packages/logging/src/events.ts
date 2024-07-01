@@ -107,8 +107,8 @@ export function addEventHandlers(client: Client) {
                 const entry = await auditEntry(ban.guild, AuditLogEvent.MemberBanRemove, ban.user);
 
                 return embed(
-                    "User Banned",
-                    `${expand(entry?.executor, "Unknown User")} banned ${expand(ban.user)} ${entry?.reason ? `with reason ${code(entry.reason)}` : ""}`,
+                    "User Unbanned",
+                    `${expand(entry?.executor, "Unknown User")} unbanned ${expand(ban.user)} ${entry?.reason ? `with reason ${code(entry.reason)}` : ""}`,
                     Colors.Green,
                 );
             });
