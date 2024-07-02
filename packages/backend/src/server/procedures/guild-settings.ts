@@ -1121,8 +1121,14 @@ export default {
 
                                 try {
                                     if (!old.message) throw 0;
+
                                     message = await channel.messages.fetch({ message: old.message, force: true });
-                                    edit = true;
+
+                                    if (message.author.id === client.user.id) edit = true;
+                                    else {
+                                        await message.delete().catch(() => null);
+                                        throw 0;
+                                    }
                                 } catch {
                                     message = await channel.send(data(true)).catch((error) => {
                                         throw `Could neither fetch the message in #${channel.name} to edit nor send a new one: ${error}`;
@@ -1833,8 +1839,14 @@ export default {
 
                             try {
                                 if (!old.message) throw 0;
+
                                 message = await channel.messages.fetch({ message: old.message, force: true });
-                                edit = true;
+
+                                if (message.author.id === client.user.id) edit = true;
+                                else {
+                                    await message.delete().catch(() => null);
+                                    throw 0;
+                                }
                             } catch {
                                 message = await channel.send(data(true)).catch((error) => {
                                     throw `Could neither fetch the message in #${channel.name} to edit nor send a new one: ${error}`;
@@ -2191,8 +2203,14 @@ export default {
 
                             try {
                                 if (!old.messageId) throw 0;
+
                                 message = await channel.messages.fetch({ message: old.messageId, force: true });
-                                edit = true;
+
+                                if (message.author.id === client.user.id) edit = true;
+                                else {
+                                    await message.delete().catch(() => null);
+                                    throw 0;
+                                }
                             } catch {
                                 message = await channel.send(data(true)).catch((error) => {
                                     throw `Could neither fetch the message in #${channel.name} to edit nor send a new one: ${error}`;
