@@ -16,16 +16,23 @@ export const stickyAutoRolesHook = (client: Client) =>
             if (stickyRolesDisabled && autoRolesDisabled) return;
             if (await willAutokick(member)) return;
 
-            let roles = await trpc.getStickyRoles.query({ guild: member.guild.id, user: member.id });
+            let roles: string[] = [];
+
+            if (!stickyRolesDisabled) {
+                roles = await trpc.getStickyRoles.query({ guild: member.guild.id, user: member.id });
+                const { roles: exclude } = await trpc.getStickyRolesConfig.query(member.guild.id);
+                roles = roles.filter((x) => !exclude.includes(x));
+            }
+
+            if (!autoRolesDisabled) {
+                const { roles: autoroles } = await trpc.getAutorolesConfig.query(member.guild.id);
+                roles = [...roles, ...autoroles];
+            }
+
             if (roles.length === 0) return;
 
-            const { roles: exclude } = await trpc.getStickyRolesConfig.query(member.guild.id);
-
             const me = await member.guild.members.fetchMe();
-            roles = roles.filter((x) => !exclude.includes(x) && me.roles.highest.comparePositionTo(x) > 0);
-
-            const { roles: autoroles } = await trpc.getAutorolesConfig.query(member.guild.id);
-            roles = roles.concat(autoroles);
+            roles = roles.filter((role) => me.roles.highest.comparePositionTo(role) > 0);
 
             if (roles.length > 0) await member.roles.add(roles);
         });
