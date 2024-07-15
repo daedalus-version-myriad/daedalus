@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { bot, clients } from "../../bot/index.js";
-import { tables } from "../../db/index.js";
 import { db } from "../../db/db.js";
+import { tables } from "../../db/index.js";
 import { snowflake } from "../schemas.js";
 import { proc } from "../trpc.js";
 import { getModmailSettings, getTicketsSettings } from "./guild-settings.js";
@@ -35,13 +35,15 @@ export default {
         return {
             thread: { ...thread, username: (cache[thread.user] = (await (await bot).users.fetch(thread.user).catch(() => null))?.tag ?? "(Unknown User)") },
             messages: await Promise.all(
-                (await db.select().from(tables.modmailMessages).where(eq(tables.modmailMessages.uuid, uuid))).map(async (message) => ({
-                    ...message,
-                    username:
-                        message.type === "incoming"
-                            ? cache[thread.user]
-                            : (cache[message.author] ??= (await (await bot).users.fetch(message.author).catch(() => null))?.tag ?? "(Unknown User)"),
-                })),
+                (await db.select().from(tables.modmailMessages).where(eq(tables.modmailMessages.uuid, uuid)).orderBy(asc(tables.modmailMessages.time))).map(
+                    async (message) => ({
+                        ...message,
+                        username:
+                            message.type === "incoming"
+                                ? cache[thread.user]
+                                : (cache[message.author] ??= (await (await bot).users.fetch(message.author).catch(() => null))?.tag ?? "(Unknown User)"),
+                    }),
+                ),
             ),
         };
     }),
@@ -78,10 +80,12 @@ export default {
                 username: (cache[ticket.user] = (await (await bot).users.fetch(ticket.user).catch(() => null))?.tag ?? "(Unknown User)"),
             },
             messages: await Promise.all(
-                (await db.select().from(tables.ticketMessages).where(eq(tables.ticketMessages.uuid, uuid))).map(async (message) => ({
-                    ...message,
-                    username: (cache[message.author] ??= (await (await bot).users.fetch(message.author).catch(() => null))?.tag ?? "(Unknown User)"),
-                })),
+                (await db.select().from(tables.ticketMessages).where(eq(tables.ticketMessages.uuid, uuid)).orderBy(asc(tables.ticketMessages.time))).map(
+                    async (message) => ({
+                        ...message,
+                        username: (cache[message.author] ??= (await (await bot).users.fetch(message.author).catch(() => null))?.tag ?? "(Unknown User)"),
+                    }),
+                ),
             ),
         };
     }),
