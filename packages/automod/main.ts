@@ -7,7 +7,15 @@ import { logError } from "../log-interface/index.js";
 import { match, skip, type Rule } from "./lib.js";
 
 export const automodHook = (client: Client) =>
-    client.on(Events.MessageCreate, async (message) => await check(message, false)).on(Events.MessageUpdate, async (_, message) => await check(message, true));
+    client
+        .on(Events.MessageCreate, async (message) => await check(message, false))
+        .on(Events.MessageUpdate, async (before, message) => {
+            if (before.partial) return;
+            if (before.content === message.content && before.attachments.size === message.attachments.size && before.stickers.size === message.stickers.size)
+                return;
+
+            await check(message, true);
+        });
 
 async function check(message: Message | PartialMessage, isEdit: boolean) {
     if (!message.guild) return;
