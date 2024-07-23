@@ -293,6 +293,7 @@ export function addEventHandlers(client: Client) {
             }));
         })
         .on(Events.MessageUpdate, (before, after) => {
+            if (before.partial) return;
             if (before.flags.has(MessageFlags.Loading)) return;
             if (before.channel.isDMBased() || after.channel.isDMBased()) return;
 
