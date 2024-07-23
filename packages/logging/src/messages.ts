@@ -152,7 +152,7 @@ export async function handleMemberUpdate(before: GuildMember, after: GuildMember
     const entry = await auditEntry(after.guild, AuditLogEvent.MemberUpdate, after);
 
     const user = entry?.executor;
-    const reason = entry?.reason ? ` with reason code(${entry.reason})` : "";
+    const reason = entry?.reason ? ` with reason ${code(entry.reason)}` : "";
 
     if (before.communicationDisabledUntilTimestamp !== after.communicationDisabledUntilTimestamp)
         if ((before.communicationDisabledUntilTimestamp ?? 0) <= Date.now())
