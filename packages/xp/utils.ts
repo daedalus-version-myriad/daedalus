@@ -87,7 +87,7 @@ export async function addXp(channel: Channel, member: GuildMember, text = 0, voi
             const removeable: string[] = [];
 
             let dmRole: string | null = null;
-            const threshold = { text: 0, voice: 0 };
+            const threshold = { text: 1, voice: 1 };
 
             for (const reward of settings.rewards) {
                 if (reward.role === null) continue;

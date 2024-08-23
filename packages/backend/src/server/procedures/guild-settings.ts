@@ -905,8 +905,8 @@ export default {
                 announcementBackground: z.string(),
                 rewards: z
                     .object({
-                        text: z.number().int("Level reward levels must be integers.").min(1, "Level reward levels should be positive.").nullable(),
-                        voice: z.number().int("Level reward levels must be integers.").min(1, "Level reward levels should be positive.").nullable(),
+                        text: z.number().int("Level reward levels must be integers.").min(0, "Level reward levels should not be negative.").nullable(),
+                        voice: z.number().int("Level reward levels must be integers.").min(0, "Level reward levels should not be negative.").nullable(),
                         role: snowflake.nullable(),
                         removeOnHigher: z.boolean(),
                         dmOnReward: z.boolean(),
