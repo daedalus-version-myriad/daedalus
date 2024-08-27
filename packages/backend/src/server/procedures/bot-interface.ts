@@ -997,7 +997,10 @@ export default {
     }),
     updateCount: proc.input(z.object({ id: z.number().int().min(1), user: snowflake })).mutation(async ({ input: { id, user } }) => {
         await db.transaction(async (tx) => {
-            await tx.update(tables.countLast).set({ last: user }).where(eq(tables.countLast.id, id));
+            await tx
+                .insert(tables.countLast)
+                .values({ id, last: user })
+                .onDuplicateKeyUpdate({ set: { last: user } });
 
             await tx
                 .insert(tables.countScoreboard)
