@@ -41,8 +41,10 @@ export const autoresponderHook = (client: Client) =>
 
             if (!allowed) continue;
 
-            if (message.member!.roles.cache.hasAny(...trigger.blockedRoles)) continue;
-            if (trigger.onlyToAllowedRoles && !message.member!.roles.cache.hasAny(...trigger.allowedRoles)) continue;
+            if (message.member) {
+                if (message.member!.roles.cache.hasAny(...trigger.blockedRoles)) continue;
+                if (trigger.onlyToAllowedRoles && !message.member!.roles.cache.hasAny(...trigger.allowedRoles)) continue;
+            }
 
             if (!trigger.bypassDefaultChannelSettings) {
                 if (channelAllowedByDefault === null) {
@@ -64,7 +66,7 @@ export const autoresponderHook = (client: Client) =>
                 if (!channelAllowedByDefault) continue;
             }
 
-            if (!trigger.bypassDefaultRoleSettings) {
+            if (message.member && !trigger.bypassDefaultRoleSettings) {
                 if (roleAllowedByDefault === null)
                     roleAllowedByDefault =
                         !message.member!.roles.cache.hasAny(...config.blockedRoles) &&
