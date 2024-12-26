@@ -12,7 +12,7 @@ export default (x: Commands) =>
                 const notes = await trpc.getUserNotes.query({ guild: _.guild!.id, user: user.id });
 
                 await _.showModal({
-                    title: `Editing Mod Notes for ${truncate(user.tag, 43)}`,
+                    title: `Notes for ${truncate(user.tag, 35)}`,
                     customId: `:notes/edit:${user.id}`,
                     components: [
                         {
