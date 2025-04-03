@@ -61,8 +61,8 @@ export async function addXp(channel: Channel, member: GuildMember, text = 0, voi
             const levelAfter = { text: xpToLevel(before.text + text), voice: xpToLevel(before.voice + voice) };
 
             if (announcement)
-                for (const key of ["text", "voice"] as const)
-                    if (levelAfter[key] > levelBefore[key])
+                for (const [key, other] of [["text", "voice"], ["voice", "text"]] as const)
+                    if (levelAfter[key] > levelBefore[key] && levelAfter[key] > levelAfter[other])
                         await fetchAndSendMessage(
                             member.guild,
                             announcement,
