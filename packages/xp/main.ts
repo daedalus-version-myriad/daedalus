@@ -1,4 +1,4 @@
-import { Client, Events, GuildChannel, MessageType, OAuth2Guild, type Channel } from "discord.js";
+import { Client, Events, Guild, GuildChannel, MessageType, type Channel } from "discord.js";
 import { trpc } from "../api/index.js";
 import { isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 import type { ClientManager } from "../clients/index.js";
@@ -49,19 +49,15 @@ const tracking = new Map<string, Set<string>>();
 async function cycle() {
     try {
         const clients = await manager.getBots();
-        const guilds: OAuth2Guild[] = [];
+        const guilds: Guild[] = [];
 
         for (const client of clients)
-            for (const guild of (await client.guilds.fetch()).values()) if (!(await isWrongClient(client, guild.id))) guilds.push(guild);
+            for (const guild of client.guilds.cache.values()) if (!(await isWrongClient(client, guild.id))) guilds.push(guild);
 
-        const ids = new Set(await trpc.getHasXpEnabled.query(guilds.map((guild) => guild.id)));
-        const filtered = guilds.filter((guild) => ids.has(guild.id));
+        for (const guild of guilds) {
+            if (await isModuleDisabled(guild.id, "xp")) continue;
 
-        const configs = Object.fromEntries((await trpc.getAllXpConfigs.query(filtered.map((guild) => guild.id))).map((data) => [data.guild, data]));
-
-        for (const guild of filtered) {
-            const settings =
-                configs[guild.id] ??
+            const settings = await trpc.getXpConfig.query(guild.id) ??
                 ({
                     guild: guild.id,
                     blockedChannels: [],
@@ -75,7 +71,7 @@ async function cycle() {
                     announcementBackground: "",
                     rewards: [],
                 } satisfies GuildXpSettings);
-
+            
             if (!tracking.has(guild.id)) tracking.set(guild.id, new Set());
             const tracker = tracking.get(guild.id)!;
 
@@ -83,7 +79,7 @@ async function cycle() {
 
             try {
                 for (const state of (await guild.fetch()).voiceStates.cache.values()) {
-                    if (!state.member) continue;
+                    if (!state.member || state.member.user.bot) continue;
 
                     seen.add(state.member.id);
 
@@ -104,10 +100,12 @@ async function cycle() {
 
                 for (const id of tracker) if (!seen.has(id)) tracker.delete(id);
             } catch (error) {
+                console.error("error handling voice XP for", guild.id);
                 console.error(error);
             }
         }
     } catch (error) {
+        console.error("error handling voice XP altogether")
         console.error(error);
     }
 }

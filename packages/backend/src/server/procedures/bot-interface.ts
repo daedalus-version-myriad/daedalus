@@ -350,24 +350,6 @@ export default {
     getXpConfig: proc.input(snowflake).query(async ({ input: guild }) => {
         return await getXpSettings(guild);
     }),
-    getHasXpEnabled: proc.input(snowflake.array()).query(async ({ input: guilds }) => {
-        return (
-            await db
-                .select({ guild: tables.guildModulesSettings.guild })
-                .from(tables.guildModulesSettings)
-                .where(
-                    and(
-                        inArray(tables.guildModulesSettings.guild, guilds),
-                        eq(tables.guildModulesSettings.module, "xp"),
-                        eq(tables.guildModulesSettings.enabled, true),
-                    ),
-                )
-        ).map(({ guild }) => guild);
-    }),
-    getAllXpConfigs: proc.input(snowflake.array()).query(async ({ input: guilds }) => {
-        if (guilds.length === 0) return [];
-        return (await db.select().from(tables.guildXpSettings).where(inArray(tables.guildXpSettings.guild, guilds))).map(transformXpSettings);
-    }),
     getReactionRoleEntries: proc.input(snowflake).query(async ({ input: guild }) => {
         return (await db
             .select()

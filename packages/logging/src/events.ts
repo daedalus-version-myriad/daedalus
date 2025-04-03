@@ -24,11 +24,6 @@ import {
 import { audit, auditEntry, channelTypes } from "./utils.js";
 
 export function addEventHandlers(client: Client) {
-    (async () => {
-        const guilds = await client.guilds.fetch();
-        for (const { id } of guilds.values()) client.guilds.cache.get(id)?.members.fetch();
-    })();
-
     client
         .on(Events.ChannelCreate, (channel) => {
             invokeLog("channelCreate", channel, async () => {

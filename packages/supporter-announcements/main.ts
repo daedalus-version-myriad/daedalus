@@ -3,11 +3,6 @@ import { trpc } from "../api/index.js";
 import { fetchAndSendCustom, isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 
 export const supporterAnnouncementsHook = (client: Client) => {
-    (async () => {
-        const guilds = await client.guilds.fetch();
-        for (const { id } of guilds.values()) client.guilds.cache.get(id)?.members.fetch();
-    })();
-
     client.on(Events.GuildMemberUpdate, async (before, after) => {
         if (before.partial) return;
         if (after.user.bot) return;
