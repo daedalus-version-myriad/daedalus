@@ -13,7 +13,11 @@ export default async function ManageLayout({ children, params: { id: guildId } }
     if (!id) return <></>;
 
     const guild = await trpc.userGuild.query({ id, guild: guildId });
-    if ("error" in guild) return void redirect(`${INVITE_LINK}&guild_id=${guildId}`);
+
+    if ("error" in guild) {
+        console.error(guild.error);
+        return void redirect(`${INVITE_LINK}&guild_id=${guildId}`);
+    }
 
     return (
         <GuildWrapper guild={guild}>
