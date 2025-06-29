@@ -27,7 +27,7 @@ export const highlightsHook = (client: Client) =>
             if (!message.mentions.users.has(id) && (!member || !member.roles.cache.hasAny(...message.mentions.roles.keys()))) repliedAuthor = id;
         }
 
-        const normalized = message.content.split(/\s+/).map((x) => [stem(x).join(""), x]);
+        const normalized = message.content.split(/\b/).map((x) => [stem(x).join(""), x]);
 
         const members: { member: GuildMember; reply: boolean; reason?: { found: string; phrase: string } }[] = [];
 
