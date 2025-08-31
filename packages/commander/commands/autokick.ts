@@ -6,7 +6,7 @@ export default (x: Commands) =>
         .slash((x) =>
             x
                 .key("autokick allow")
-                .description("Exempt a user from autokick, allowing them to join regardless of their account age.")
+                .description("exempt a user from autokick, allowing them to join regardless of their account age")
                 .userOption("user", "the user to allow", { required: true })
                 .fn(defer(true))
                 .fn(async ({ _, user }) => {
@@ -17,7 +17,7 @@ export default (x: Commands) =>
         .slash((x) =>
             x
                 .key("autokick clear")
-                .description("Clear a user's exemption from autokick, subjecting them to the account age limit if they join again.")
+                .description("clear a user's exemption from autokick, subjecting them to the account age limit if they join again")
                 .userOption("user", "the user to modify", { required: true })
                 .fn(defer(true))
                 .fn(async ({ _, user }) => {

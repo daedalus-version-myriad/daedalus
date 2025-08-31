@@ -11,7 +11,7 @@ export default (x: Commands) =>
     x.slash((x) =>
         x
             .key("admin sweep-clients")
-            .description("Sweep dead clients.")
+            .description("sweep dead clients")
             .fn(ensureAdmin)
             .fn(defer(true))
             .fn(async () => {
