@@ -72,15 +72,8 @@ export default async function (interaction: ButtonInteraction | StringSelectMenu
         if (interaction.guild!.channels.cache.has(existing.channel)) return template.info(`You already have an open ticket at <#${existing.channel}>.`);
         else await trpc.markTicketAsClosed.mutate(existing.uuid);
 
-    const channel = await category.children.create({
-        name: interaction.user.tag,
-        permissionOverwrites: [
-            ...category.permissionOverwrites.cache.toJSON(),
-            ...(category.permissionOverwrites.cache.has(interaction.user.id)
-                ? []
-                : [{ type: OverwriteType.Member, id: interaction.user.id, allow: PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages }]),
-        ],
-    });
+    const channel = await category.children.create({ name: interaction.user.tag });
+    await channel.permissionOverwrites.create(interaction.user, { [PermissionFlagBits.ViewChannel]: true, [PermissionFlagBits.SendMessages]: true });
 
     const uuid = await trpc.openTicket.mutate({
         guild: interaction.guild!.id,
