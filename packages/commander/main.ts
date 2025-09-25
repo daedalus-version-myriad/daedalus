@@ -64,6 +64,7 @@ import xpReset from "./commands/xp-reset.js";
 import { setManager } from "./lib/clients.js";
 
 const argentium = new Argentium()
+    .allowInDms("avatar", "banner", "code", "convert", "help", "info", "qr", "random", "reminder", "snowflake", "Extract IDs")
     .commands((x) =>
         x
             .beforeAll(async ({ _, ...data }, escape) => {
@@ -135,7 +136,9 @@ const argentium = new Argentium()
             .use(notesView)
             .use(poll)
             .use(purge)
+            .use(random)
             .use(rank)
+            .use(reminders)
             .use(reportUser)
             .use(report)
             .use(roleDelete)
@@ -152,13 +155,11 @@ const argentium = new Argentium()
             .use(unban)
             .use(unmute)
             .use(unstick)
+            .use(utility)
             .use(warn)
             .use(xpReset)
             .use(xpMee6Import),
     )
-    .use(random)
-    .use(reminders)
-    .use(utility)
     .onCommandError((e, _) => {
         if (_.isRepliable() && typeof e === "string") {
             reply(_, template.error(e));
