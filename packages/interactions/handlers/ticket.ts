@@ -73,7 +73,7 @@ export default async function (interaction: ButtonInteraction | StringSelectMenu
         else await trpc.markTicketAsClosed.mutate(existing.uuid);
 
     const channel = await category.children.create({ name: interaction.user.tag });
-    await channel.permissionOverwrites.create(interaction.user, { [PermissionFlagBits.ViewChannel]: true, [PermissionFlagBits.SendMessages]: true });
+    await channel.permissionOverwrites.create(interaction.user, { [PermissionFlagsBits.ViewChannel]: true, [PermissionFlagsBits.SendMessages]: true });
 
     const uuid = await trpc.openTicket.mutate({
         guild: interaction.guild!.id,
