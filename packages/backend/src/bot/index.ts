@@ -79,6 +79,7 @@ export const clients: ClientManager = new ClientManager({
             partials: [Partials.Channel, Partials.Message, Partials.GuildMember, Partials.Reaction],
             sweepers: { messages: { lifetime: 604800, interval: 3600 } },
             allowedMentions: { parse: [] },
+            failIfNotExists: false,
         }),
     postprocess: (client, guild) =>
         [
