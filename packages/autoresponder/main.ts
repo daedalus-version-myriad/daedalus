@@ -80,7 +80,7 @@ export const autoresponderHook = (client: Client) =>
                     trigger.replyMode === "normal" ? message.channel : message,
                     trigger.parsed,
                     "Autoresponder",
-                    `Error responding to ${message.url}`,
+                    `Error responding to ${message.url} (trigger: ${trigger.match})`,
                     { guild: message.guild, user: message.author, member: message.member },
                     false,
                     trigger.replyMode === "ping-reply",
