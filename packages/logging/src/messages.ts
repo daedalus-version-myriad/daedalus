@@ -28,6 +28,7 @@ import stickerCache from "../../bot-utils/sticker-cache.js";
 import { archiveDurations, permissions } from "../../data/index.js";
 import { englishList } from "../../formatting/index.js";
 import { DurationStyle, formatDuration } from "../../global-utils/index.js";
+import { stickyMessageLocationsSuppressDeleteLogs } from "../../sticky-messages/lib.js";
 import { invokeLog } from "./lib.js";
 import { audit, auditEntry, channelTypes, eventStatuses, fieldsFor } from "./utils.js";
 
@@ -428,6 +429,8 @@ export async function guildUpdate(before: Guild, after: Guild): Promise<MessageC
 }
 
 export async function messageDelete(message: Message | PartialMessage, fileOnlyMode: boolean): Promise<MessageCreateOptions[]> {
+    if (stickyMessageLocationsSuppressDeleteLogs[message.channel.id].includes(message.id)) return [];
+
     if (fileOnlyMode && message.attachments.size === 0 && message.stickers.size === 0) return [];
 
     const files = await copyMedia(message, SpoilerLevel.HIDE);

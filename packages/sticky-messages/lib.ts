@@ -4,6 +4,8 @@ import { trpc } from "../api/index.js";
 const lastUpdate = new Map<string, number>();
 const scheduledUpdate = new Map<string, Timer>();
 
+export const stickyMessageLocationsSuppressDeleteLogs: Record<string, string[]> = {};
+
 export async function updateStick(channel: GuildTextBasedChannel) {
     const entry = await trpc.getStickyMessage.query(channel.id);
     if (!entry) return;
@@ -31,6 +33,10 @@ export async function updateStick(channel: GuildTextBasedChannel) {
 
     if (entry.message)
         try {
+            const list = (stickyMessageLocationsSuppressDeleteLogs[entry.channel] ??= []);
+            list.push(entry.message);
+            while (list.length > 3) list.shift();
+
             const message = await channel.messages.fetch(entry.message);
             await message.delete();
         } catch {
