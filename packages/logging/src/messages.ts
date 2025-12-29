@@ -429,7 +429,7 @@ export async function guildUpdate(before: Guild, after: Guild): Promise<MessageC
 }
 
 export async function messageDelete(message: Message | PartialMessage, fileOnlyMode: boolean): Promise<MessageCreateOptions[]> {
-    if (stickyMessageLocationsSuppressDeleteLogs[message.channel.id].includes(message.id)) return [];
+    if (stickyMessageLocationsSuppressDeleteLogs[message.channel.id]?.includes(message.id)) return [];
 
     if (fileOnlyMode && message.attachments.size === 0 && message.stickers.size === 0) return [];
 
