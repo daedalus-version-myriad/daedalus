@@ -62,7 +62,9 @@ export class ClientManager {
                 if (client) this.cleanup(guildId, client);
             }
 
-            return await (this.bot ??= this.factory(secrets.DISCORD.TOKEN));
+            return await (this.bot ??= this.factory(secrets.DISCORD.TOKEN).catch((error) => {
+                throw error ?? "failed to mint bot with default token and no real error thrown!";
+            }));
         }
 
         if (this.cache.has(guildId)) {
