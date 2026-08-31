@@ -848,6 +848,13 @@
       "when": 1788197877713,
       "tag": "0120_smart_junta",
       "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "5",
+      "when": 1788202421143,
+      "tag": "0121_slippery_mojo",
+      "breakpoints": true
     }
   ]
 }
