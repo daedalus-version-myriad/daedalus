@@ -1,4 +1,4 @@
-import { db, tables } from "@daedalus/backend/index.js";
+import { db, tables } from "../backend/index.js";
 import { count } from "drizzle-orm";
 import { psdb } from "./psdb.js";
 

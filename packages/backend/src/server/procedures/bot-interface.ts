@@ -1,4 +1,4 @@
-import { encryptContent } from "@daedalus/bot-utils/index.js";
+import { encryptContent } from "../../../../bot-utils/index.js";
 import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import { z } from "zod";
 import { commandMap, logEvents, modules, type PremiumBenefits } from "../../../../data/index.js";

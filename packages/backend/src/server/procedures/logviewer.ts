@@ -1,4 +1,4 @@
-import { decryptContent } from "@daedalus/bot-utils/index.js";
+import { decryptContent } from "../../../../bot-utils/index.js";
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { bot, clients } from "../../bot/index.js";

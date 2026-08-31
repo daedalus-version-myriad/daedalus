@@ -1,5 +1,5 @@
-import { db, tables } from "@daedalus/backend/index.js";
-import { encryptContent } from "@daedalus/bot-utils/index.js";
+import { db, tables } from "../backend/index.js";
+import { encryptContent } from "../bot-utils/index.js";
 import { count, inArray, not } from "drizzle-orm";
 
 for (const [table, name] of [
