@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { textTypes } from "@/lib/data";
 import { applyIndex, removeIndex } from "@/lib/processors";
+import { tryParse } from "@/lib/utils";
 import { GuildXpSettings } from "@daedalus/types";
 import _ from "lodash";
 import React, { useState } from "react";
@@ -83,7 +84,7 @@ export function Body({ data: initial, disabled }: { data: GuildXpSettings; disab
                                 type="number"
                                 value={`${multiplier}`}
                                 onChange={({ currentTarget: { value } }) =>
-                                    setBonusChannels((channels) => applyIndex(channels, i, (d) => ({ ...d, multiplier: +value ?? null })))
+                                    setBonusChannels((channels) => applyIndex(channels, i, (d) => ({ ...d, multiplier: tryParse(value, null) })))
                                 }
                             ></Input>
                         </React.Fragment>
@@ -122,7 +123,7 @@ export function Body({ data: initial, disabled }: { data: GuildXpSettings; disab
                                 type="number"
                                 value={`${multiplier}`}
                                 onChange={({ currentTarget: { value } }) =>
-                                    setBonusRoles((roles) => applyIndex(roles, i, (d) => ({ ...d, multiplier: +value ?? null })))
+                                    setBonusRoles((roles) => applyIndex(roles, i, (d) => ({ ...d, multiplier: tryParse(value, null) })))
                                 }
                             ></Input>
                         </React.Fragment>
@@ -180,14 +181,14 @@ export function Body({ data: initial, disabled }: { data: GuildXpSettings; disab
                                 type="number"
                                 value={`${text}`}
                                 onChange={({ currentTarget: { value } }) =>
-                                    setRewards((rewards) => applyIndex(rewards, i, (reward) => ({ ...reward, text: +value ?? null })))
+                                    setRewards((rewards) => applyIndex(rewards, i, (reward) => ({ ...reward, text: tryParse(value, null) })))
                                 }
                             ></Input>
                             <Input
                                 type="number"
                                 value={`${voice}`}
                                 onChange={({ currentTarget: { value } }) =>
-                                    setRewards((rewards) => applyIndex(rewards, i, (reward) => ({ ...reward, voice: +value ?? null })))
+                                    setRewards((rewards) => applyIndex(rewards, i, (reward) => ({ ...reward, voice: tryParse(value, null) })))
                                 }
                             ></Input>
                             <SingleRoleSelector

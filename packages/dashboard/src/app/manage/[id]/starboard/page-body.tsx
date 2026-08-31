@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { textTypes } from "@/lib/data";
 import { applyIndex, removeIndex } from "@/lib/processors";
+import { tryParse } from "@/lib/utils";
 import { GuildStarboardSettings } from "@daedalus/types";
 import _ from "lodash";
 import React, { useState } from "react";
@@ -35,7 +36,7 @@ export function Body({ data: initial, disabled }: { data: GuildStarboardSettings
                 <h1 className="text-xl">Default Starboard Channel</h1>
                 <SingleChannelSelector channel={channel} setChannel={setChannel} types={textTypes}></SingleChannelSelector>
                 <h1 className="text-xl">Default Threshold</h1>
-                <Input type="number" value={threshold || ""} onChange={({ currentTarget: { value } }) => setThreshold(+value ?? 0)} min={2}></Input>
+                <Input type="number" value={threshold || ""} onChange={({ currentTarget: { value } }) => setThreshold(tryParse(value, 0))} min={2}></Input>
             </Panel>
             <Panel>
                 <h1 className="text-xl">Channel Overrides</h1>
@@ -72,9 +73,7 @@ export function Body({ data: initial, disabled }: { data: GuildStarboardSettings
                                 <Input
                                     type="number"
                                     value={override.threshold ?? ""}
-                                    onChange={({ currentTarget: { value } }) =>
-                                        setOverride((override) => ({ ...override, threshold: !value ? null : +value ?? null }))
-                                    }
+                                    onChange={({ currentTarget: { value } }) => setOverride((override) => ({ ...override, threshold: tryParse(value, null) }))}
                                     min={2}
                                 ></Input>
                             </React.Fragment>

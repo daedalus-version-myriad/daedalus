@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { textTypes } from "@/lib/data";
 import { applyIndex, removeIndex } from "@/lib/processors";
+import { tryParse } from "@/lib/utils";
 import { DurationStyle, formatDuration } from "@daedalus/global-utils";
 import { GiveawayBase, GuildGiveawaySettings } from "@daedalus/types";
 import _ from "lodash";
@@ -267,7 +268,10 @@ function GiveawayBaseEditor<T extends GiveawayBase>({ data, setData }: { data: T
                                     type="number"
                                     value={weight.weight}
                                     onChange={({ currentTarget: { value } }) =>
-                                        setData((data) => ({ ...data, weights: applyIndex(data.weights, i, (weight) => ({ ...weight, weight: +value ?? 1 })) }))
+                                        setData((data) => ({
+                                            ...data,
+                                            weights: applyIndex(data.weights, i, (weight) => ({ ...weight, weight: tryParse(value, 1) })),
+                                        }))
                                     }
                                     min={1}
                                 ></Input>
@@ -292,7 +296,7 @@ function GiveawayBaseEditor<T extends GiveawayBase>({ data, setData }: { data: T
                     <Input
                         type="number"
                         value={data.winners}
-                        onChange={({ currentTarget: { value } }) => setData((data) => ({ ...data, winners: +value ?? 1 }))}
+                        onChange={({ currentTarget: { value } }) => setData((data) => ({ ...data, winners: tryParse(value, 1) }))}
                         min={1}
                     ></Input>
                 </div>

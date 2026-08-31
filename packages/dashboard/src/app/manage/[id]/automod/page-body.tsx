@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { textTypes } from "@/lib/data";
 import { applyIndex, removeIndex } from "@/lib/processors";
+import { tryParse } from "@/lib/utils";
 import { formatDuration, parseDuration } from "@daedalus/global-utils";
 import { GuildAutomodSettings } from "@daedalus/types";
 import _ from "lodash";
@@ -248,7 +249,7 @@ function Item({
                                     type="number"
                                     value={`${rule.capsSpamData.ratioLimit}`}
                                     onChange={({ currentTarget: { value } }) =>
-                                        setRule((rule) => ({ ...rule, capsSpamData: { ...rule.capsSpamData, ratioLimit: +value ?? 0 } }))
+                                        setRule((rule) => ({ ...rule, capsSpamData: { ...rule.capsSpamData, ratioLimit: tryParse(value, 0) } }))
                                     }
                                     min={40}
                                     max={100}
@@ -258,7 +259,7 @@ function Item({
                                     type="number"
                                     value={`${rule.capsSpamData.limit}`}
                                     onChange={({ currentTarget: { value } }) =>
-                                        setRule((rule) => ({ ...rule, capsSpamData: { ...rule.capsSpamData, limit: +value ?? 0 } }))
+                                        setRule((rule) => ({ ...rule, capsSpamData: { ...rule.capsSpamData, limit: tryParse(value, 0) } }))
                                     }
                                     min={1}
                                 ></Input>
@@ -292,7 +293,7 @@ function Item({
                                     type="number"
                                     value={`${rule.newlineSpamData.consecutiveLimit}`}
                                     onChange={({ currentTarget: { value } }) =>
-                                        setRule((rule) => ({ ...rule, newlineSpamData: { ...rule.newlineSpamData, consecutiveLimit: +value ?? 0 } }))
+                                        setRule((rule) => ({ ...rule, newlineSpamData: { ...rule.newlineSpamData, consecutiveLimit: tryParse(value, 0) } }))
                                     }
                                     min={1}
                                 ></Input>
@@ -301,7 +302,7 @@ function Item({
                                     type="number"
                                     value={`${rule.newlineSpamData.totalLimit}`}
                                     onChange={({ currentTarget: { value } }) =>
-                                        setRule((rule) => ({ ...rule, newlineSpamData: { ...rule.newlineSpamData, totalLimit: +value ?? 0 } }))
+                                        setRule((rule) => ({ ...rule, newlineSpamData: { ...rule.newlineSpamData, totalLimit: tryParse(value, 0) } }))
                                     }
                                     min={1}
                                 ></Input>
@@ -332,7 +333,7 @@ function Item({
                                     onChange={({ currentTarget: { value } }) =>
                                         setRule((rule) => ({
                                             ...rule,
-                                            repeatedCharactersData: { ...rule.repeatedCharactersData, consecutiveLimit: +value ?? 0 },
+                                            repeatedCharactersData: { ...rule.repeatedCharactersData, consecutiveLimit: tryParse(value, 0) },
                                         }))
                                     }
                                     min={2}
@@ -359,7 +360,7 @@ function Item({
                                     onChange={({ currentTarget: { value } }) =>
                                         setRule((rule) => ({
                                             ...rule,
-                                            lengthLimitData: { ...rule.lengthLimitData, limit: +value ?? 0 },
+                                            lengthLimitData: { ...rule.lengthLimitData, limit: tryParse(value, 0) },
                                         }))
                                     }
                                     min={2}
@@ -386,7 +387,7 @@ function Item({
                                     onChange={({ currentTarget: { value } }) =>
                                         setRule((rule) => ({
                                             ...rule,
-                                            emojiSpamData: { ...rule.emojiSpamData, limit: +value ?? 0 },
+                                            emojiSpamData: { ...rule.emojiSpamData, limit: tryParse(value, 0) },
                                         }))
                                     }
                                     min={2}
@@ -442,7 +443,7 @@ function Item({
                                             onChange={({ currentTarget: { value } }) =>
                                                 setRule((rule) => ({
                                                     ...rule,
-                                                    [key]: { ...rule[key], threshold: +value ?? 0 },
+                                                    [key]: { ...rule[key], threshold: tryParse(value, 0) },
                                                 }))
                                             }
                                             min={2}
@@ -454,7 +455,7 @@ function Item({
                                             onChange={({ currentTarget: { value } }) =>
                                                 setRule((rule) => ({
                                                     ...rule,
-                                                    [key]: { ...rule[key], timeInSeconds: +value ?? 0 },
+                                                    [key]: { ...rule[key], timeInSeconds: tryParse(value, 0) },
                                                 }))
                                             }
                                             min={1}
@@ -556,7 +557,7 @@ function Item({
                                     onChange={({ currentTarget: { value } }) =>
                                         setRule((rule) => ({
                                             ...rule,
-                                            mentionSpamData: { ...rule.mentionSpamData, perMessageLimit: +value ?? 0 },
+                                            mentionSpamData: { ...rule.mentionSpamData, perMessageLimit: tryParse(value, 0) },
                                         }))
                                     }
                                     min={2}
@@ -568,7 +569,7 @@ function Item({
                                     onChange={({ currentTarget: { value } }) =>
                                         setRule((rule) => ({
                                             ...rule,
-                                            mentionSpamData: { ...rule.mentionSpamData, totalLimit: +value ?? 0 },
+                                            mentionSpamData: { ...rule.mentionSpamData, totalLimit: tryParse(value, 0) },
                                         }))
                                     }
                                     min={1}
@@ -580,7 +581,7 @@ function Item({
                                     onChange={({ currentTarget: { value } }) =>
                                         setRule((rule) => ({
                                             ...rule,
-                                            mentionSpamData: { ...rule.mentionSpamData, timeInSeconds: +value ?? 0 },
+                                            mentionSpamData: { ...rule.mentionSpamData, timeInSeconds: tryParse(value, 0) },
                                         }))
                                     }
                                     min={1}
