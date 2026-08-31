@@ -194,11 +194,12 @@ async function runReminders() {
 }
 
 async function cycle() {
-    await Promise.all(
-        [runModerationRemovalTasks, runModmailCloseTasks, rollGiveaways, runReminders].map((fn) =>
-            fn().catch((error) => console.error(`error handling cycle in task runner:`, stringifyError(error))),
-        ),
-    );
+    await Promise.all([
+        runModerationRemovalTasks().catch((error) => console.error(`error in moderation removal task runner:`, stringifyError(error))),
+        runModmailCloseTasks().catch((error) => console.error(`error in modmail close task runner:`, stringifyError(error))),
+        rollGiveaways().catch((error) => console.error(`error in roll giveaways task runner:`, stringifyError(error))),
+        runReminders().catch((error) => console.error(`error in run reminders task runner:`, stringifyError(error))),
+    ]);
     setTimeout(cycle, 10000);
 }
 
