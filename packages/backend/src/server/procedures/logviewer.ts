@@ -1,3 +1,4 @@
+import { decryptContent } from "@daedalus/bot-utils/index.js";
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { bot, clients } from "../../bot/index.js";
@@ -38,6 +39,11 @@ export default {
                 (await db.select().from(tables.modmailMessages).where(eq(tables.modmailMessages.uuid, uuid)).orderBy(asc(tables.modmailMessages.time))).map(
                     async (message) => ({
                         ...message,
+                        content: decryptContent(message.content),
+                        attachments: (message.attachments as { name: string; url: string }[]).map(({ name, url }) => ({
+                            name: decryptContent(name),
+                            url: decryptContent(url),
+                        })),
                         username:
                             message.type === "incoming"
                                 ? cache[thread.user]
@@ -83,6 +89,11 @@ export default {
                 (await db.select().from(tables.ticketMessages).where(eq(tables.ticketMessages.uuid, uuid)).orderBy(asc(tables.ticketMessages.time))).map(
                     async (message) => ({
                         ...message,
+                        content: decryptContent(message.content),
+                        attachments: (message.attachments as { name: string; url: string }[]).map(({ name, url }) => ({
+                            name: decryptContent(name),
+                            url: decryptContent(url),
+                        })),
                         username: (cache[message.author] ??= (await (await bot).users.fetch(message.author).catch(() => null))?.tag ?? "(Unknown User)"),
                     }),
                 ),

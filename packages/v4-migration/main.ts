@@ -1,7 +1,7 @@
 import { count, eq, sql } from "drizzle-orm";
 import { trpc } from "../api/index.js";
 import { db, tables } from "../backend/index.js";
-import { truncate } from "../bot-utils/index.js";
+import { encryptContent, truncate } from "../bot-utils/index.js";
 import { secrets } from "../config/index.js";
 import { serializeGiveawayBase } from "../global-utils/index.js";
 import { splitMessage } from "./lib.js";
@@ -691,9 +691,10 @@ await migrate("modmail-threads", async () => {
                     author: data.type === "incoming" ? x.user : data.author,
                     anon: data.type === "outgoing" ? data.anon : false,
                     targetName: data.type === "open" ? data.targetName ?? "" : "",
-                    content: "content" in data ? data.content ?? "" : "",
+                    content: encryptContent("content" in data ? data.content ?? "" : ""),
                     edits: "edits" in data ? data.edits ?? [] : [],
-                    attachments: "attachments" in data ? data.attachments : [],
+                    attachments:
+                        "attachments" in data ? data.attachments.map(({ name, url }) => ({ name: encryptContent(name), url: encryptContent(url) })) : [],
                     deleted: "deleted" in data ? data.deleted : false,
                     sent: "sent" in data ? data.sent : false,
                 })),
@@ -729,7 +730,7 @@ await migrate("ticket-threads", async () => {
                     type: data.type,
                     id: data.type === "message" ? data.id : "",
                     author: data.type === "open" ? "" : data.author,
-                    content: data.type === "message" ? data.content : "",
+                    content: encryptContent(data.type === "message" ? data.content : ""),
                     attachments: data.type === "message" ? data.attachments : [],
                     edits: data.type === "message" ? data.edits ?? [] : [],
                     deleted: data.type === "message" ? !!data.deleted : false,

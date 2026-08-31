@@ -1,3 +1,4 @@
+import { encryptContent } from "@daedalus/bot-utils/index.js";
 import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import { z } from "zod";
 import { commandMap, logEvents, modules, type PremiumBenefits } from "../../../../data/index.js";
@@ -31,7 +32,6 @@ import {
     getTicketsSettings,
     getXpSettings,
     transformGiveawayBase,
-    transformXpSettings,
 } from "./guild-settings.js";
 import { getLimit } from "./premium.js";
 
@@ -593,8 +593,10 @@ export default {
                 type: "internal",
                 id: input.id,
                 author: input.author,
-                content: input.content,
-                attachments: await mapFiles(input.attachments),
+                content: encryptContent(input.content),
+                attachments: await mapFiles(input.attachments).then((files) =>
+                    files.map(({ name, url }) => ({ name: encryptContent(name), url: encryptContent(url) })),
+                ),
             });
         }),
     getOpenModmailThreads: proc.input(z.object({ guild: snowflake.nullable(), user: snowflake })).query(async ({ input: { guild, user } }) => {
@@ -716,9 +718,15 @@ export default {
             const [entry] = await db.select({ uuid: tables.modmailThreads.uuid }).from(tables.modmailThreads).where(eq(tables.modmailThreads.channel, channel));
             if (!entry) return;
 
-            await db
-                .insert(tables.modmailMessages)
-                .values({ ...defaultModmailMessage, uuid: entry.uuid, type: "incoming", content, attachments: await mapFiles(attachments) });
+            await db.insert(tables.modmailMessages).values({
+                ...defaultModmailMessage,
+                uuid: entry.uuid,
+                type: "incoming",
+                content: encryptContent(content),
+                attachments: await mapFiles(attachments).then((files) =>
+                    files.map(({ name, url }) => ({ name: encryptContent(name), url: encryptContent(url) })),
+                ),
+            });
         }),
     recordInternalMessageEdit: proc.input(z.object({ message: snowflake, content: z.string().max(4000) })).mutation(async ({ input: { message, content } }) => {
         const [entry] = await db.select({ edits: tables.modmailMessages.edits }).from(tables.modmailMessages).where(eq(tables.modmailMessages.id, message));
@@ -726,7 +734,7 @@ export default {
 
         await db
             .update(tables.modmailMessages)
-            .set({ edits: [...(entry.edits as string[]), content] })
+            .set({ edits: [...(entry.edits as string[]), encryptContent(content)] })
             .where(eq(tables.modmailMessages.id, message));
     }),
     recordInternalMessageDeletes: proc.input(snowflake.array()).mutation(async ({ input: messages }) => {
@@ -754,9 +762,15 @@ export default {
             const [entry] = await db.select({ uuid: tables.modmailThreads.uuid }).from(tables.modmailThreads).where(eq(tables.modmailThreads.channel, channel));
             if (!entry) return;
 
-            await db
-                .insert(tables.modmailMessages)
-                .values({ ...defaultModmailMessage, ...data, uuid: entry.uuid, type: "outgoing", attachments: await mapFiles(attachments) });
+            await db.insert(tables.modmailMessages).values({
+                ...defaultModmailMessage,
+                ...data,
+                uuid: entry.uuid,
+                type: "outgoing",
+                attachments: await mapFiles(attachments).then((files) =>
+                    files.map(({ name, url }) => ({ name: encryptContent(name), url: encryptContent(url) })),
+                ),
+            });
         }),
     closeModmailThread: proc
         .input(z.object({ channel: snowflake, author: snowflake, content: z.string().max(4000), sent: z.boolean() }))
@@ -765,7 +779,9 @@ export default {
             if (!entry) return;
 
             await db.update(tables.modmailThreads).set({ closed: true }).where(eq(tables.modmailThreads.uuid, entry.uuid));
-            await db.insert(tables.modmailMessages).values({ ...defaultModmailMessage, uuid: entry.uuid, type: "close", ...data });
+            await db
+                .insert(tables.modmailMessages)
+                .values({ ...defaultModmailMessage, uuid: entry.uuid, type: "close", ...data, content: encryptContent(data.content) });
             await db.delete(tables.modmailAutoclose).where(eq(tables.modmailAutoclose.channel, channel));
         }),
     getAndClearModmailCloseTasks: proc.query(async () => {
@@ -805,7 +821,7 @@ export default {
 
             await db
                 .update(tables.modmailMessages)
-                .set({ edits: [...(entry.edits as string[]), content] })
+                .set({ edits: [...(entry.edits as string[]), encryptContent(content)] })
                 .where(and(eq(tables.modmailMessages.uuid, uuid), eq(tables.modmailMessages.source, source)));
         }),
     recordOutgoingModmailMessageDelete: proc
@@ -873,7 +889,16 @@ export default {
             }),
         )
         .mutation(async ({ input: { attachments, ...data } }) => {
-            await db.insert(tables.ticketMessages).values({ ...defaultTicketMessage, type: "message", ...data, attachments: await mapFiles(attachments) });
+            await db
+                .insert(tables.ticketMessages)
+                .values({
+                    ...defaultTicketMessage,
+                    type: "message",
+                    ...data,
+                    attachments: await mapFiles(attachments).then((files) =>
+                        files.map(({ name, url }) => ({ name: encryptContent(name), url: encryptContent(url) })),
+                    ),
+                });
         }),
     editTicketMessage: proc.input(z.object({ id: snowflake, content: z.string().max(4000) })).mutation(async ({ input: { id, content } }) => {
         const [entry] = await db.select({ edits: tables.ticketMessages.edits }).from(tables.ticketMessages).where(eq(tables.ticketMessages.id, id));
@@ -881,7 +906,7 @@ export default {
 
         await db
             .update(tables.ticketMessages)
-            .set({ edits: [...(entry.edits as string[]), content] })
+            .set({ edits: [...(entry.edits as string[]), encryptContent(content)] })
             .where(eq(tables.ticketMessages.id, id));
     }),
     deleteTicketMessages: proc.input(snowflake.array()).mutation(async ({ input: ids }) => {
@@ -1475,7 +1500,7 @@ const defaultModmailMessage = {
     author: "",
     anon: false,
     targetName: "",
-    content: "",
+    content: encryptContent(""),
     edits: [],
     attachments: [],
     deleted: false,
@@ -1483,7 +1508,7 @@ const defaultModmailMessage = {
 } as const;
 
 const defaultTicketMessage = {
-    content: "",
+    content: encryptContent(""),
     attachments: [],
     edits: [],
     deleted: false,

@@ -1,3 +1,4 @@
+import CryptoJS from "crypto-js";
 import {
     Attachment,
     ButtonInteraction,
@@ -38,6 +39,7 @@ import { stringifyError } from "../formatting/index.js";
 import { logError } from "../log-interface/index.js";
 import type { CustomMessageContext, ParsedMessage } from "../types/index.js";
 import stickerCache from "./sticker-cache.js";
+
 export const mdash = "—";
 export const to = "→";
 
@@ -616,4 +618,12 @@ export async function pagify(cmd: ChatInputCommandInteraction, messages: any[], 
         if (deleted) return;
         await message.edit({ components: message.components.slice(1) }).catch(() => {});
     });
+}
+
+export function encryptContent(message: string) {
+    return CryptoJS.AES.encrypt(message, secrets.CONTENT_ENCRYPTION_KEY).ciphertext.toString();
+}
+
+export function decryptContent(ciphertext: string) {
+    return CryptoJS.AES.decrypt(ciphertext, secrets.CONTENT_ENCRYPTION_KEY).toString();
 }
