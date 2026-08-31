@@ -85,7 +85,9 @@ export class ClientManager {
     }
 
     async getBots() {
-        const entries = await trpc.vanityClientList.query();
+        const entries = await trpc.vanityClientList.query().catch(() => {
+            throw "failed to get vanity client list from trpc";
+        });
 
         const clients = [await this.getDefaultBot()];
 

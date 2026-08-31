@@ -138,7 +138,9 @@ function formatReminder(reminder: { id: number; origin: string; query: string | 
 async function runReminders() {
     if (!manager) return;
 
-    const reminders = await trpc.getAndClearPastReminders.query();
+    const reminders = await trpc.getAndClearPastReminders.query().catch(() => {
+        throw "failed to get-and-clear past reminders";
+    });
 
     const guildReminders: Record<string, typeof reminders> = {};
     const dmReminders: Record<string, typeof reminders> = {};
