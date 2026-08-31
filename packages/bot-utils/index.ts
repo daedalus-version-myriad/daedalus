@@ -621,9 +621,9 @@ export async function pagify(cmd: ChatInputCommandInteraction, messages: any[], 
 }
 
 export function encryptContent(message: string) {
-    return CryptoJS.AES.encrypt(message, secrets.CONTENT_ENCRYPTION_KEY).ciphertext.toString();
+    return CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(message), secrets.CONTENT_ENCRYPTION_KEY).toString(CryptoJS.format.OpenSSL);
 }
 
 export function decryptContent(ciphertext: string) {
-    return CryptoJS.AES.decrypt(ciphertext, secrets.CONTENT_ENCRYPTION_KEY).toString();
+    return CryptoJS.AES.decrypt(CryptoJS.format.OpenSSL.parse(ciphertext), secrets.CONTENT_ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
 }
