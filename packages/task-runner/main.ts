@@ -192,7 +192,9 @@ async function runReminders() {
                 const user = await client.users.fetch(reminder.user);
                 await user.send(formatReminder(reminder, 0x009688));
                 fallbackReminders.delete(key);
-            } catch {}
+            } catch (error) {
+                console.error(`failed to send fallback reminder to ${reminder.user}:`, stringifyError(error));
+            }
 }
 
 async function cycle() {

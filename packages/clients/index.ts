@@ -81,7 +81,9 @@ export class ClientManager {
     }
 
     async getBot(guildId?: string): Promise<Client<true> | null> {
-        return await this.getBotFromToken(guildId, guildId && (await trpc.vanityClientGet.query(guildId)));
+        return await this.getBotFromToken(guildId, guildId && (await trpc.vanityClientGet.query(guildId))).catch((error) => {
+            throw error ?? "failed to get bot from token";
+        });
     }
 
     async getBots() {
@@ -89,10 +91,16 @@ export class ClientManager {
             throw "failed to get vanity client list from trpc";
         });
 
-        const clients = [await this.getDefaultBot()];
+        const clients = [
+            await this.getDefaultBot().catch((error) => {
+                throw error ?? "failed to get default bot";
+            }),
+        ];
 
         for (const { guild, token } of entries) {
-            const client = await this.getBotFromToken(guild, token);
+            const client = await this.getBotFromToken(guild, token).catch((error) => {
+                throw error ?? "failed to get bot from token";
+            });
             if (client) clients.push(client);
         }
 
