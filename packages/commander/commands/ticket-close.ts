@@ -1,8 +1,8 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { ButtonStyle, Colors, ComponentType } from "discord.js";
 import { trpc } from "../../api/index.js";
 import { template, type Commands } from "../../bot-utils/index.js";
 import { secrets } from "../../config/index.js";
+import { stringifyError } from "../../formatting/index.js";
 
 export default (x: Commands) =>
     x.slash((x) =>

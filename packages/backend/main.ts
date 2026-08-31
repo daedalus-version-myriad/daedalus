@@ -1,5 +1,5 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { eq, not, or } from "drizzle-orm";
+import { stringifyError } from "../formatting/index.js";
 import { db } from "./src/db/db.js";
 import { tables } from "./src/db/index.js";
 import "./src/server/index.js";

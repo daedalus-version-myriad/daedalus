@@ -1,4 +1,3 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import {
     Attachment,
     ButtonStyle,
@@ -31,6 +30,7 @@ import { trpc } from "../api/index.js";
 import { SpoilerLevel, copyMedia, embed, expand, getColor, isModuleDisabled, isWrongClient, mdash, obtainLimit, template } from "../bot-utils/index.js";
 import { secrets } from "../config/index.js";
 import { formatCustomMessageString } from "../custom-messages/index.js";
+import { stringifyError } from "../formatting/index.js";
 import { modmailLoading } from "../interactions/lib/modmail.js";
 import { logError } from "../log-interface/index.js";
 

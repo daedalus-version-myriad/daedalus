@@ -1,6 +1,6 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { stringifyError } from "../../../../formatting/index.js";
 import { db } from "../../db/db.js";
 import { tables } from "../../db/index.js";
 import { proc } from "../trpc.js";

@@ -1,4 +1,3 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import {
     ChannelType,
     GuildScheduledEventStatus,
@@ -10,6 +9,7 @@ import {
     type PartialMessage,
 } from "discord.js";
 import { expand, timestamp } from "../../bot-utils/index.js";
+import { stringifyError } from "../../formatting/index.js";
 
 export async function auditEntry(guild: Guild, type: GuildAuditLogsResolvable, target?: any, key: string = "id"): Promise<GuildAuditLogsEntry | null> {
     const time = Date.now();

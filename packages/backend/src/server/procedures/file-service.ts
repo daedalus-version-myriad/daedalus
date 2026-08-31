@@ -1,8 +1,8 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import type { TextChannel } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { secrets } from "../../../../config/index.js";
+import { stringifyError } from "../../../../formatting/index.js";
 import { bot } from "../../bot/index.js";
 import { db, tables } from "../../db/index.js";
 import { proc } from "../trpc.js";

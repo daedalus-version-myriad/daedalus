@@ -1,4 +1,3 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import {
     Attachment,
     ButtonInteraction,
@@ -35,6 +34,7 @@ import { secrets } from "../config/index.js";
 import { formatMessage } from "../custom-messages/index.js";
 import type { PremiumBenefits } from "../data/index.js";
 import { commandMap, modules, permissions } from "../data/index.js";
+import { stringifyError } from "../formatting/index.js";
 import { logError } from "../log-interface/index.js";
 import type { CustomMessageContext, ParsedMessage } from "../types/index.js";
 import stickerCache from "./sticker-cache.js";

@@ -1,9 +1,9 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { ApplicationCommandOptionType, Client } from "discord.js";
 import { trpc } from "../api/index.js";
 import Argentium from "../argentium/index.js";
 import { checkPermissions, isWrongClient, reply, template } from "../bot-utils/index.js";
 import { ClientManager } from "../clients/index.js";
+import { stringifyError } from "../formatting/index.js";
 import admin from "./commands/admin.js";
 import autokick from "./commands/autokick.js";
 import ban from "./commands/ban.js";

@@ -1,8 +1,8 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { escapeMarkdown, type Channel, type GuildMember } from "discord.js";
 import { trpc } from "../api/index.js";
 import { fetchAndSendMessage, getColor, to } from "../bot-utils/index.js";
 import { secrets } from "../config/index.js";
+import { stringifyError } from "../formatting/index.js";
 import { logError } from "../log-interface/index.js";
 import type { GuildXpSettings } from "../types/index.js";
 

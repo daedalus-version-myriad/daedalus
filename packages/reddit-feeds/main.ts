@@ -1,8 +1,8 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import * as he from "he";
 import { trpc } from "../api/index.js";
 import { getColor, isModuleDisabled, obtainLimit, truncate } from "../bot-utils/index.js";
 import type { ClientManager } from "../clients/index.js";
+import { stringifyError } from "../formatting/index.js";
 
 let manager: ClientManager;
 export const redditFeedsHook = (_: unknown, x: ClientManager) => (manager = x);

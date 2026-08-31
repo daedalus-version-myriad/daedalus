@@ -1,7 +1,7 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { Client, Events } from "discord.js";
 import { reply, template } from "../bot-utils/index.js";
 import type { ClientManager } from "../clients/index.js";
+import { stringifyError } from "../formatting/index.js";
 
 export let clients: ClientManager;
 

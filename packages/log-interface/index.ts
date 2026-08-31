@@ -1,6 +1,6 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { secrets } from "../config/index.js";
+import { stringifyError } from "../formatting/index.js";
 import type { Router } from "../logging/index.js";
 
 const trpc = createTRPCClient<Router>({ links: [httpBatchLink({ url: `http://localhost:${secrets.PORTS.LOG}` })] });

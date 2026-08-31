@@ -1,7 +1,7 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { parseWebhookURL, type Awaitable, type Channel, type Guild, type InviteGuild, type MessageCreateOptions } from "discord.js";
 import { trpc } from "../../api/index.js";
 import { getChannelStack, isModuleDisabled, isWrongClient } from "../../bot-utils/index.js";
+import { stringifyError } from "../../formatting/index.js";
 
 type MaybeArray<T> = T | T[];
 

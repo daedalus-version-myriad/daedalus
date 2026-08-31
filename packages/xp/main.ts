@@ -1,8 +1,8 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { Client, Events, Guild, GuildChannel, MessageType, type Channel } from "discord.js";
 import { trpc } from "../api/index.js";
 import { isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
 import type { ClientManager } from "../clients/index.js";
+import { stringifyError } from "../formatting/index.js";
 import { GuildXpSettings } from "../types/index.js";
 import { addXp } from "./utils.js";
 

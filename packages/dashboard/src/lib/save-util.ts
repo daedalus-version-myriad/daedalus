@@ -1,6 +1,6 @@
 "use server";
 
-import { stringifyError } from "@daedalus/formatting";
+import { stringifyError } from "../../../formatting/index.js";
 import { Awaitable } from "./types";
 
 export async function trpcSave<T>(fn: () => Awaitable<T | void>, errorMap: (error: string) => T = (e) => e as T) {

@@ -1,4 +1,3 @@
-import { stringifyError } from "@daedalus/formatting/index.js";
 import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMessageOptions } from "discord.js";
 import { and, eq, inArray, not, sql } from "drizzle-orm";
 import _ from "lodash";
@@ -7,6 +6,7 @@ import { secrets } from "../../../../config/index.js";
 import { parseCustomMessageString, parseMessage } from "../../../../custom-messages/index.js";
 import { triggerCustomRoleSweep } from "../../../../custom-roles/index.js";
 import { logCategories, logEvents, modules } from "../../../../data/index.js";
+import { stringifyError } from "../../../../formatting/index.js";
 import { serializeGiveawayBase } from "../../../../global-utils/index.js";
 import type {
     CustomMessageText,
