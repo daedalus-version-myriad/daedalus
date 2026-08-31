@@ -1,7 +1,8 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { tables } from "../../db/index.js";
 import { db } from "../../db/db.js";
+import { tables } from "../../db/index.js";
 import { proc } from "../trpc.js";
 
 const DEFAULT_LIMIT = 10;
@@ -44,7 +45,7 @@ export default {
             } catch (error: any) {
                 return error.body.message.includes("AlreadyExists")
                     ? "That code is already in use."
-                    : (console.error(error), "An unexpected database error occurred.");
+                    : (console.error(`unexpected error cresting a news article:`, stringifyError(error)), "An unexpected database error occurred.");
             }
         }),
     newsEdit: proc

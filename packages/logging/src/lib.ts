@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import { parseWebhookURL, type Awaitable, type Channel, type Guild, type InviteGuild, type MessageCreateOptions } from "discord.js";
 import { trpc } from "../../api/index.js";
 import { getChannelStack, isModuleDisabled, isWrongClient } from "../../bot-utils/index.js";
@@ -34,13 +35,13 @@ export async function invokeLog(event: string, context: Channel | Guild | Invite
             try {
                 await webhook.send(entry);
             } catch (error) {
-                console.error(error);
+                console.error(`error invoking log to webhook:`, stringifyError(error));
             }
     } else
         for (const entry of array)
             try {
                 await target.send(entry);
             } catch (error) {
-                console.error(error);
+                console.error(`error invoking log to channel:`, stringifyError(error));
             }
 }

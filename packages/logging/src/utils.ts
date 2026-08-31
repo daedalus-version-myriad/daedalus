@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import {
     ChannelType,
     GuildScheduledEventStatus,
@@ -31,7 +32,7 @@ export async function auditEntry(guild: Guild, type: GuildAuditLogsResolvable, t
             if (entry.target && key in entry.target && entry.target[key as keyof typeof entry.target] === target) return entry;
         }
     } catch (error) {
-        console.error(error);
+        console.error(`error auditing entry (guild=${guild.id},type=${type}):`, stringifyError(error));
     }
 
     return null;

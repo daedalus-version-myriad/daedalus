@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import {
     Attachment,
     ButtonStyle,
@@ -379,7 +380,7 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
 
     try {
         const message = await interaction.message.fetchReference().catch((error) => {
-            console.error(error);
+            console.error(`error fetching interaction reference for send-modmail:`, stringifyError(error));
             throw "Your message could not be fetched. If you did not delete it before confirming your modmail target, please contact support.";
         });
 
@@ -633,7 +634,7 @@ export async function sendModmail(interaction: MessageComponentInteraction | Mod
         if (typeof error === "string") await interaction.editReply(template.error(error));
         else {
             const id = crypto.randomUUID();
-            console.error(`${id}`, error);
+            console.error(`error sending modmail message towards server:`, `${id}`, stringifyError(error));
 
             await interaction.editReply(
                 template.error(
@@ -815,7 +816,7 @@ export async function closeModmailThread(ctx: ChatInputCommandInteraction | Guil
                 ],
             });
         } catch (error) {
-            console.error(error);
+            console.error(`error notifying user for closing modmail thread:`, stringifyError(error));
             await send(template.error("The user could not be notified. They may have disabled DMs or blocked the bot."));
             return;
         }

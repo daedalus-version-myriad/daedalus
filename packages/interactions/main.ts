@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import { Client, Events } from "discord.js";
 import { reply, template } from "../bot-utils/index.js";
 import type { ClientManager } from "../clients/index.js";
@@ -21,7 +22,7 @@ export const interactionsHook = (client: Client, x: ClientManager) => {
         try {
             fn = (await import(`./handlers/${path}.js`)).default;
         } catch (error) {
-            console.error(path, error);
+            console.error(`error importing interactino:`, path, stringifyError(error));
             return void (await interaction
                 .reply(template.error(`That interaction's handler is not implemented yet (path: \`${path}\`). Please contact support.`))
                 .catch(() => null));
@@ -36,7 +37,7 @@ export const interactionsHook = (client: Client, x: ClientManager) => {
             if (typeof error === "string") return void (await reply(interaction, template.error(error)));
 
             const id = crypto.randomUUID();
-            console.error(id, error);
+            console.error(`error handling interaction:`, id, stringifyError(error));
 
             return void (await reply(
                 interaction,

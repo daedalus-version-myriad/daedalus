@@ -1,7 +1,8 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
+import { ButtonStyle, Colors, ComponentType } from "discord.js";
 import { trpc } from "../../api/index.js";
 import { template, type Commands } from "../../bot-utils/index.js";
 import { secrets } from "../../config/index.js";
-import { ButtonStyle, Colors, ComponentType } from "discord.js";
 
 export default (x: Commands) =>
     x.slash((x) =>
@@ -46,7 +47,10 @@ export default (x: Commands) =>
 
                     return template.success("This ticket is now closed!");
                 } catch (error) {
-                    console.error(error);
+                    console.error(
+                        `failed to post log message for closing ticket (uuid=${uuid}, user=${user}, prompt=${prompt}, target=${target}):`,
+                        stringifyError(error),
+                    );
                     throw "The ticket has been closed, but the log message could not be posted.";
                 } finally {
                     setTimeout(() => _.channel!.delete(), 5000);

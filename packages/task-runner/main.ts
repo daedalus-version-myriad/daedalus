@@ -2,7 +2,7 @@ import { trpc } from "../api/index.js";
 import { getColor, getMuteRole } from "../bot-utils/index.js";
 import { ClientManager } from "../clients/index.js";
 import { secrets } from "../config/index.js";
-import { englishList } from "../formatting/index.js";
+import { englishList, stringifyError } from "../formatting/index.js";
 import { draw } from "../giveaways/index.js";
 import { logError } from "../log-interface/index.js";
 import { closeModmailThread } from "../modmail/index.js";
@@ -87,7 +87,7 @@ async function rollGiveaways() {
         if (!channel?.isTextBased()) continue;
 
         const result = await draw(guild, giveaway).catch((error) => {
-            console.error(error);
+            console.error(`error computing giveaway results:`, stringifyError(error));
             logError(guild.id, "Rolling Giveaway", "An unexpected error occurred computing the results of your giveaway. Please contact support.");
         });
 
@@ -194,7 +194,11 @@ async function runReminders() {
 }
 
 async function cycle() {
-    await Promise.all([runModerationRemovalTasks, runModmailCloseTasks, rollGiveaways, runReminders].map((fn) => fn().catch(console.error)));
+    await Promise.all(
+        [runModerationRemovalTasks, runModmailCloseTasks, rollGiveaways, runReminders].map((fn) =>
+            fn().catch((error) => console.error(`error handling cycle in task runner:`, stringifyError(error))),
+        ),
+    );
     setTimeout(cycle, 10000);
 }
 

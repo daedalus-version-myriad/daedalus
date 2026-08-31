@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import { escapeMarkdown, type Channel, type GuildMember } from "discord.js";
 import { trpc } from "../api/index.js";
 import { fetchAndSendMessage, getColor, to } from "../bot-utils/index.js";
@@ -61,7 +62,10 @@ export async function addXp(channel: Channel, member: GuildMember, text = 0, voi
             const levelAfter = { text: xpToLevel(before.text + text), voice: xpToLevel(before.voice + voice) };
 
             if (announcement)
-                for (const [key, other] of [["text", "voice"], ["voice", "text"]] as const)
+                for (const [key, other] of [
+                    ["text", "voice"],
+                    ["voice", "text"],
+                ] as const)
                     if (levelAfter[key] > levelBefore[key] && levelAfter[key] > levelAfter[other])
                         await fetchAndSendMessage(
                             member.guild,
@@ -145,7 +149,7 @@ export async function addXp(channel: Channel, member: GuildMember, text = 0, voi
                     .catch(() => null);
         }
     } catch (error) {
-        console.error(error);
+        console.error(`error handling XP gain (channel=${channel}, user=${member.id}, text=${text}, voice=${voice}):`, stringifyError(error));
     }
 
     await trpc.increaseXp.mutate({ guild: member.guild.id, user: member.id, text, voice });

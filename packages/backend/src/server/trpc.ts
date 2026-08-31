@@ -9,7 +9,7 @@ export const proc = publicProcedure.use(async (opts) => {
     const start = Date.now();
     const result = await opts.next();
     const duration = Date.now() - start;
-    if (!result.ok) console.log({ path: opts.path, type: opts.type, duration, ok: result.ok, error: result.error });
+    if (!result.ok) console.log("TRPC result not OK:", { path: opts.path, type: opts.type, duration, ok: result.ok, error: result.error });
 
     return result;
 });

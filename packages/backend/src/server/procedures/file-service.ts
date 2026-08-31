@@ -1,7 +1,8 @@
-import { secrets } from "../../../../config/index.js";
+import { stringifyError } from "@daedalus/formatting/index.js";
 import type { TextChannel } from "discord.js";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { secrets } from "../../../../config/index.js";
 import { bot } from "../../bot/index.js";
 import { db, tables } from "../../db/index.js";
 import { proc } from "../trpc.js";
@@ -23,7 +24,7 @@ export async function addFile(url: string) {
             return `/file/${uuid}`;
         }
     } catch (error) {
-        console.error(error);
+        console.error(`failed to add file (url=${url}):`, stringifyError(error));
         return url;
     }
 }
@@ -45,7 +46,7 @@ export default {
             const message = await ch.messages.fetch({ message: entry.message, force: true });
             return message.attachments.first()!.url;
         } catch (error) {
-            console.error(error);
+            console.error(`failed to get file (uuid=${uuid}):`, stringifyError(error));
         }
 
         return null;

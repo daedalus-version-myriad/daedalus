@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import { ButtonStyle, ComponentType, Message, PermissionFlagsBits, type BaseMessageOptions } from "discord.js";
 import { and, eq, inArray, not, sql } from "drizzle-orm";
 import _ from "lodash";
@@ -1167,7 +1168,7 @@ export default {
 
                     prompt.error = null;
                 } catch (error) {
-                    if (typeof error !== "string") console.error(error);
+                    if (typeof error !== "string") console.error(`unexpected error saving a reaction role prompt:`, stringifyError(error), prompt);
                     prompt.error = `${error}`;
                 }
             }
@@ -1876,7 +1877,7 @@ export default {
                     prompt.message = message.id;
                     prompt.error = null;
                 } catch (error) {
-                    if (typeof error !== "string") console.error(error);
+                    if (typeof error !== "string") console.error(`unexpected error saving a ticket prompt:`, stringifyError(error), prompt);
                     prompt.error = `${error}`;
                 }
             }
@@ -2240,7 +2241,7 @@ export default {
                     giveaway.messageId = message?.id ?? null;
                     giveaway.error = null;
                 } catch (error) {
-                    if (typeof error !== "string") console.error(error);
+                    if (typeof error !== "string") console.error(`unexpected error saving a giveaway prompt:`, stringifyError(error), prompt);
                     giveaway.error = `${error}`;
                 }
             }

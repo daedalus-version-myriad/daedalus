@@ -1,7 +1,7 @@
 import { AuditLogEvent, Client, Colors, Events, GuildChannel, type APIRole, type Guild, type User } from "discord.js";
 import { trpc } from "../api/index.js";
 import { expand, isModuleDisabled, isWrongClient } from "../bot-utils/index.js";
-import { englishList } from "../formatting/index.js";
+import { englishList, stringifyError } from "../formatting/index.js";
 import { audit } from "../logging/index.js";
 import type { GuildNukeguardSettings } from "../types/index.js";
 
@@ -95,7 +95,9 @@ export const nukeguardHook = (client: Client) =>
                         ],
                         allowedMentions: { parse: ["everyone", "roles"] },
                     })
-                    .catch(() => console.error);
+                    .catch((error) =>
+                        console.error(`error alerting for nukeguard webhook created (executor=${entry.executorId}, id=${webhook.id})`, stringifyError(error)),
+                    );
 
                 return;
             } else if (entry.action === AuditLogEvent.WebhookDelete) {
@@ -269,7 +271,9 @@ async function quarantine(guild: Guild, user: User, config: GuildNukeguardSettin
             ],
             allowedMentions: { parse: ["everyone", "roles"] },
         })
-        .catch(() => console.error);
+        .catch((error) =>
+            console.error(`error quarantining nuke action (guild=${guild.id}, user=${user.id}, message=${message})`, config, stringifyError(error)),
+        );
 }
 
 setInterval(() => {

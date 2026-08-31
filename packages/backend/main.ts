@@ -1,9 +1,10 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import { eq, not, or } from "drizzle-orm";
-import { tables } from "./src/db/index.js";
 import { db } from "./src/db/db.js";
+import { tables } from "./src/db/index.js";
 import "./src/server/index.js";
 
-process.on("uncaughtException", console.error);
+process.on("uncaughtException", (err) => console.error("top-level uncaught exception!", stringifyError(err)));
 
 async function updateXpAmounts() {
     const lastXpPurge = (await db.select({ lastXpPurge: tables.globals.lastXpPurge }).from(tables.globals)).at(0)?.lastXpPurge ?? 0;

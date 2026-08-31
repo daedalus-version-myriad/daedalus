@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import { ApplicationCommandOptionType, Client } from "discord.js";
 import { trpc } from "../api/index.js";
 import Argentium from "../argentium/index.js";
@@ -167,7 +168,7 @@ const argentium = new Argentium()
         }
 
         const id = crypto.randomUUID();
-        console.error(`${id}`, e);
+        console.error(`argentium command error triggered:`, `${id}`, stringifyError(e));
 
         return template.error(
             `An unexpected error occurred. We sincerely apologize for this issue. Please contact support if this issue persists. This error has ID \`${id}\`.`,

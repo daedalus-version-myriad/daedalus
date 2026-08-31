@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import * as he from "he";
 import { trpc } from "../api/index.js";
 import { getColor, isModuleDisabled, obtainLimit, truncate } from "../bot-utils/index.js";
@@ -60,7 +61,12 @@ async function run() {
                                 },
                             ],
                         })
-                        .catch(console.error);
+                        .catch((error) =>
+                            console.error(
+                                `error posting reddit message (post=${post.permalink}, author=u/${post.author}, subreddit=${post.subreddit_name_prefixed}):`,
+                                stringifyError(error),
+                            ),
+                        );
 
                     await new Promise((r) => setTimeout(r, (60 * 1000) / posts.length));
                 }

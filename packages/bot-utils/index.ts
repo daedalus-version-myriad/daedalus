@@ -1,3 +1,4 @@
+import { stringifyError } from "@daedalus/formatting/index.js";
 import {
     Attachment,
     ButtonInteraction,
@@ -392,7 +393,7 @@ export async function checkPermissions(user: User | GuildMember, name: string, c
             )
                 return `The bot is missing required permissions: ${command.selfPermissions?.map((x) => permissions[x as keyof typeof permissions].name).join(", ")}`;
         } catch (error) {
-            console.error(error);
+            console.error(`error checking permissions (user=${user.id}, name=${name}, channel=${channel.id}, bypass=${bypass}):`, stringifyError(error));
             return "An unknown error occurred trying to verify your permissions.";
         }
     }
