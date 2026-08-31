@@ -123,7 +123,7 @@ export class ClientManager {
     }
 }
 
-export async function loginAndReady(client: Client, token: string, timeout: number = 10000) {
+export async function loginAndReady(client: Client, token: string, timeout: number = 60000) {
     const promise = new Promise<Client<true>>((res, rej) => {
         const timer = setTimeout(() => rej("timed out!"), timeout);
 
