@@ -785,7 +785,7 @@ export const modmailMessages = mysqlTable(
         attachments: json("attachments").notNull(),
         deleted: boolean("deleted").notNull(),
         sent: boolean("sent").notNull(),
-        encrypted: boolean("encrypted").default(false).notNull(),
+        encrypted: boolean("encrypted").default(true).notNull(),
     },
     (t) => ({
         idx_uuid_source: index("idx_uuid_source").on(t.uuid, t.source),
@@ -852,7 +852,7 @@ export const ticketMessages = mysqlTable(
         attachments: json("attachments").notNull(),
         edits: json("edits").notNull(),
         deleted: boolean("deleted").notNull(),
-        encrypted: boolean("encrypted").default(false).notNull(),
+        encrypted: boolean("encrypted").default(true).notNull(),
     },
     (t) => ({
         idx_uuid: index("idx_uuid").on(t.uuid),

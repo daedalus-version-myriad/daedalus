@@ -1,6 +1,6 @@
-import { encryptContent } from "../../../../bot-utils/index.js";
 import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import { z } from "zod";
+import { encryptContent } from "../../../../bot-utils/index.js";
 import { commandMap, logEvents, modules, type PremiumBenefits } from "../../../../data/index.js";
 import type {
     CustomMessageText,
@@ -767,6 +767,7 @@ export default {
                 ...data,
                 uuid: entry.uuid,
                 type: "outgoing",
+                content: encryptContent(data.content),
                 attachments: await mapFiles(attachments).then((files) =>
                     files.map(({ name, url }) => ({ name: encryptContent(name), url: encryptContent(url) })),
                 ),
@@ -889,16 +890,15 @@ export default {
             }),
         )
         .mutation(async ({ input: { attachments, ...data } }) => {
-            await db
-                .insert(tables.ticketMessages)
-                .values({
-                    ...defaultTicketMessage,
-                    type: "message",
-                    ...data,
-                    attachments: await mapFiles(attachments).then((files) =>
-                        files.map(({ name, url }) => ({ name: encryptContent(name), url: encryptContent(url) })),
-                    ),
-                });
+            await db.insert(tables.ticketMessages).values({
+                ...defaultTicketMessage,
+                type: "message",
+                ...data,
+                content: encryptContent(data.content),
+                attachments: await mapFiles(attachments).then((files) =>
+                    files.map(({ name, url }) => ({ name: encryptContent(name), url: encryptContent(url) })),
+                ),
+            });
         }),
     editTicketMessage: proc.input(z.object({ id: snowflake, content: z.string().max(4000) })).mutation(async ({ input: { id, content } }) => {
         const [entry] = await db.select({ edits: tables.ticketMessages.edits }).from(tables.ticketMessages).where(eq(tables.ticketMessages.id, id));

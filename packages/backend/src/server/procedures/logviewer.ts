@@ -1,6 +1,6 @@
-import { decryptContent } from "../../../../bot-utils/index.js";
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { decryptContent } from "../../../../bot-utils/index.js";
 import { bot, clients } from "../../bot/index.js";
 import { db } from "../../db/db.js";
 import { tables } from "../../db/index.js";
@@ -40,6 +40,7 @@ export default {
                     async (message) => ({
                         ...message,
                         content: decryptContent(message.content),
+                        edits: (message.edits as string[]).map(decryptContent),
                         attachments: (message.attachments as { name: string; url: string }[]).map(({ name, url }) => ({
                             name: decryptContent(name),
                             url: decryptContent(url),
@@ -90,6 +91,7 @@ export default {
                     async (message) => ({
                         ...message,
                         content: decryptContent(message.content),
+                        edits: (message.edits as string[]).map(decryptContent),
                         attachments: (message.attachments as { name: string; url: string }[]).map(({ name, url }) => ({
                             name: decryptContent(name),
                             url: decryptContent(url),

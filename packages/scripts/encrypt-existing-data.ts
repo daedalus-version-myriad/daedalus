@@ -1,30 +1,41 @@
+import { and, count, inArray, not, sql } from "drizzle-orm";
 import { db, tables } from "../backend/index.js";
 import { encryptContent } from "../bot-utils/index.js";
-import { count, inArray, not } from "drizzle-orm";
 
 for (const [table, name] of [
     [tables.ticketMessages, "ticket-messages"],
     [tables.modmailMessages, "modmail-messages"],
 ] as const) {
-    const [{ rows }] = await db.select({ rows: count() }).from(table).where(not(table.encrypted));
-    console.log(`encrypting ${rows} rows in table ${name}...`);
+    const [{ rows }] = await db
+        .select({ rows: count(sql`distinct uuid`) })
+        .from(table)
+        .where(not(table.encrypted));
+
+    console.log(`encrypting ${rows} threads 100-by-100 in table ${name}...`);
 
     while (true) {
-        const done = await db.transaction(async (tx) => {
-            const entries = await tx.select().from(table).where(not(table.encrypted)).limit(10000);
-            if (entries.length === 0) return true;
+        const count = await db.transaction(async (tx) => {
+            const threads = await tx
+                .selectDistinct({ uuid: table.uuid })
+                .from(table)
+                .where(not(table.encrypted))
+                .limit(100)
+                .then((rows) => rows.map((row) => row.uuid));
 
-            await tx.delete(table).where(
-                inArray(
-                    table.uuid,
-                    entries.map((entry) => entry.uuid),
-                ),
-            );
+            if (threads.length === 0) return 0;
+
+            const entries = await tx
+                .select()
+                .from(table)
+                .where(and(inArray(table.uuid, threads), not(table.encrypted)));
+
+            await tx.delete(table).where(and(inArray(table.uuid, threads), not(table.encrypted)));
 
             await tx.insert(table).values(
                 entries.map((entry) => ({
                     ...entry,
                     content: encryptContent(entry.content),
+                    edits: (entry.edits as string[]).map(encryptContent),
                     attachments: (entry.attachments as { name: string; url: string }[]).map(({ name, url }) => ({
                         name: encryptContent(name),
                         url: encryptContent(url),
@@ -33,11 +44,11 @@ for (const [table, name] of [
                 })),
             );
 
-            return false;
+            return threads.length;
         });
 
-        console.log(`encrypted 10K rows of table ${name}`);
-        if (done) break;
+        if (count === 0) break;
+        console.log(`encrypted ${count} thread(s) of table ${name}`);
     }
 }
 
