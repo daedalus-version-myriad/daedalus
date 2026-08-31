@@ -62,25 +62,27 @@ export async function setPresence(client: Client<true>, guild?: string) {
 const Intents = IntentsBitField.Flags;
 
 export const clients: ClientManager = new ClientManager({
-    factory: () =>
-        new Client({
-            intents:
-                Intents.Guilds |
-                Intents.GuildMembers |
-                Intents.GuildMessages |
-                Intents.MessageContent |
-                Intents.DirectMessages |
-                Intents.GuildEmojisAndStickers |
-                Intents.GuildModeration |
-                Intents.GuildScheduledEvents |
-                Intents.GuildInvites |
-                Intents.GuildMessageReactions |
-                Intents.GuildVoiceStates,
-            partials: [Partials.Channel, Partials.Message, Partials.GuildMember, Partials.Reaction],
-            sweepers: { messages: { lifetime: 604800, interval: 3600 } },
-            allowedMentions: { parse: [] },
-            failIfNotExists: false,
-        }),
+    factory: (sequence) =>
+        sequence > 3
+            ? null
+            : new Client({
+                  intents:
+                      Intents.Guilds |
+                      (sequence === 0 || sequence === 2 ? Intents.GuildMembers : 0) |
+                      Intents.GuildMessages |
+                      (sequence === 0 || sequence === 1 ? Intents.MessageContent : 0) |
+                      Intents.DirectMessages |
+                      Intents.GuildEmojisAndStickers |
+                      Intents.GuildModeration |
+                      Intents.GuildScheduledEvents |
+                      Intents.GuildInvites |
+                      Intents.GuildMessageReactions |
+                      Intents.GuildVoiceStates,
+                  partials: [Partials.Channel, Partials.Message, Partials.GuildMember, Partials.Reaction],
+                  sweepers: { messages: { lifetime: 604800, interval: 3600 } },
+                  allowedMentions: { parse: [] },
+                  failIfNotExists: false,
+              }),
     postprocess: (client, guild) =>
         [
             (x: Client<true>, _: unknown, guild?: string) => setPresence(x, guild),

@@ -12,19 +12,23 @@ export class ClientManager {
         postprocess,
         sweep = 86400000,
     }: {
-        factory: () => Client<boolean>;
+        factory: (sequence: number) => Client<boolean> | null;
         postprocess?: (client: Client<true>, guild?: string) => unknown;
         sweep?: number;
     }) {
         this.factory = async (token, guild) => {
-            console.log(`[CM] Producing client for guild ${guild} with token ${token.slice(0, 5)}...${token.slice(-5)}`);
-            const client = await loginAndReady(factory(), token).catch((error) => {
-                console.error(`[CM] Error creating client for ${guild}:`, error);
-                throw error;
-            });
-            postprocess?.(client, guild);
-            console.log(`[CM] ${client.user.tag} is online.`);
-            return client;
+            for (let sequence = 0; ; sequence++) {
+                const output = factory(sequence);
+                if (output === null) throw new Error(`factory @ sequence=${sequence} returned null, indicating that there are no more outputs`);
+                console.log(`[CM] Producing client for guild ${guild} with token ${token.slice(0, 5)}...${token.slice(-5)} (sequence=${sequence})`);
+                const client = await loginAndReady(output, token).catch((error) => {
+                    console.error(`[CM] Error creating client for ${guild}:`, error);
+                });
+                if (!client) continue;
+                postprocess?.(client, guild);
+                console.log(`[CM] ${client.user.tag} is online.`);
+                return client;
+            }
         };
 
         if (sweep > 0) setInterval(() => this.sweepClients(), sweep);
