@@ -125,7 +125,7 @@ export class ClientManager {
 
 export async function loginAndReady(client: Client, token: string, timeout: number = 10000) {
     const promise = new Promise<Client<true>>((res, rej) => {
-        const timer = setTimeout(() => rej(), timeout);
+        const timer = setTimeout(() => rej("timed out!"), timeout);
 
         client.on(Events.ClientReady, (bot) => {
             res(bot);
@@ -133,7 +133,9 @@ export async function loginAndReady(client: Client, token: string, timeout: numb
         });
     });
 
-    await client.login(token);
+    await client.login(token).catch((error) => {
+        throw error ?? `failed to log in with token ${token.slice(0, 5)}...${token.slice(-5)}`;
+    });
 
     return await promise;
 }
