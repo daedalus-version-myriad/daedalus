@@ -8,6 +8,8 @@
         "migrate": "bun src/db/migrate.ts"
     },
     "dependencies": {
-        "@trpc/server": "next"
+        "@trpc/server": "next",
+        "drizzle-kit": "^0.31.10",
+        "drizzle-orm": "^0.45.2"
     }
 }

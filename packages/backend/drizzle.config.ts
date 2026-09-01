@@ -4,7 +4,7 @@ import type { Config } from "drizzle-kit";
 export default {
     schema: "./src/db/tables.ts",
     out: "./drizzle",
-    driver: "mysql2",
+    dialect: "mysql",
     dbCredentials: {
         host: secrets.DATABASE.HOST,
         user: secrets.DATABASE.USERNAME,
