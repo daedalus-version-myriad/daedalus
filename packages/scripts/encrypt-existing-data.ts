@@ -1,4 +1,4 @@
-import { and, count, inArray, not, sql } from "drizzle-orm";
+import { and, countDistinct, inArray, not } from "drizzle-orm";
 import { db, tables } from "../backend/index.js";
 import { encryptContent } from "../bot-utils/index.js";
 
@@ -7,7 +7,7 @@ for (const [table, name] of [
     [tables.modmailMessages, "modmail-messages"],
 ] as const) {
     const [{ rows }] = await db
-        .select({ rows: count(sql`distinct uuid`) })
+        .select({ rows: countDistinct(table.uuid) })
         .from(table)
         .where(not(table.encrypted));
 
